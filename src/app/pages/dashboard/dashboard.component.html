@@ -44,10 +44,15 @@
             <mat-card-title>
               <mat-icon>calendar_today</mat-icon>
               Your Events Calendar
+              <button mat-button color="primary" (click)="goToToday()" class="today-button">
+                <mat-icon>today</mat-icon>
+                Today
+              </button>
             </mat-card-title>
           </mat-card-header>
           <mat-card-content>
             <mat-calendar
+              #calendar
               [selected]="selectedDate"
               (selectedChange)="onDateSelected($event)"
               [dateClass]="hasEventsOnDate"
@@ -66,6 +71,12 @@
             <mat-card-title>
               <mat-icon>event</mat-icon>
               Scheduled Events
+              <span *ngIf="isDateFiltered" class="date-filter-info">
+                {{ selectedDate | date:'mediumDate' }}
+                <button mat-icon-button (click)="clearDateFilter()" matTooltip="Clear date filter">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </span>
             </mat-card-title>
             <div class="category-filter">
               <button mat-raised-button

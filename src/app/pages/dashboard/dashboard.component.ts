@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
@@ -6,7 +6,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDatepickerModule, MatCalendar } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -98,6 +98,7 @@ export const MY_FORMATS = {
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
+  @ViewChild('calendar') calendar?: MatCalendar<Date>;
   currentUser: User | null = null;
   currentDate: Date = new Date();
   bookedEvents: BookedEvent[] = [];
@@ -126,6 +127,7 @@ export class DashboardComponent implements OnInit {
   currentPage: number = 1;
   itemsPerPage: number = 2;
   totalPages: number = 1;
+  isDateFiltered: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -297,6 +299,14 @@ export class DashboardComponent implements OnInit {
   getFilteredEvents(): BookedEvent[] {
     let events = this.bookedEvents;
     
+    // Apply date filter if a date is selected
+    if (this.isDateFiltered && this.selectedDate) {
+      events = events.filter(event => 
+        moment(event.date).isSame(this.selectedDate, 'day')
+      );
+    }
+    
+    // Apply category filter
     if (this.selectedCategory !== 'All') {
       events = events.filter(event => event.category === this.selectedCategory);
     }
@@ -378,6 +388,8 @@ export class DashboardComponent implements OnInit {
 
   onDateSelected(date: Date | null) {
     this.selectedDate = date;
+    this.isDateFiltered = date !== null;
+    this.currentPage = 1; // Reset to first page when filtering
   }
 
   getEventsForDate(date: Date): BookedEvent[] {
@@ -429,6 +441,37 @@ export class DashboardComponent implements OnInit {
   previousPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
+    }
+  }
+
+  clearDateFilter() {
+    this.selectedDate = null;
+    this.isDateFiltered = false;
+    this.currentPage = 1;
+  }
+
+  goToToday() {
+    const today = new Date();
+    this.selectedDate = today;
+    this.isDateFiltered = true;
+    this.currentPage = 1;
+    
+    // Force calendar to update to current month and date
+    if (this.calendar) {
+      // First set the active date to trigger the view update
+      this.calendar.activeDate = today;
+      
+      // Force a re-render by temporarily setting selected to null and back
+      setTimeout(() => {
+        if (this.calendar) {
+          this.calendar.selected = null;
+          setTimeout(() => {
+            if (this.calendar) {
+              this.calendar.selected = today;
+            }
+          });
+        }
+      });
     }
   }
 } 
