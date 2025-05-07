@@ -84,35 +84,43 @@
                   <mat-card-subtitle>
                     <span class="event-status" [class]="getEventStatusClass(event.status)">
                       <mat-icon>{{ getStatusIcon(event.status) }}</mat-icon>
-                      {{ event.status }}
+                      <span class="status-text">{{ event.status | titlecase }}</span>
                     </span>
                   </mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
                   <div class="event-info">
                     <p>
-                      <mat-icon>event</mat-icon>
+                      <mat-icon>calendar_month</mat-icon>
                       {{ formatDate(event.date) }}
                     </p>
                     <p>
-                      <mat-icon>location_on</mat-icon>
+                      <mat-icon>schedule</mat-icon>
+                      {{ formatTime(event.date) }}
+                    </p>
+                    <p>
+                      <mat-icon>place</mat-icon>
                       {{ event.location }}
                     </p>
                     <p>
-                      <mat-icon>confirmation_number</mat-icon>
+                      <mat-icon>local_activity</mat-icon>
                       {{ event.ticketType }}
                     </p>
                     <p>
-                      <mat-icon>attach_money</mat-icon>
+                      <mat-icon>payments</mat-icon>
                       {{ formatCurrency(event.price) }}
                     </p>
                     <p>
-                      <mat-icon>category</mat-icon>
+                      <mat-icon>label</mat-icon>
                       {{ event.category }}
                     </p>
                     <p>
-                      <mat-icon>group</mat-icon>
+                      <mat-icon>people</mat-icon>
                       {{ event.attendees }} attendees
+                    </p>
+                    <p>
+                      <mat-icon>business</mat-icon>
+                      {{ event.organizer }}
                     </p>
                   </div>
                   <p class="event-description">{{ event.description }}</p>

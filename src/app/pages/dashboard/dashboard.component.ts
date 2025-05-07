@@ -124,7 +124,7 @@ export class DashboardComponent implements OnInit {
   sortBy: 'date' | 'price' | 'name' = 'date';
   sortOrder: 'asc' | 'desc' = 'asc';
   currentPage: number = 1;
-  itemsPerPage: number = 6;
+  itemsPerPage: number = 2;
   totalPages: number = 1;
 
   constructor(
@@ -353,9 +353,9 @@ export class DashboardComponent implements OnInit {
       case 'upcoming':
         return 'event_available';
       case 'completed':
-        return 'check_circle';
+        return 'task_alt';
       case 'cancelled':
-        return 'cancel';
+        return 'event_busy';
       default:
         return 'help';
     }
