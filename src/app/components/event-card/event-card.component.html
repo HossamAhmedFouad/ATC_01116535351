@@ -1,0 +1,29 @@
+<div class="event-card">
+  <div class="event-image" [style.background-image]="'url(' + event.imageUrl + ')'">
+    <div class="event-category">{{event.category}}</div>
+  </div>
+  <div class="event-content">
+    <h2>{{event.title}}</h2>
+    <div class="event-meta">
+      <span class="event-date">📅 {{event.date}}</span>
+      <span class="event-duration">⏱️ {{event.duration}}</span>
+    </div>
+    <p class="event-location">📍 {{event.location}}</p>
+    <p class="event-description">{{event.description}}</p>
+    <div class="event-footer">
+      <div class="event-price">
+        <span class="price">${{event.price}}</span>
+        <span class="tickets-left" *ngIf="event.availableTickets < 10">
+          Only {{event.availableTickets}} tickets left!
+        </span>
+      </div>
+      <button 
+        class="book-button" 
+        [disabled]="event.availableTickets === 0"
+        (click)="onBookClick()"
+      >
+        {{event.availableTickets === 0 ? 'Sold Out' : 'Book Now'}}
+      </button>
+    </div>
+  </div>
+</div> 

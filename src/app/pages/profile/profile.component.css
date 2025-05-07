@@ -1,0 +1,32 @@
+.profile-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 64px); /* Subtract navbar height */
+  padding-top: 84px; /* Navbar height + some spacing */
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+p {
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+/* Dark mode styles */
+:host-context(.dark-mode) .profile-container {
+  background-color: #111827;
+}
+
+:host-context(.dark-mode) h1 {
+  color: #f3f4f6;
+}
+
+:host-context(.dark-mode) p {
+  color: #d1d5db;
+} 

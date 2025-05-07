@@ -1,0 +1,151 @@
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <h1>Welcome, {{ currentUser?.name }}</h1>
+    <div class="view-controls">
+      <button mat-raised-button
+        [class.active]="selectedView === 'day'"
+        (click)="changeView('day')">
+        <mat-icon>today</mat-icon>
+        Day
+      </button>
+      <button mat-raised-button
+        [class.active]="selectedView === 'week'"
+        (click)="changeView('week')">
+        <mat-icon>view_week</mat-icon>
+        Week
+      </button>
+      <button mat-raised-button
+        [class.active]="selectedView === 'month'"
+        (click)="changeView('month')">
+        <mat-icon>calendar_month</mat-icon>
+        Month
+      </button>
+    </div>
+  </header>
+
+  <div class="dashboard-content">
+    <section class="calendar-section">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>calendar_today</mat-icon>
+            Your Events Calendar
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-calendar
+            [selected]="selectedDate"
+            (selectedChange)="onDateSelected($event)"
+            [dateClass]="hasEventsOnDate">
+          </mat-calendar>
+          
+          <div class="selected-date-events" *ngIf="selectedDate">
+            <h3>
+              <mat-icon>event</mat-icon>
+              Events for {{ selectedDate | date:'MMMM d, yyyy' }}
+            </h3>
+            <div class="events-list">
+              <mat-card *ngFor="let event of getEventsForDate(selectedDate)" class="event-card">
+                <mat-card-header>
+                  <mat-card-title>{{ event.title }}</mat-card-title>
+                  <mat-card-subtitle>
+                    <span class="event-status" [class]="getEventStatusClass(event.status)">
+                      <mat-icon>{{ getStatusIcon(event.status) }}</mat-icon>
+                      {{ event.status }}
+                    </span>
+                  </mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="event-info">
+                    <p>
+                      <mat-icon>schedule</mat-icon>
+                      {{ formatTime(event.date) }}
+                    </p>
+                    <p>
+                      <mat-icon>location_on</mat-icon>
+                      {{ event.location }}
+                    </p>
+                    <p>
+                      <mat-icon>confirmation_number</mat-icon>
+                      {{ event.ticketType }}
+                    </p>
+                    <p>
+                      <mat-icon>attach_money</mat-icon>
+                      {{ event.price }}
+                    </p>
+                  </div>
+                </mat-card-content>
+                <mat-card-actions>
+                  <button mat-raised-button color="primary" [routerLink]="['/events', event.id]">
+                    <mat-icon>visibility</mat-icon>
+                    View Details
+                  </button>
+                  <button mat-raised-button color="warn" *ngIf="event.status === 'upcoming'" (click)="cancelEvent(event)">
+                    <mat-icon>cancel</mat-icon>
+                    Cancel Booking
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="upcoming-events-section">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>upcoming</mat-icon>
+            Upcoming Events
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="events-list">
+            <mat-card *ngFor="let event of bookedEvents" class="event-card">
+              <mat-card-header>
+                <mat-card-title>{{ event.title }}</mat-card-title>
+                <mat-card-subtitle>
+                  <span class="event-status" [class]="getEventStatusClass(event.status)">
+                    <mat-icon>{{ getStatusIcon(event.status) }}</mat-icon>
+                    {{ event.status }}
+                  </span>
+                </mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="event-info">
+                  <p>
+                    <mat-icon>event</mat-icon>
+                    {{ formatDate(event.date) }}
+                  </p>
+                  <p>
+                    <mat-icon>location_on</mat-icon>
+                    {{ event.location }}
+                  </p>
+                  <p>
+                    <mat-icon>confirmation_number</mat-icon>
+                    {{ event.ticketType }}
+                  </p>
+                  <p>
+                    <mat-icon>attach_money</mat-icon>
+                    {{ event.price }}
+                  </p>
+                </div>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-raised-button color="primary" [routerLink]="['/events', event.id]">
+                  <mat-icon>visibility</mat-icon>
+                  View Details
+                </button>
+                <button mat-raised-button color="warn" *ngIf="event.status === 'upcoming'" (click)="cancelEvent(event)">
+                  <mat-icon>cancel</mat-icon>
+                  Cancel Booking
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+  </div>
+</div> 

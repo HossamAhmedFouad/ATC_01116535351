@@ -1,0 +1,62 @@
+<nav class="navbar" [class.dark-mode]="isDarkMode">
+  <div class="navbar-brand">
+    <a routerLink="/" class="brand-link">Event Booking</a>
+  </div>
+  
+  <div class="navbar-menu">
+    <div class="navbar-start">
+      <a routerLink="/" class="nav-link">Home</a>
+      <a routerLink="/events" class="nav-link">Events</a>
+      <a routerLink="/about" class="nav-link">About</a>
+      <a routerLink="/contact" class="nav-link">Contact</a>
+    </div>
+    
+    <div class="navbar-end">
+      <button class="theme-toggle" (click)="toggleDarkMode()" [title]="isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+        <svg *ngIf="isDarkMode" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg *ngIf="!isDarkMode" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+      
+      <div class="user-menu" *ngIf="currentUser">
+        <button class="user-button" (click)="toggleUserMenu()">
+          <div class="user-avatar">
+            {{ currentUser.name.charAt(0).toUpperCase() }}
+          </div>
+          <span class="user-name">{{ currentUser.name }}</span>
+        </button>
+        
+        <div class="user-dropdown" *ngIf="isUserMenuOpen">
+          <a routerLink="/dashboard" class="dropdown-item">
+            <span class="material-icons">dashboard</span>
+            Dashboard
+          </a>
+          <a routerLink="/profile" class="dropdown-item">
+            <span class="material-icons">person</span>
+            Profile
+          </a>
+          <button class="dropdown-item" (click)="logout()">
+            <span class="material-icons">logout</span>
+            Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-buttons" *ngIf="!currentUser">
+        <a routerLink="/auth/signin" class="auth-button signin">Sign In</a>
+        <a routerLink="/auth/signup" class="auth-button signup">Sign Up</a>
+      </div>
+    </div>
+  </div>
+</nav> 

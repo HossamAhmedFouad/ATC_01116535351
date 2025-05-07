@@ -1,0 +1,301 @@
+.about-container {
+  padding-top: 64px;
+  min-height: 100vh;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 6rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="rgba(255,255,255,0.1)"/></svg>');
+  opacity: 0.1;
+}
+
+.hero-content h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-content .subtitle {
+  font-size: 1.5rem;
+  opacity: 0.9;
+}
+
+/* Mission Section */
+.mission-section {
+  padding: 4rem 0;
+  text-align: center;
+  background-color: var(--card-background);
+}
+
+.mission-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+
+.mission-section p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--secondary-color);
+}
+
+/* Team Section */
+.team-section {
+  padding: 4rem 0;
+  background-color: var(--background-color);
+}
+
+.team-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: var(--text-color);
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.team-member {
+  background-color: var(--card-background);
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.team-member:hover {
+  transform: translateY(-5px);
+}
+
+.member-image {
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+
+.member-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.team-member:hover .member-image img {
+  transform: scale(1.05);
+}
+
+.team-member h3 {
+  font-size: 1.5rem;
+  margin: 1.5rem 1.5rem 0.5rem;
+  color: var(--text-color);
+}
+
+.team-member .role {
+  color: var(--primary-color);
+  font-weight: 600;
+  margin: 0 1.5rem;
+}
+
+.team-member .bio {
+  color: var(--secondary-color);
+  margin: 1rem 1.5rem 1.5rem;
+  line-height: 1.6;
+}
+
+/* Milestones Section */
+.milestones-section {
+  padding: 4rem 0;
+  background-color: var(--card-background);
+}
+
+.milestones-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: var(--text-color);
+}
+
+.timeline {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 100%;
+  background-color: var(--border-color);
+}
+
+.timeline-item {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+  position: relative;
+}
+
+.year {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  margin-right: 2rem;
+}
+
+.content {
+  background-color: var(--background-color);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  flex: 0 1 400px;
+}
+
+.content h3 {
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.content p {
+  color: var(--secondary-color);
+  line-height: 1.6;
+}
+
+/* Values Section */
+.values-section {
+  padding: 4rem 0;
+  background-color: var(--background-color);
+}
+
+.values-section h2 {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: var(--text-color);
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.value-card {
+  background-color: var(--card-background);
+  padding: 2rem;
+  border-radius: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-5px);
+}
+
+.value-card i {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.value-card h3 {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.value-card p {
+  color: var(--secondary-color);
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero-content .subtitle {
+    font-size: 1.25rem;
+  }
+
+  .mission-section h2,
+  .team-section h2,
+  .milestones-section h2,
+  .values-section h2 {
+    font-size: 2rem;
+  }
+
+  .timeline::before {
+    left: 0;
+  }
+
+  .timeline-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 2rem;
+  }
+
+  .year {
+    margin-bottom: 1rem;
+  }
+
+  .content {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .hero-section {
+    padding: 4rem 1rem;
+  }
+
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+
+  .mission-section,
+  .team-section,
+  .milestones-section,
+  .values-section {
+    padding: 3rem 0;
+  }
+} 

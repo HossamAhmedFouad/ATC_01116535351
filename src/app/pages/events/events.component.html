@@ -1,0 +1,83 @@
+<div class="events-container">
+  <div class="events-header">
+    <h1>Discover Events</h1>
+    <app-search-bar
+      [(searchText)]="searchQuery"
+      placeholder="Search events by title or description..."
+    ></app-search-bar>
+  </div>
+
+  <div class="filters-section">
+    <div class="filters">
+      <select [(ngModel)]="priceFilter" class="filter-select">
+        <option value="">All Prices</option>
+        <option value="free">Free</option>
+        <option value="under50">Under $50</option>
+        <option value="under100">Under $100</option>
+        <option value="under200">Under $200</option>
+        <option value="over200">Over $200</option>
+      </select>
+
+      <select [(ngModel)]="locationFilter" class="filter-select">
+        <option value="">All Locations</option>
+        <option *ngFor="let location of locations" [value]="location">{{location}}</option>
+      </select>
+
+      <select [(ngModel)]="dateFilter" class="filter-select">
+        <option value="">All Dates</option>
+        <option value="today">Today</option>
+        <option value="thisWeek">This Week</option>
+        <option value="thisMonth">This Month</option>
+        <option value="nextMonth">Next Month</option>
+      </select>
+
+      <select [(ngModel)]="categoryFilter" class="filter-select">
+        <option value="">All Categories</option>
+        <option *ngFor="let category of categories" [value]="category">{{category}}</option>
+      </select>
+
+      <button (click)="resetFilters()" class="reset-button">Reset Filters</button>
+    </div>
+  </div>
+
+  <div class="events-grid">
+    <app-event-card
+      *ngFor="let event of paginatedEvents"
+      [event]="event"
+    ></app-event-card>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      class="pagination-button" 
+      [disabled]="currentPage === 1"
+      (click)="previousPage()"
+    >
+      Previous
+    </button>
+    
+    <div class="page-numbers">
+      <button 
+        *ngFor="let page of pageNumbers"
+        class="page-number"
+        [class.active]="page === currentPage"
+        (click)="changePage(page)"
+      >
+        {{page}}
+      </button>
+    </div>
+
+    <button 
+      class="pagination-button"
+      [disabled]="currentPage === totalPages"
+      (click)="nextPage()"
+    >
+      Next
+    </button>
+  </div>
+
+  <div class="no-events" *ngIf="filteredEvents.length === 0">
+    <p>No events found matching your criteria.</p>
+    <button class="reset-filters" (click)="resetFilters()">Reset Filters</button>
+  </div>
+</div> 

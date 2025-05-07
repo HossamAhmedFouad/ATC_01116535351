@@ -1,0 +1,122 @@
+<div class="home-container">
+  <div class="page-background">
+    <section class="hero">
+      <h1>Welcome to Event Registration</h1>
+      <p class="hero-subtitle">Your Gateway to Extraordinary Experiences</p>
+      <a routerLink="/events" class="cta-button">Browse Events</a>
+    </section>
+
+    <div class="features-container">
+      <div class="slider-container">
+        <div class="slider-wrapper" [style.transform]="'translateX(' + currentSlide * -100 + '%)'">
+          <section class="feature-section" *ngFor="let feature of features; let i = index" 
+                  [class.animate]="feature.isVisible"
+                  [class.active]="i === currentSlide"
+                  #featureSection>
+            <div class="feature-content">
+              <div class="feature-icon-wrapper">
+                <div class="feature-icon">{{ feature.icon }}</div>
+              </div>
+              <h2>{{ feature.title }}</h2>
+              <p>{{ feature.description }}</p>
+              <div class="feature-highlights">
+                <div class="highlight-item" *ngFor="let highlight of feature.highlights">
+                  <span class="highlight-icon">✓</span>
+                  <span class="highlight-text">{{ highlight }}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="slider-controls">
+          <button class="slider-arrow prev" (click)="prevSlide()" [disabled]="currentSlide === 0">
+            <span class="arrow-icon">←</span>
+          </button>
+          <div class="slider-dots">
+            <button *ngFor="let feature of features; let i = index" 
+                    class="slider-dot" 
+                    [class.active]="i === currentSlide"
+                    (click)="goToSlide(i)">
+            </button>
+          </div>
+          <button class="slider-arrow next" (click)="nextSlide()" [disabled]="currentSlide === features.length - 1">
+            <span class="arrow-icon">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <section class="stats-section" #statsSection>
+      <div class="stats-container">
+        <div class="stat-item" *ngFor="let stat of stats">
+          <div class="stat-number" [class.animate]="isStatsVisible">
+            <span class="counter" [attr.data-target]="stat.target">{{ stat.current }}</span>
+            <span *ngIf="stat.suffix">{{ stat.suffix }}</span>
+          </div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section">
+      <h2 class="section-title">What Our Users Say</h2>
+      <div class="testimonials-grid">
+        <div class="testimonial-card" *ngFor="let testimonial of testimonials">
+          <div class="testimonial-content">
+            <p class="testimonial-text">"{{ testimonial.text }}"</p>
+            <div class="testimonial-author">
+              <img [src]="testimonial.avatar" [alt]="testimonial.name" class="author-avatar">
+              <div class="author-info">
+                <div class="author-name">{{ testimonial.name }}</div>
+                <div class="author-title">{{ testimonial.title }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upcoming Events Preview -->
+    <section class="events-preview-section">
+      <h2 class="section-title">Upcoming Events</h2>
+      <div class="events-grid">
+        <div class="event-card" *ngFor="let event of upcomingEvents">
+          <div class="event-image" [style.background-image]="'url(' + event.image + ')'"></div>
+          <div class="event-content">
+            <div class="event-date">{{ event.date }}</div>
+            <h3 class="event-title">{{ event.title }}</h3>
+            <p class="event-description">{{ event.description }}</p>
+            <div class="event-meta">
+              <span class="event-location">📍 {{ event.location }}</span>
+              <span class="event-price">💰 {{ event.price }}</span>
+            </div>
+            <a [routerLink]="['/events', event.id]" class="event-link">Learn More</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="newsletter-section">
+      <div class="newsletter-content">
+        <h2>Stay Updated</h2>
+        <p>Subscribe to our newsletter for the latest events and exclusive offers.</p>
+        <form class="newsletter-form" (ngSubmit)="subscribeNewsletter()">
+          <input type="email" placeholder="Enter your email" class="newsletter-input">
+          <button type="submit" class="newsletter-button">Subscribe</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="cta-content" [class.animate]="isCtaVisible" #ctaSection>
+        <h2>Ready to Start Your Journey?</h2>
+        <p>Join thousands of event enthusiasts and never miss out on amazing experiences.</p>
+        <a routerLink="/auth/signup" class="signup-button">Sign Up Now</a>
+      </div>
+    </section>
+  </div>
+</div> 

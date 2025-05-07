@@ -1,0 +1,352 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "title": "Tech Conference 2024",
+      "date": "2024-03-15",
+      "location": "San Francisco, CA",
+      "description": "Join us for the biggest tech conference of the year featuring the latest innovations and networking opportunities.",
+      "imageUrl": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 299,
+      "category": "Technology",
+      "duration": "2 days",
+      "organizer": "Tech Events Inc.",
+      "availableTickets": 150,
+      "schedule": [
+        {
+          "day": "Day 1",
+          "events": [
+            { "time": "08:00 AM", "title": "Registration & Welcome Coffee" },
+            { "time": "09:00 AM", "title": "Opening Keynote" },
+            { "time": "10:30 AM", "title": "AI & Machine Learning Panel" },
+            { "time": "12:00 PM", "title": "Lunch Break" },
+            { "time": "01:30 PM", "title": "Cloud Computing Workshop" },
+            { "time": "03:00 PM", "title": "Cybersecurity Trends" },
+            { "time": "04:30 PM", "title": "Networking Session" }
+          ]
+        },
+        {
+          "day": "Day 2",
+          "events": [
+            { "time": "09:00 AM", "title": "Future of Web Development" },
+            { "time": "10:30 AM", "title": "Blockchain Innovations" },
+            { "time": "12:00 PM", "title": "Lunch Break" },
+            { "time": "01:30 PM", "title": "Data Science Workshop" },
+            { "time": "03:00 PM", "title": "Closing Keynote" },
+            { "time": "04:30 PM", "title": "Networking & Farewell" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Music Festival",
+      "date": "2024-06-20",
+      "location": "Los Angeles, CA",
+      "description": "A three-day music festival featuring top artists from around the world.",
+      "imageUrl": "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 199,
+      "category": "Music",
+      "duration": "3 days",
+      "organizer": "Music Festivals LLC",
+      "availableTickets": 500,
+      "schedule": [
+        {
+          "day": "Day 1",
+          "events": [
+            { "time": "02:00 PM", "title": "Gates Open" },
+            { "time": "03:00 PM", "title": "Opening Act" },
+            { "time": "05:00 PM", "title": "Main Stage Performance" },
+            { "time": "07:00 PM", "title": "Headliner Performance" },
+            { "time": "10:00 PM", "title": "Closing Set" }
+          ]
+        },
+        {
+          "day": "Day 2",
+          "events": [
+            { "time": "02:00 PM", "title": "Gates Open" },
+            { "time": "03:00 PM", "title": "Local Artists Showcase" },
+            { "time": "05:00 PM", "title": "International Artists" },
+            { "time": "07:00 PM", "title": "Main Headliner" },
+            { "time": "10:00 PM", "title": "Special Guest Performance" }
+          ]
+        },
+        {
+          "day": "Day 3",
+          "events": [
+            { "time": "02:00 PM", "title": "Gates Open" },
+            { "time": "03:00 PM", "title": "Final Day Performances" },
+            { "time": "05:00 PM", "title": "Special Collaborations" },
+            { "time": "07:00 PM", "title": "Closing Headliner" },
+            { "time": "10:00 PM", "title": "Grand Finale" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Food & Wine Expo",
+      "date": "2024-04-10",
+      "location": "New York, NY",
+      "description": "Experience the finest cuisines and wines from renowned chefs and wineries.",
+      "imageUrl": "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 75,
+      "category": "Food & Drink",
+      "duration": "1 day",
+      "organizer": "Gourmet Events",
+      "availableTickets": 200,
+      "schedule": [
+        {
+          "day": "Main Event",
+          "events": [
+            { "time": "10:00 AM", "title": "Expo Opening" },
+            { "time": "11:00 AM", "title": "Wine Tasting Session 1" },
+            { "time": "12:30 PM", "title": "Chef's Cooking Demo" },
+            { "time": "02:00 PM", "title": "Wine Tasting Session 2" },
+            { "time": "03:30 PM", "title": "Food Pairing Workshop" },
+            { "time": "05:00 PM", "title": "Grand Tasting" },
+            { "time": "07:00 PM", "title": "Closing Ceremony" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Startup Pitch Competition",
+      "date": "2024-05-05",
+      "location": "Boston, MA",
+      "description": "Watch innovative startups pitch their ideas to top investors and win funding.",
+      "imageUrl": "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 50,
+      "category": "Business",
+      "duration": "1 day",
+      "organizer": "Startup Network",
+      "availableTickets": 100,
+      "schedule": [
+        {
+          "day": "Competition Day",
+          "events": [
+            { "time": "08:30 AM", "title": "Registration & Networking" },
+            { "time": "09:30 AM", "title": "Opening Remarks" },
+            { "time": "10:00 AM", "title": "Startup Pitches - Round 1" },
+            { "time": "12:30 PM", "title": "Lunch Break" },
+            { "time": "02:00 PM", "title": "Startup Pitches - Round 2" },
+            { "time": "04:00 PM", "title": "Investor Panel Discussion" },
+            { "time": "05:30 PM", "title": "Awards Ceremony" },
+            { "time": "06:30 PM", "title": "Networking Reception" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Fitness & Wellness Retreat",
+      "date": "2024-07-15",
+      "location": "Miami, FL",
+      "description": "A week-long retreat focused on fitness, wellness, and personal growth.",
+      "imageUrl": "https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 899,
+      "category": "Health & Wellness",
+      "duration": "7 days",
+      "organizer": "Wellness Retreats",
+      "availableTickets": 30,
+      "schedule": [
+        {
+          "day": "Day 1 - Arrival",
+          "events": [
+            { "time": "02:00 PM", "title": "Check-in & Welcome" },
+            { "time": "04:00 PM", "title": "Orientation Session" },
+            { "time": "06:00 PM", "title": "Welcome Dinner" },
+            { "time": "08:00 PM", "title": "Evening Meditation" }
+          ]
+        },
+        {
+          "day": "Day 2-6 - Daily Schedule",
+          "events": [
+            { "time": "06:30 AM", "title": "Morning Yoga" },
+            { "time": "08:00 AM", "title": "Breakfast" },
+            { "time": "09:30 AM", "title": "Fitness Session" },
+            { "time": "11:30 AM", "title": "Wellness Workshop" },
+            { "time": "01:00 PM", "title": "Lunch" },
+            { "time": "03:00 PM", "title": "Group Activities" },
+            { "time": "05:00 PM", "title": "Personal Time" },
+            { "time": "07:00 PM", "title": "Dinner" },
+            { "time": "08:30 PM", "title": "Evening Program" }
+          ]
+        },
+        {
+          "day": "Day 7 - Departure",
+          "events": [
+            { "time": "07:00 AM", "title": "Final Yoga Session" },
+            { "time": "09:00 AM", "title": "Closing Ceremony" },
+            { "time": "11:00 AM", "title": "Check-out" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Art Exhibition",
+      "date": "2024-04-20",
+      "location": "Chicago, IL",
+      "description": "Contemporary art exhibition featuring works from emerging and established artists.",
+      "imageUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 25,
+      "category": "Arts & Culture",
+      "duration": "2 days",
+      "organizer": "Modern Art Gallery",
+      "availableTickets": 300,
+      "schedule": [
+        {
+          "day": "Day 1",
+          "events": [
+            { "time": "10:00 AM", "title": "Exhibition Opening" },
+            { "time": "11:00 AM", "title": "Artist Talk - Contemporary Trends" },
+            { "time": "02:00 PM", "title": "Guided Tour" },
+            { "time": "04:00 PM", "title": "Art Workshop" },
+            { "time": "06:00 PM", "title": "Evening Reception" }
+          ]
+        },
+        {
+          "day": "Day 2",
+          "events": [
+            { "time": "10:00 AM", "title": "Gallery Opens" },
+            { "time": "11:00 AM", "title": "Artist Panel Discussion" },
+            { "time": "02:00 PM", "title": "Interactive Art Session" },
+            { "time": "04:00 PM", "title": "Closing Ceremony" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Blockchain Summit",
+      "date": "2024-05-15",
+      "location": "Austin, TX",
+      "description": "Explore the future of blockchain technology with industry leaders and innovators.",
+      "imageUrl": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 399,
+      "category": "Technology",
+      "duration": "3 days",
+      "organizer": "Blockchain Association",
+      "availableTickets": 200
+    },
+    {
+      "id": 8,
+      "title": "Jazz Night",
+      "date": "2024-04-25",
+      "location": "New Orleans, LA",
+      "description": "An evening of smooth jazz featuring renowned artists in an intimate setting.",
+      "imageUrl": "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 45,
+      "category": "Music",
+      "duration": "1 day",
+      "organizer": "Jazz Club",
+      "availableTickets": 150
+    },
+    {
+      "id": 9,
+      "title": "Craft Beer Festival",
+      "date": "2024-06-10",
+      "location": "Portland, OR",
+      "description": "Sample craft beers from over 50 local and national breweries.",
+      "imageUrl": "https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 35,
+      "category": "Food & Drink",
+      "duration": "2 days",
+      "organizer": "Beer Enthusiasts",
+      "availableTickets": 1000
+    },
+    {
+      "id": 10,
+      "title": "Digital Marketing Conference",
+      "date": "2024-05-20",
+      "location": "Seattle, WA",
+      "description": "Learn the latest digital marketing strategies from industry experts.",
+      "imageUrl": "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 249,
+      "category": "Business",
+      "duration": "2 days",
+      "organizer": "Marketing Pro",
+      "availableTickets": 300
+    },
+    {
+      "id": 11,
+      "title": "Yoga Retreat",
+      "date": "2024-07-01",
+      "location": "Bali, Indonesia",
+      "description": "A transformative yoga retreat in the heart of Bali's natural beauty.",
+      "imageUrl": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 1299,
+      "category": "Health & Wellness",
+      "duration": "7 days",
+      "organizer": "Yoga Bliss",
+      "availableTickets": 20
+    },
+    {
+      "id": 12,
+      "title": "Photography Workshop",
+      "date": "2024-04-15",
+      "location": "Denver, CO",
+      "description": "Master your photography skills with hands-on workshops and expert guidance.",
+      "imageUrl": "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 150,
+      "category": "Arts & Culture",
+      "duration": "1 day",
+      "organizer": "Photo Masters",
+      "availableTickets": 25
+    },
+    {
+      "id": 13,
+      "title": "AI & Machine Learning Summit",
+      "date": "2024-06-05",
+      "location": "San Jose, CA",
+      "description": "Explore the cutting edge of AI and machine learning technologies.",
+      "imageUrl": "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 499,
+      "category": "Technology",
+      "duration": "3 days",
+      "organizer": "AI Institute",
+      "availableTickets": 250
+    },
+    {
+      "id": 14,
+      "title": "Rock Concert",
+      "date": "2024-05-25",
+      "location": "Las Vegas, NV",
+      "description": "An electrifying night of rock music featuring top international bands.",
+      "imageUrl": "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 89,
+      "category": "Music",
+      "duration": "1 day",
+      "organizer": "Rock Productions",
+      "availableTickets": 5000
+    },
+    {
+      "id": 15,
+      "title": "Wine Tasting Tour",
+      "date": "2024-06-15",
+      "location": "Napa Valley, CA",
+      "description": "Experience the finest wines from Napa Valley's premier vineyards.",
+      "imageUrl": "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 125,
+      "category": "Food & Drink",
+      "duration": "1 day",
+      "organizer": "Wine Tours",
+      "availableTickets": 40
+    },
+    {
+      "id": 16,
+      "title": "Business Networking Mixer",
+      "date": "2024-04-30",
+      "location": "New York, NY",
+      "description": "Connect with industry leaders and expand your professional network.",
+      "imageUrl": "https://images.unsplash.com/photo-1556761175-4b46a572b786?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      "price": 75,
+      "category": "Business",
+      "duration": "1 day",
+      "organizer": "Business Network",
+      "availableTickets": 100
+    }
+  ]
+} 

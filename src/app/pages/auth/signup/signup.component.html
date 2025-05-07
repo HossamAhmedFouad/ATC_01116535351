@@ -1,0 +1,113 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h1>Sign Up</h1>
+    
+    <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="auth-form">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          placeholder="Enter your full name"
+          [class.error]="signupForm.get('name')?.invalid && signupForm.get('name')?.touched"
+        >
+        <div class="error-message" *ngIf="signupForm.get('name')?.invalid && signupForm.get('name')?.touched">
+          <span *ngIf="signupForm.get('name')?.errors?.['required']">Name is required</span>
+          <span *ngIf="signupForm.get('name')?.errors?.['minlength']">Name must be at least 2 characters</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          placeholder="Choose a username"
+          [class.error]="signupForm.get('username')?.invalid && signupForm.get('username')?.touched"
+        >
+        <div class="error-message" *ngIf="signupForm.get('username')?.invalid && signupForm.get('username')?.touched">
+          <span *ngIf="signupForm.get('username')?.errors?.['required']">Username is required</span>
+          <span *ngIf="signupForm.get('username')?.errors?.['minlength']">Username must be at least 3 characters</span>
+          <span *ngIf="signupForm.get('username')?.errors?.['pattern']">Username can only contain letters, numbers, and underscores</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Location</label>
+        <input
+          type="text"
+          id="location"
+          formControlName="location"
+          placeholder="Enter your location"
+          [class.error]="signupForm.get('location')?.invalid && signupForm.get('location')?.touched"
+        >
+        <div class="error-message" *ngIf="signupForm.get('location')?.invalid && signupForm.get('location')?.touched">
+          <span *ngIf="signupForm.get('location')?.errors?.['required']">Location is required</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          placeholder="Enter your email"
+          [class.error]="signupForm.get('email')?.invalid && signupForm.get('email')?.touched"
+        >
+        <div class="error-message" *ngIf="signupForm.get('email')?.invalid && signupForm.get('email')?.touched">
+          <span *ngIf="signupForm.get('email')?.errors?.['required']">Email is required</span>
+          <span *ngIf="signupForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="Create a password"
+          [class.error]="signupForm.get('password')?.invalid && signupForm.get('password')?.touched"
+        >
+        <div class="error-message" *ngIf="signupForm.get('password')?.invalid && signupForm.get('password')?.touched">
+          <span *ngIf="signupForm.get('password')?.errors?.['required']">Password is required</span>
+          <span *ngIf="signupForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters</span>
+        </div>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="signupForm.invalid || isLoading"
+      >
+        <span *ngIf="!isLoading">Sign Up</span>
+        <span *ngIf="isLoading">Signing up...</span>
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>or</span>
+    </div>
+
+    <button
+      type="button"
+      class="google-button"
+      (click)="signUpWithGoogle()"
+      [disabled]="isLoading"
+    >
+      <img src="assets/google-icon.svg" alt="Google">
+      Sign up with Google
+    </button>
+
+    <p class="auth-link">
+      Already have an account? <a routerLink="/auth/signin">Sign In</a>
+    </p>
+  </div>
+</div> 
