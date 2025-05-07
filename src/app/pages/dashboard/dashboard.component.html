@@ -1,51 +1,84 @@
 <div class="dashboard-container">
-  <header class="dashboard-header">
-    <h1>Welcome, {{ currentUser?.name }}</h1>
-    <div class="view-controls">
-      <button mat-raised-button
-        [class.active]="selectedView === 'day'"
-        (click)="changeView('day')">
-        <mat-icon>today</mat-icon>
-        Day
-      </button>
-      <button mat-raised-button
-        [class.active]="selectedView === 'week'"
-        (click)="changeView('week')">
-        <mat-icon>view_week</mat-icon>
-        Week
-      </button>
-      <button mat-raised-button
-        [class.active]="selectedView === 'month'"
-        (click)="changeView('month')">
-        <mat-icon>calendar_month</mat-icon>
-        Month
-      </button>
-    </div>
-  </header>
-
   <div class="dashboard-content">
-    <section class="calendar-section">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>calendar_today</mat-icon>
-            Your Events Calendar
-          </mat-card-title>
-        </mat-card-header>
+    <section class="stats-section">
+      <mat-card class="stats-card">
         <mat-card-content>
-          <mat-calendar
-            [selected]="selectedDate"
-            (selectedChange)="onDateSelected($event)"
-            [dateClass]="hasEventsOnDate">
-          </mat-calendar>
-          
-          <div class="selected-date-events" *ngIf="selectedDate">
-            <h3>
+          <div class="stats-grid">
+            <div class="stat-item">
               <mat-icon>event</mat-icon>
-              Events for {{ selectedDate | date:'MMMM d, yyyy' }}
-            </h3>
+              <div class="stat-info">
+                <span class="stat-value">{{ eventStats.totalEvents }}</span>
+                <span class="stat-label">Total Events</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <mat-icon>upcoming</mat-icon>
+              <div class="stat-info">
+                <span class="stat-value">{{ eventStats.upcomingEvents }}</span>
+                <span class="stat-label">Upcoming</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <mat-icon>check_circle</mat-icon>
+              <div class="stat-info">
+                <span class="stat-value">{{ eventStats.completedEvents }}</span>
+                <span class="stat-label">Completed</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <mat-icon>attach_money</mat-icon>
+              <div class="stat-info">
+                <span class="stat-value">{{ formatCurrency(eventStats.totalSpent) }}</span>
+                <span class="stat-label">Total Spent</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="calendar-events-section">
+      <div class="calendar-container">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>calendar_today</mat-icon>
+              Your Events Calendar
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-calendar
+              [selected]="selectedDate"
+              (selectedChange)="onDateSelected($event)"
+              [dateClass]="hasEventsOnDate"
+              [minDate]="minDate"
+              [maxDate]="maxDate"
+              class="custom-calendar"
+              tabindex="0">
+            </mat-calendar>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="events-container">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>event</mat-icon>
+              Scheduled Events
+            </mat-card-title>
+            <div class="category-filter">
+              <button mat-raised-button
+                *ngFor="let category of categories"
+                [class.active]="selectedCategory === category"
+                (click)="filterEventsByCategory(category)">
+                {{ category }}
+              </button>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
             <div class="events-list">
-              <mat-card *ngFor="let event of getEventsForDate(selectedDate)" class="event-card">
+              <mat-card *ngFor="let event of getPaginatedEvents()" class="event-card">
                 <mat-card-header>
                   <mat-card-title>{{ event.title }}</mat-card-title>
                   <mat-card-subtitle>
@@ -58,8 +91,8 @@
                 <mat-card-content>
                   <div class="event-info">
                     <p>
-                      <mat-icon>schedule</mat-icon>
-                      {{ formatTime(event.date) }}
+                      <mat-icon>event</mat-icon>
+                      {{ formatDate(event.date) }}
                     </p>
                     <p>
                       <mat-icon>location_on</mat-icon>
@@ -71,9 +104,18 @@
                     </p>
                     <p>
                       <mat-icon>attach_money</mat-icon>
-                      {{ event.price }}
+                      {{ formatCurrency(event.price) }}
+                    </p>
+                    <p>
+                      <mat-icon>category</mat-icon>
+                      {{ event.category }}
+                    </p>
+                    <p>
+                      <mat-icon>group</mat-icon>
+                      {{ event.attendees }} attendees
                     </p>
                   </div>
+                  <p class="event-description">{{ event.description }}</p>
                 </mat-card-content>
                 <mat-card-actions>
                   <button mat-raised-button color="primary" [routerLink]="['/events', event.id]">
@@ -87,65 +129,23 @@
                 </mat-card-actions>
               </mat-card>
             </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </section>
 
-    <section class="upcoming-events-section">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>upcoming</mat-icon>
-            Upcoming Events
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="events-list">
-            <mat-card *ngFor="let event of bookedEvents" class="event-card">
-              <mat-card-header>
-                <mat-card-title>{{ event.title }}</mat-card-title>
-                <mat-card-subtitle>
-                  <span class="event-status" [class]="getEventStatusClass(event.status)">
-                    <mat-icon>{{ getStatusIcon(event.status) }}</mat-icon>
-                    {{ event.status }}
-                  </span>
-                </mat-card-subtitle>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="event-info">
-                  <p>
-                    <mat-icon>event</mat-icon>
-                    {{ formatDate(event.date) }}
-                  </p>
-                  <p>
-                    <mat-icon>location_on</mat-icon>
-                    {{ event.location }}
-                  </p>
-                  <p>
-                    <mat-icon>confirmation_number</mat-icon>
-                    {{ event.ticketType }}
-                  </p>
-                  <p>
-                    <mat-icon>attach_money</mat-icon>
-                    {{ event.price }}
-                  </p>
-                </div>
-              </mat-card-content>
-              <mat-card-actions>
-                <button mat-raised-button color="primary" [routerLink]="['/events', event.id]">
-                  <mat-icon>visibility</mat-icon>
-                  View Details
-                </button>
-                <button mat-raised-button color="warn" *ngIf="event.status === 'upcoming'" (click)="cancelEvent(event)">
-                  <mat-icon>cancel</mat-icon>
-                  Cancel Booking
-                </button>
-              </mat-card-actions>
-            </mat-card>
-          </div>
-        </mat-card-content>
-      </mat-card>
+            <div class="pagination-controls">
+              <button mat-button (click)="previousPage()" [disabled]="currentPage === 1">
+                <mat-icon>chevron_left</mat-icon>
+                Previous
+              </button>
+              <span class="pagination-info">
+                Page {{ currentPage }} of {{ totalPages }}
+              </span>
+              <button mat-button (click)="nextPage()" [disabled]="currentPage === totalPages">
+                Next
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
     </section>
   </div>
 </div> 
