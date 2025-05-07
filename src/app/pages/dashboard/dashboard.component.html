@@ -35,6 +35,44 @@
           </div>
         </mat-card-content>
       </mat-card>
+
+      <!-- Monthly Stats -->
+      <mat-card class="monthly-stats-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>bar_chart</mat-icon>
+            Monthly Overview
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="monthly-stats-container">
+            <div class="monthly-chart">
+              <div class="chart-bars">
+                <div *ngFor="let stat of monthlyStats" class="chart-bar-container">
+                  <div class="chart-bar" [style.height]="getBarHeight(stat.spending) + '%'">
+                    <span class="bar-value">{{ formatCurrency(stat.spending) }}</span>
+                  </div>
+                  <span class="bar-label">{{ stat.month }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="monthly-stats-summary">
+              <div class="summary-item">
+                <span class="summary-label">Total Events</span>
+                <span class="summary-value">{{ getTotalEvents() }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Total Spending</span>
+                <span class="summary-value">{{ formatCurrency(getTotalSpending()) }}</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">Average per Month</span>
+                <span class="summary-value">{{ formatCurrency(getAverageSpending()) }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </section>
 
     <section class="calendar-events-section">
@@ -61,6 +99,50 @@
               class="custom-calendar"
               tabindex="0">
             </mat-calendar>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Upcoming Events Preview -->
+        <mat-card class="upcoming-events-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>upcoming</mat-icon>
+              Upcoming Events
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              <mat-list-item *ngFor="let event of upcomingEventsPreview">
+                <mat-icon matListItemIcon [style.color]="getCategoryColor(event.category)">
+                  {{ getCategoryIcon(event.category) }}
+                </mat-icon>
+                <div matListItemTitle>{{ event.title }}</div>
+                <div matListItemLine>{{ formatDate(event.date) }}</div>
+              </mat-list-item>
+            </mat-list>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Recent Activity -->
+        <mat-card class="recent-activity-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>history</mat-icon>
+              Recent Activity
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-list>
+              <mat-list-item *ngFor="let activity of recentActivity">
+                <mat-icon matListItemIcon [style.color]="getActivityColor(activity.type)">
+                  {{ getActivityIcon(activity.type) }}
+                </mat-icon>
+                <div matListItemTitle>{{ activity.event.title }}</div>
+                <div matListItemLine>
+                  {{ activity.type | titlecase }} on {{ formatDate(activity.date) }}
+                </div>
+              </mat-list-item>
+            </mat-list>
           </mat-card-content>
         </mat-card>
       </div>

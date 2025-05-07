@@ -15,6 +15,9 @@ import { DateAdapter, MAT_DATE_LOCALE as MAT_DATE_LOCALE_2 } from '@angular/mate
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
 import moment from 'moment';
 
 interface BookedEvent {
@@ -55,6 +58,13 @@ interface CategoryStats {
   percentage: number;
 }
 
+interface EventCategory {
+  name: string;
+  count: number;
+  color: string;
+  icon: string;
+}
+
 export const MY_FORMATS = {
   parse: {
     dateInput: 'LL',
@@ -82,7 +92,10 @@ export const MY_FORMATS = {
     MatBadgeModule,
     MatProgressBarModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatDividerModule,
+    MatListModule,
+    MatMenuModule
   ],
   providers: [
     {
@@ -129,6 +142,18 @@ export class DashboardComponent implements OnInit {
   totalPages: number = 1;
   isDateFiltered: boolean = false;
 
+  eventCategories: EventCategory[] = [
+    { name: 'Music', count: 0, color: '#7c3aed', icon: 'music_note' },
+    { name: 'Sports', count: 0, color: '#16a34a', icon: 'sports_soccer' },
+    { name: 'Technology', count: 0, color: '#2563eb', icon: 'computer' },
+    { name: 'Food', count: 0, color: '#ea580c', icon: 'restaurant' },
+    { name: 'Arts', count: 0, color: '#db2777', icon: 'palette' }
+  ];
+
+  upcomingEventsPreview: BookedEvent[] = [];
+  recentActivity: { type: string; event: BookedEvent; date: Date }[] = [];
+  monthlyStats: { month: string; count: number; spending: number }[] = [];
+
   constructor(
     private authService: AuthService,
     private snackBar: MatSnackBar
@@ -141,13 +166,15 @@ export class DashboardComponent implements OnInit {
         this.loadUserEvents();
         this.calculateStats();
         this.calculateCategoryStats();
+        this.updateUpcomingEventsPreview();
+        this.generateRecentActivity();
+        this.calculateMonthlyStats();
       }
     });
   }
 
   loadUserEvents() {
-    // TODO: Replace with actual API call
-    // This is mock data for demonstration
+    // Mock data with diverse dates and spending patterns
     this.bookedEvents = [
       {
         id: 1,
@@ -156,7 +183,7 @@ export class DashboardComponent implements OnInit {
         location: 'San Francisco, CA',
         status: 'upcoming',
         ticketType: 'VIP Pass',
-        price: 299,
+        price: 599,
         category: 'Technology',
         description: 'Join us for the biggest tech conference of the year featuring AI, Cloud Computing, and more.',
         imageUrl: 'assets/images/tech-conference.jpg',
@@ -172,7 +199,7 @@ export class DashboardComponent implements OnInit {
         location: 'Austin, TX',
         status: 'upcoming',
         ticketType: 'General Admission',
-        price: 199,
+        price: 299,
         category: 'Music',
         description: 'A three-day music festival featuring top artists from around the world.',
         imageUrl: 'assets/images/music-festival.jpg',
@@ -188,7 +215,7 @@ export class DashboardComponent implements OnInit {
         location: 'Chicago, IL',
         status: 'upcoming',
         ticketType: 'Premium Pass',
-        price: 149,
+        price: 249,
         category: 'Food',
         description: 'Experience the finest cuisines and wines from renowned chefs and wineries.',
         imageUrl: 'assets/images/food-expo.jpg',
@@ -204,7 +231,7 @@ export class DashboardComponent implements OnInit {
         location: 'Los Angeles, CA',
         status: 'completed',
         ticketType: 'Courtside',
-        price: 450,
+        price: 850,
         category: 'Sports',
         description: 'Watch the final championship game with courtside seats.',
         imageUrl: 'assets/images/basketball.jpg',
@@ -228,6 +255,118 @@ export class DashboardComponent implements OnInit {
         organizer: 'Modern Art Gallery',
         progress: 30,
         tags: ['Art', 'Exhibition', 'Contemporary']
+      },
+      {
+        id: 6,
+        title: 'Winter Music Festival',
+        date: new Date('2023-12-15'),
+        location: 'Denver, CO',
+        status: 'completed',
+        ticketType: 'VIP Pass',
+        price: 450,
+        category: 'Music',
+        description: 'Annual winter music festival with top artists.',
+        imageUrl: 'assets/images/winter-festival.jpg',
+        attendees: 3000,
+        organizer: 'Winter Events Co.',
+        progress: 100,
+        tags: ['Music', 'Winter', 'Festival']
+      },
+      {
+        id: 7,
+        title: 'Tech Startup Summit',
+        date: new Date('2024-01-20'),
+        location: 'Seattle, WA',
+        status: 'completed',
+        ticketType: 'Early Bird',
+        price: 299,
+        category: 'Technology',
+        description: 'Connect with innovative startups and investors.',
+        imageUrl: 'assets/images/startup-summit.jpg',
+        attendees: 1200,
+        organizer: 'Tech Ventures',
+        progress: 100,
+        tags: ['Startup', 'Technology', 'Networking']
+      },
+      {
+        id: 8,
+        title: 'Food Truck Festival',
+        date: new Date('2024-02-10'),
+        location: 'Portland, OR',
+        status: 'completed',
+        ticketType: 'Foodie Pass',
+        price: 75,
+        category: 'Food',
+        description: 'Sample cuisine from the best food trucks in the region.',
+        imageUrl: 'assets/images/food-truck.jpg',
+        attendees: 5000,
+        organizer: 'Food Festivals Inc.',
+        progress: 100,
+        tags: ['Food', 'Street Food', 'Festival']
+      },
+      {
+        id: 9,
+        title: 'Modern Art Gallery Opening',
+        date: new Date('2024-02-25'),
+        location: 'Miami, FL',
+        status: 'completed',
+        ticketType: 'Opening Night',
+        price: 150,
+        category: 'Arts',
+        description: 'Exclusive opening night of the new modern art gallery.',
+        imageUrl: 'assets/images/art-gallery.jpg',
+        attendees: 300,
+        organizer: 'Miami Arts',
+        progress: 100,
+        tags: ['Art', 'Gallery', 'Opening']
+      },
+      {
+        id: 10,
+        title: 'Soccer Championship',
+        date: new Date('2024-01-05'),
+        location: 'Boston, MA',
+        status: 'completed',
+        ticketType: 'Premium',
+        price: 200,
+        category: 'Sports',
+        description: 'Championship match with premium seating.',
+        imageUrl: 'assets/images/soccer.jpg',
+        attendees: 25000,
+        organizer: 'Sports Events LLC',
+        progress: 100,
+        tags: ['Sports', 'Soccer', 'Championship']
+      },
+      {
+        id: 11,
+        title: 'Jazz Night',
+        date: new Date('2024-03-01'),
+        location: 'New Orleans, LA',
+        status: 'upcoming',
+        ticketType: 'Standard',
+        price: 85,
+        category: 'Music',
+        description: 'Evening of jazz with renowned artists.',
+        imageUrl: 'assets/images/jazz-night.jpg',
+        attendees: 500,
+        organizer: 'Jazz Club',
+        progress: 40,
+        tags: ['Music', 'Jazz', 'Night']
+      },
+      {
+        id: 12,
+        title: 'Cooking Masterclass',
+        date: new Date('2024-03-20'),
+        location: 'San Francisco, CA',
+        status: 'upcoming',
+        ticketType: 'Participant',
+        price: 195,
+        category: 'Food',
+        description: 'Learn from master chefs in this hands-on cooking class.',
+        imageUrl: 'assets/images/cooking-class.jpg',
+        attendees: 20,
+        organizer: 'Culinary Arts Academy',
+        progress: 25,
+        tags: ['Food', 'Cooking', 'Class']
       }
     ];
   }
@@ -473,5 +612,117 @@ export class DashboardComponent implements OnInit {
         }
       });
     }
+  }
+
+  updateUpcomingEventsPreview() {
+    const now = new Date();
+    this.upcomingEventsPreview = this.bookedEvents
+      .filter(event => event.status === 'upcoming' && event.date > now)
+      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .slice(0, 3);
+  }
+
+  generateRecentActivity() {
+    const now = new Date();
+    this.recentActivity = this.bookedEvents
+      .map(event => {
+        const activities = [];
+        if (event.status === 'completed') {
+          activities.push({ type: 'completed', event, date: event.date });
+        }
+        if (event.status === 'cancelled') {
+          activities.push({ type: 'cancelled', event, date: event.date });
+        }
+        return activities;
+      })
+      .flat()
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 5);
+  }
+
+  calculateMonthlyStats() {
+    const now = new Date();
+    const months = Array.from({ length: 6 }, (_, i) => {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      return {
+        month: date.toLocaleString('default', { month: 'short' }),
+        count: 0,
+        spending: 0
+      };
+    }).reverse();
+
+    this.bookedEvents.forEach(event => {
+      const eventMonth = event.date.getMonth();
+      const eventYear = event.date.getFullYear();
+      const monthIndex = months.findIndex(m => {
+        const monthDate = new Date(eventYear, eventMonth, 1);
+        return monthDate.getMonth() === eventMonth && monthDate.getFullYear() === eventYear;
+      });
+
+      if (monthIndex !== -1) {
+        months[monthIndex].count++;
+        months[monthIndex].spending += event.price;
+      }
+    });
+
+    this.monthlyStats = months;
+  }
+
+  getActivityIcon(type: string): string {
+    switch (type) {
+      case 'completed':
+        return 'check_circle';
+      case 'cancelled':
+        return 'cancel';
+      default:
+        return 'event';
+    }
+  }
+
+  getActivityColor(type: string): string {
+    switch (type) {
+      case 'completed':
+        return 'var(--success-color)';
+      case 'cancelled':
+        return 'var(--error-color)';
+      default:
+        return 'var(--primary-color)';
+    }
+  }
+
+  formatMonthYear(date: Date): string {
+    return moment(date).format('MMM YYYY');
+  }
+
+  getCategoryColor(category: string): string {
+    const categoryInfo = this.eventCategories.find(c => c.name === category);
+    return categoryInfo?.color || 'var(--primary-color)';
+  }
+
+  getCategoryIcon(category: string): string {
+    const categoryInfo = this.eventCategories.find(c => c.name === category);
+    return categoryInfo?.icon || 'event';
+  }
+
+  getBarHeight(spending: number): number {
+    const maxSpending = Math.max(...this.monthlyStats.map(stat => stat.spending));
+    if (maxSpending === 0) return 0;
+    // Calculate height as a percentage of the maximum spending
+    // Using 80% of the chart height as maximum to leave space for labels
+    return Math.max((spending / maxSpending) * 80, 4); // Minimum 4% height
+  }
+
+  getTotalEvents(): number {
+    return this.monthlyStats.reduce((sum, stat) => sum + stat.count, 0);
+  }
+
+  getTotalSpending(): number {
+    return this.monthlyStats.reduce((sum, stat) => sum + stat.spending, 0);
+  }
+
+  getAverageSpending(): number {
+    const totalSpending = this.getTotalSpending();
+    const monthsWithSpending = this.monthlyStats.filter(stat => stat.spending > 0).length;
+    return monthsWithSpending > 0 ? totalSpending / monthsWithSpending : 0;
   }
 } 

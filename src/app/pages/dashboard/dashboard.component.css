@@ -956,4 +956,192 @@ mat-card-subtitle {
 
 :host-context(.dark-mode) .today-button:hover {
   background-color: var(--primary-color-dark);
+}
+
+/* Monthly Stats */
+.monthly-stats-card {
+  margin-top: 1.5rem;
+}
+
+.monthly-stats-container {
+  padding: 1rem;
+}
+
+.monthly-chart {
+  height: 300px;
+  margin-bottom: 2rem;
+  position: relative;
+  padding: 2rem 1rem 3rem;
+  background-color: var(--card-background);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.chart-bars {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 100%;
+  padding: 0 1rem;
+  position: relative;
+}
+
+.chart-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+  position: relative;
+  padding: 0 0.5rem;
+}
+
+.chart-bar {
+  width: 40px;
+  background: linear-gradient(to top, var(--primary-color), var(--primary-color-light));
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  transition: height 0.3s ease;
+  min-height: 4px;
+  margin-bottom: 1rem;
+}
+
+.bar-value {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  background-color: var(--card-background);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px var(--shadow-color);
+}
+
+.bar-label {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.monthly-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--hover-background);
+  border-radius: 0.5rem;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Dark Mode Overrides */
+:host-context(.dark-mode) .chart-bars::before {
+  background-color: var(--border-color);
+}
+
+:host-context(.dark-mode) .chart-bar {
+  background: linear-gradient(to top, var(--primary-color-dark), var(--primary-color));
+}
+
+:host-context(.dark-mode) .monthly-stats-summary {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+:host-context(.dark-mode) .bar-value {
+  background-color: var(--card-background);
+  color: var(--text-primary);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .monthly-stats-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-bar {
+    width: 30px;
+  }
+
+  .bar-value {
+    font-size: 0.7rem;
+  }
+}
+
+/* Upcoming Events Card */
+.upcoming-events-card {
+  margin-top: 1.5rem;
+}
+
+.upcoming-events-card mat-list-item {
+  height: auto;
+  padding: 0.75rem 0;
+}
+
+.upcoming-events-card mat-icon {
+  margin-right: 1rem;
+}
+
+/* Recent Activity Card */
+.recent-activity-card {
+  margin-top: 1.5rem;
+}
+
+.recent-activity-card mat-list-item {
+  height: auto;
+  padding: 0.75rem 0;
+}
+
+.recent-activity-card mat-icon {
+  margin-right: 1rem;
+}
+
+/* Dark Mode Overrides */
+:host-context(.dark-mode) .monthly-stat-item .month-label {
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) .stat-details {
+  color: var(--text-secondary);
+}
+
+:host-context(.dark-mode) .stat-spending {
+  color: var(--primary-color-light);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+  .monthly-stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .monthly-stats-grid {
+    grid-template-columns: 1fr;
+  }
 } 
