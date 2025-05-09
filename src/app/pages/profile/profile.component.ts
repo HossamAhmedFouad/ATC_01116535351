@@ -23,6 +23,7 @@ import { ThemePalette } from '@angular/material/core';
 import { AuthService, User, BookedEvent } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import moment from 'moment';
+import { SidebarNavComponent, NavItem } from '../../components/sidebar-nav/sidebar-nav.component';
 
 interface ProfileSettings {
   emailNotifications: boolean;
@@ -30,14 +31,6 @@ interface ProfileSettings {
   darkMode: boolean;
   language: string;
   timezone: string;
-}
-
-interface NavItem {
-  id: string;
-  label: string;
-  icon: string;
-  badge?: number;
-  badgeColor?: ThemePalette;
 }
 
 @Component({
@@ -63,7 +56,8 @@ interface NavItem {
     MatProgressSpinnerModule,
     MatBadgeModule,
     MatChipsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    SidebarNavComponent
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']

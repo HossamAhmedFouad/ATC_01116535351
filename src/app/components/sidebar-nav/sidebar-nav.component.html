@@ -1,0 +1,38 @@
+<div class="profile-sidenav" [class.collapsed]="!isOpen">
+  <div class="sidenav-header">
+    <div class="header-content" *ngIf="isOpen">
+      <h2>Profile</h2>
+      <p class="user-email">{{userEmail}}</p>
+    </div>
+    <button mat-icon-button (click)="onToggleSidenav()" class="toggle-btn" [class.rotated]="!isOpen">
+      <mat-icon>{{isOpen ? 'chevron_left' : 'chevron_right'}}</mat-icon>
+    </button>
+  </div>
+  
+  <mat-nav-list>
+    <a mat-list-item 
+       *ngFor="let item of navItems"
+       (click)="onSectionChange(item.id)"
+       [class.active]="currentSection === item.id"
+       [matTooltip]="!isOpen ? item.label : ''"
+       [matTooltipPosition]="'right'">
+      <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
+      <span matListItemTitle>{{item.label}}</span>
+      <span matListItemMeta *ngIf="isOpen && item.badge !== undefined">
+        <mat-icon matBadge="{{item.badge}}" 
+                 [matBadgeColor]="item.badgeColor"
+                 *ngIf="item.badge > 0">
+          notifications
+        </mat-icon>
+      </span>
+    </a>
+  </mat-nav-list>
+
+  <div class="sidenav-footer" *ngIf="isOpen">
+    <mat-divider></mat-divider>
+    <div class="user-info">
+      <mat-icon>account_circle</mat-icon>
+      <span>{{username}}</span>
+    </div>
+  </div>
+</div> 

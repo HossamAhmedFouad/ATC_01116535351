@@ -1,42 +1,15 @@
 <div class="profile-container">
   <mat-sidenav-container>
-    <mat-sidenav #sidenav mode="side" [opened]="isSidenavOpen" [class.collapsed]="!isSidenavOpen" class="profile-sidenav">
-      <div class="sidenav-header">
-        <div class="header-content" *ngIf="isSidenavOpen">
-          <h2>Profile</h2>
-          <p class="user-email">{{user?.email}}</p>
-        </div>
-        <button mat-icon-button (click)="toggleSidenav()" class="toggle-btn" [class.rotated]="!isSidenavOpen">
-          <mat-icon>{{isSidenavOpen ? 'chevron_left' : 'chevron_right'}}</mat-icon>
-        </button>
-      </div>
-      
-      <mat-nav-list>
-        <a mat-list-item 
-           *ngFor="let item of navItems"
-           (click)="navigateToSection(item.id)"
-           [class.active]="currentSection === item.id"
-           [matTooltip]="!isSidenavOpen ? item.label : ''"
-           [matTooltipPosition]="'right'">
-          <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
-          <span matListItemTitle>{{item.label}}</span>
-          <span matListItemMeta *ngIf="isSidenavOpen && item.badge !== undefined">
-            <mat-icon matBadge="{{item.badge}}" 
-                     [matBadgeColor]="item.badgeColor"
-                     *ngIf="item.badge > 0">
-              notifications
-            </mat-icon>
-          </span>
-        </a>
-      </mat-nav-list>
-
-      <div class="sidenav-footer" *ngIf="isSidenavOpen">
-        <mat-divider></mat-divider>
-        <div class="user-info">
-          <mat-icon>account_circle</mat-icon>
-          <span>{{user?.username}}</span>
-        </div>
-      </div>
+    <mat-sidenav #sidenav mode="side" [opened]="isSidenavOpen" [class.collapsed]="!isSidenavOpen">
+      <app-sidebar-nav
+        [isOpen]="isSidenavOpen"
+        [currentSection]="currentSection"
+        [navItems]="navItems"
+        [userEmail]="user?.email"
+        [username]="user?.username"
+        (toggleSidenav)="toggleSidenav()"
+        (sectionChange)="navigateToSection($event)">
+      </app-sidebar-nav>
     </mat-sidenav>
 
     <mat-sidenav-content>
