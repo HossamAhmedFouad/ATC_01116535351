@@ -155,8 +155,8 @@
               Scheduled Events
               <span *ngIf="isDateFiltered" class="date-filter-info">
                 {{ selectedDate | date:'mediumDate' }}
-                <button mat-icon-button (click)="clearDateFilter()" matTooltip="Clear date filter">
-                  <mat-icon>close</mat-icon>
+                <button mat-mini-fab color="warn" (click)="clearDateFilter()" matTooltip="Clear date filter" class="clear-filter-btn">
+                  <mat-icon>filter_alt_off</mat-icon>
                 </button>
               </span>
             </mat-card-title>

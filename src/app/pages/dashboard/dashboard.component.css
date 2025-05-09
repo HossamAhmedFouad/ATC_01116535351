@@ -1,5 +1,5 @@
 :root {
-  /* Modern color palette */
+  /* Light Mode Colors */
   --primary-color: #4f46e5;
   --primary-color-light: #6366f1;
   --primary-color-dark: #4338ca;
@@ -20,6 +20,48 @@
   --calendar-today-bg: #4f46e5;
   --calendar-selected-bg: #4338ca;
   --calendar-range-bg: #eef2ff;
+  --chart-bar-gradient-start: #1e293b;
+  --chart-bar-gradient-end: #334155;
+  --chart-bar-shadow: rgba(30, 41, 59, 0.2);
+  --status-upcoming: #1a56db;
+  --status-upcoming-bg: rgba(26, 86, 219, 0.1);
+  --status-completed: #059669;
+  --status-completed-bg: rgba(5, 150, 105, 0.1);
+  --status-cancelled: #dc2626;
+  --status-cancelled-bg: rgba(220, 38, 38, 0.1);
+}
+
+/* Dark Mode Colors */
+:host-context(.dark-mode) {
+  --primary-color: #6366f1;
+  --primary-color-light: #818cf8;
+  --primary-color-dark: #4f46e5;
+  --background-color: #111827;
+  --card-background: #1f2937;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --hover-background: #374151;
+  --error-color: #f87171;
+  --success-color: #34d399;
+  --warning-color: #fbbf24;
+  --gradient-start: #6366f1;
+  --gradient-end: #818cf8;
+  --calendar-header-bg: #1f2937;
+  --calendar-cell-hover: #374151;
+  --calendar-today-bg: #6366f1;
+  --calendar-selected-bg: #4f46e5;
+  --calendar-range-bg: #374151;
+  --chart-bar-gradient-start: #818cf8;
+  --chart-bar-gradient-end: #6366f1;
+  --chart-bar-shadow: rgba(99, 102, 241, 0.3);
+  --status-upcoming: #60a5fa;
+  --status-upcoming-bg: rgba(96, 165, 250, 0.1);
+  --status-completed: #34d399;
+  --status-completed-bg: rgba(52, 211, 153, 0.1);
+  --status-cancelled: #f87171;
+  --status-cancelled-bg: rgba(248, 113, 113, 0.1);
 }
 
 /* Card Styles */
@@ -578,33 +620,33 @@ mat-card-subtitle {
 }
 
 .status-upcoming {
-  color: #1a56db;
-  background-color: rgba(26, 86, 219, 0.1);
-  border: 1px solid rgba(26, 86, 219, 0.2);
+  color: var(--status-upcoming);
+  background-color: var(--status-upcoming-bg);
+  border: 1px solid var(--status-upcoming);
 }
 
 .status-upcoming mat-icon {
-  color: #1a56db;
+  color: var(--status-upcoming);
 }
 
 .status-completed {
-  color: #059669;
-  background-color: rgba(5, 150, 105, 0.1);
-  border: 1px solid rgba(5, 150, 105, 0.2);
+  color: var(--status-completed);
+  background-color: var(--status-completed-bg);
+  border: 1px solid var(--status-completed);
 }
 
 .status-completed mat-icon {
-  color: #059669;
+  color: var(--status-completed);
 }
 
 .status-cancelled {
-  color: #dc2626;
-  background-color: rgba(220, 38, 38, 0.1);
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: var(--status-cancelled);
+  background-color: var(--status-cancelled-bg);
+  border: 1px solid var(--status-cancelled);
 }
 
 .status-cancelled mat-icon {
-  color: #dc2626;
+  color: var(--status-cancelled);
 }
 
 /* Dark Mode Status Overrides */
@@ -961,10 +1003,14 @@ mat-card-subtitle {
 /* Monthly Stats */
 .monthly-stats-card {
   margin-top: 1.5rem;
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px var(--shadow-color);
 }
 
 .monthly-stats-container {
-  padding: 1rem;
+  padding: 1.5rem;
 }
 
 .monthly-chart {
@@ -975,6 +1021,9 @@ mat-card-subtitle {
   background-color: var(--card-background);
   border-radius: 0.5rem;
   border: 1px solid var(--border-color);
+  display: flex;
+  align-items: flex-end;
+  box-shadow: inset 0 1px 3px var(--shadow-color);
 }
 
 .chart-bars {
@@ -982,6 +1031,7 @@ mat-card-subtitle {
   justify-content: space-between;
   align-items: flex-end;
   height: 100%;
+  width: 100%;
   padding: 0 1rem;
   position: relative;
 }
@@ -998,12 +1048,13 @@ mat-card-subtitle {
 
 .chart-bar {
   width: 40px;
-  background: linear-gradient(to top, var(--primary-color), var(--primary-color-light));
+  background: black;
   border-radius: 4px 4px 0 0;
   position: relative;
   transition: height 0.3s ease;
   min-height: 4px;
   margin-bottom: 1rem;
+  box-shadow: 0 2px 4px var(--chart-bar-shadow);
 }
 
 .bar-value {
@@ -1012,12 +1063,13 @@ mat-card-subtitle {
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   white-space: nowrap;
   background-color: var(--card-background);
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   box-shadow: 0 1px 3px var(--shadow-color);
+  z-index: 1;
 }
 
 .bar-label {
@@ -1026,7 +1078,7 @@ mat-card-subtitle {
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
@@ -1035,45 +1087,58 @@ mat-card-subtitle {
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   padding: 1rem;
-  background-color: var(--hover-background);
+  background-color: var(--card-background);
   border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  margin-top: 1rem;
 }
 
 .summary-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  padding: 0.5rem;
+  padding: 1rem;
+  background-color: var(--card-background);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 3px var(--shadow-color);
 }
 
 .summary-label {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .summary-value {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-/* Dark Mode Overrides */
-:host-context(.dark-mode) .chart-bars::before {
-  background-color: var(--border-color);
-}
-
+/* Dark mode overrides */
 :host-context(.dark-mode) .chart-bar {
   background: linear-gradient(to top, var(--primary-color-dark), var(--primary-color));
 }
 
-:host-context(.dark-mode) .monthly-stats-summary {
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
 :host-context(.dark-mode) .bar-value {
   background-color: var(--card-background);
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) .bar-label {
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) .summary-item {
+  background-color: var(--card-background);
+}
+
+:host-context(.dark-mode) .summary-label {
+  color: var(--text-secondary);
+}
+
+:host-context(.dark-mode) .summary-value {
   color: var(--text-primary);
 }
 
@@ -1144,4 +1209,143 @@ mat-card-subtitle {
   .monthly-stats-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Material Card List Item Styles */
+:host-context(.dark-mode) mat-card mat-list-item {
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) mat-card mat-list-item .mdc-list-item__primary-text {
+  color: var(--text-primary) !important;
+}
+
+:host-context(.dark-mode) mat-card mat-list-item .mdc-list-item__secondary-text {
+  color: var(--text-secondary) !important;
+}
+
+:host-context(.dark-mode) mat-card mat-list-item .mat-mdc-list-item-title {
+  color: var(--text-primary) !important;
+}
+
+:host-context(.dark-mode) mat-card mat-list-item .mat-mdc-list-item-subtitle {
+  color: var(--text-secondary) !important;
+}
+
+/* Recent Activity and Upcoming Events Cards */
+.recent-activity-card mat-list-item,
+.upcoming-events-card mat-list-item {
+  height: auto;
+  padding: 0.75rem 0;
+}
+
+:host-context(.dark-mode) .recent-activity-card mat-list-item,
+:host-context(.dark-mode) .upcoming-events-card mat-list-item {
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) .recent-activity-card mat-list-item .mdc-list-item__primary-text,
+:host-context(.dark-mode) .upcoming-events-card mat-list-item .mdc-list-item__primary-text {
+  color: var(--text-primary) !important;
+}
+
+:host-context(.dark-mode) .recent-activity-card mat-list-item .mdc-list-item__secondary-text,
+:host-context(.dark-mode) .upcoming-events-card mat-list-item .mdc-list-item__secondary-text {
+  color: var(--text-secondary) !important;
+}
+
+/* Filter Button Styles */
+.filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: var(--surface-color);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px var(--shadow-color);
+  margin-left: 12px;
+}
+
+.filter-button:hover {
+  background: var(--primary-color-light);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.filter-button.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 6px var(--shadow-color);
+}
+
+.filter-button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+}
+
+.filter-button:hover mat-icon {
+  transform: scale(1.1);
+}
+
+/* Dark Mode Overrides */
+:host-context(.dark-mode) .filter-button {
+  background: var(--card-background);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:host-context(.dark-mode) .filter-button:hover {
+  background: var(--primary-color-light);
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+:host-context(.dark-mode) .filter-button.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* Clear Filter Button Styles */
+.clear-filter-btn {
+  width: 24px !important;
+  height: 24px !important;
+  margin-left: 8px;
+  background: var(--error-color) !important;
+  box-shadow: 0 2px 4px var(--shadow-color) !important;
+  transition: all 0.3s ease !important;
+}
+
+.clear-filter-btn:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 4px 6px var(--shadow-color) !important;
+}
+
+.clear-filter-btn mat-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  line-height: 16px !important;
+  color: white !important;
+}
+
+/* Dark Mode Overrides */
+:host-context(.dark-mode) .clear-filter-btn {
+  background: var(--error-color) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+:host-context(.dark-mode) .clear-filter-btn:hover {
+  background: var(--error-color) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
 } 

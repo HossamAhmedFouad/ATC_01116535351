@@ -1,4 +1,330 @@
 <div class="profile-container">
-  <h1>Profile</h1>
-  <p>Profile page content will be implemented here.</p>
+  <mat-sidenav-container>
+    <mat-sidenav #sidenav mode="side" [opened]="isSidenavOpen" [class.collapsed]="!isSidenavOpen" class="profile-sidenav">
+      <div class="sidenav-header">
+        <div class="header-content" *ngIf="isSidenavOpen">
+          <h2>Profile</h2>
+          <p class="user-email">{{user?.email}}</p>
+        </div>
+        <button mat-icon-button (click)="toggleSidenav()" class="toggle-btn" [class.rotated]="!isSidenavOpen">
+          <mat-icon>{{isSidenavOpen ? 'chevron_left' : 'chevron_right'}}</mat-icon>
+        </button>
+      </div>
+      
+      <mat-nav-list>
+        <a mat-list-item 
+           *ngFor="let item of navItems"
+           (click)="navigateToSection(item.id)"
+           [class.active]="currentSection === item.id"
+           [matTooltip]="!isSidenavOpen ? item.label : ''"
+           [matTooltipPosition]="'right'">
+          <mat-icon matListItemIcon>{{item.icon}}</mat-icon>
+          <span matListItemTitle>{{item.label}}</span>
+          <span matListItemMeta *ngIf="isSidenavOpen && item.badge !== undefined">
+            <mat-icon matBadge="{{item.badge}}" 
+                     [matBadgeColor]="item.badgeColor"
+                     *ngIf="item.badge > 0">
+              notifications
+            </mat-icon>
+          </span>
+        </a>
+      </mat-nav-list>
+
+      <div class="sidenav-footer" *ngIf="isSidenavOpen">
+        <mat-divider></mat-divider>
+        <div class="user-info">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{user?.username}}</span>
+        </div>
+      </div>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="profile-content">
+        <!-- Floating button to reopen sidenav -->
+        <button mat-fab color="primary" class="reopen-sidenav-btn" *ngIf="!isSidenavOpen" (click)="toggleSidenav()">
+          <mat-icon>menu</mat-icon>
+        </button>
+
+        <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" diameter="40" class="loading-spinner"></mat-progress-spinner>
+
+        <!-- Personal Info Section -->
+        <section *ngIf="currentSection === 'personal-info' && !isLoading" class="profile-section">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Personal Information</mat-card-title>
+              <button mat-icon-button color="primary" (click)="personalInfoForm.reset()" matTooltip="Reset Form">
+                <mat-icon>refresh</mat-icon>
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="personalInfoForm" (ngSubmit)="updatePersonalInfo()">
+                <mat-form-field appearance="outline">
+                  <mat-label>Username</mat-label>
+                  <input matInput formControlName="username" required>
+                  <mat-icon matSuffix>person</mat-icon>
+                  <mat-error *ngIf="personalInfoForm.get('username')?.hasError('required')">
+                    Username is required
+                  </mat-error>
+                  <mat-error *ngIf="personalInfoForm.get('username')?.hasError('minlength')">
+                    Username must be at least 3 characters
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput formControlName="email" type="email" required>
+                  <mat-icon matSuffix>email</mat-icon>
+                  <mat-error *ngIf="personalInfoForm.get('email')?.hasError('required')">
+                    Email is required
+                  </mat-error>
+                  <mat-error *ngIf="personalInfoForm.get('email')?.hasError('email')">
+                    Please enter a valid email
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Phone Number</mat-label>
+                  <input matInput formControlName="phone">
+                  <mat-icon matSuffix>phone</mat-icon>
+                  <mat-error *ngIf="personalInfoForm.get('phone')?.hasError('pattern')">
+                    Please enter a valid phone number
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Location</mat-label>
+                  <input matInput formControlName="location">
+                  <mat-icon matSuffix>location_on</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Bio</mat-label>
+                  <textarea matInput formControlName="bio" rows="4" maxlength="500"></textarea>
+                  <mat-hint align="end">{{personalInfoForm.get('bio')?.value?.length || 0}}/500</mat-hint>
+                </mat-form-field>
+
+                <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="!personalInfoForm.valid || isUpdating">
+                    <mat-icon>save</mat-icon>
+                    Update Profile
+                    <mat-progress-spinner *ngIf="isUpdating" mode="indeterminate" diameter="20" class="button-spinner"></mat-progress-spinner>
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </section>
+
+        <!-- Security Section -->
+        <section *ngIf="currentSection === 'security' && !isLoading" class="profile-section">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Security Settings</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="securityForm" (ngSubmit)="updatePassword()">
+                <mat-form-field appearance="outline">
+                  <mat-label>Current Password</mat-label>
+                  <input matInput formControlName="currentPassword" type="password" required>
+                  <mat-icon matSuffix>lock</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>New Password</mat-label>
+                  <input matInput formControlName="newPassword" type="password" required>
+                  <mat-icon matSuffix>vpn_key</mat-icon>
+                  <mat-error *ngIf="securityForm.get('newPassword')?.hasError('minlength')">
+                    Password must be at least 8 characters
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Confirm New Password</mat-label>
+                  <input matInput formControlName="confirmPassword" type="password" required>
+                  <mat-icon matSuffix>vpn_key</mat-icon>
+                  <mat-error *ngIf="securityForm.hasError('mismatch')">
+                    Passwords do not match
+                  </mat-error>
+                </mat-form-field>
+
+                <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="!securityForm.valid || isUpdating">
+                    <mat-icon>security</mat-icon>
+                    Update Password
+                    <mat-progress-spinner *ngIf="isUpdating" mode="indeterminate" diameter="20" class="button-spinner"></mat-progress-spinner>
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </section>
+
+        <!-- Event History Section -->
+        <section *ngIf="currentSection === 'event-history' && !isLoading" class="profile-section">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Event History</mat-card-title>
+              <div class="event-stats">
+                <div class="chip-container">
+                  <mat-chip-set>
+                    <mat-chip [class.selected]="eventStatusFilter === 'all'" (click)="filterEventsByStatus('all')">
+                      All ({{eventHistory.length}})
+                    </mat-chip>
+                    <mat-chip [class.selected]="eventStatusFilter === 'upcoming'" (click)="filterEventsByStatus('upcoming')">
+                      Upcoming ({{getEventCount('upcoming')}})
+                    </mat-chip>
+                    <mat-chip [class.selected]="eventStatusFilter === 'completed'" (click)="filterEventsByStatus('completed')">
+                      Completed ({{getEventCount('completed')}})
+                    </mat-chip>
+                    <mat-chip [class.selected]="eventStatusFilter === 'cancelled'" (click)="filterEventsByStatus('cancelled')">
+                      Cancelled ({{getEventCount('cancelled')}})
+                    </mat-chip>
+                  </mat-chip-set>
+                </div>
+                <div class="total-spent">
+                  Total Spent: {{formatCurrency(getTotalSpent())}}
+                </div>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              <table mat-table [dataSource]="filteredEvents" class="event-table" matSort>
+                <!-- Title Column -->
+                <ng-container matColumnDef="title">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Event</th>
+                  <td mat-cell *matCellDef="let event">
+                    <div class="event-title">
+                      <span class="event-name">{{event.title}}</span>
+                      <span class="event-category">{{event.category}}</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Date Column -->
+                <ng-container matColumnDef="date">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+                  <td mat-cell *matCellDef="let event">
+                    <div class="event-date">
+                      <mat-icon>event</mat-icon>
+                      {{formatDate(event.date)}}
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+                  <td mat-cell *matCellDef="let event">
+                    <span class="event-status" [class]="getEventStatusClass(event.status)">
+                      <mat-icon>{{getStatusIcon(event.status)}}</mat-icon>
+                      {{event.status | titlecase}}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- Price Column -->
+                <ng-container matColumnDef="price">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
+                  <td mat-cell *matCellDef="let event">
+                    <div class="event-price">
+                      <span class="price-amount">{{formatCurrency(event.price)}}</span>
+                      <span class="ticket-type">{{event.ticketType}}</span>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let event">
+                    <div class="event-actions">
+                      <button mat-icon-button color="primary" (click)="viewEventDetails(event.id)" matTooltip="View Details">
+                        <mat-icon>visibility</mat-icon>
+                      </button>
+                      <button *ngIf="event.status === 'upcoming'" 
+                              mat-icon-button 
+                              color="warn" 
+                              (click)="cancelBooking(event)" 
+                              matTooltip="Cancel Booking"
+                              class="cancel-booking-btn">
+                        <mat-icon>cancel</mat-icon>
+                      </button>
+                    </div>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+
+              <mat-paginator [pageSize]="5" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+            </mat-card-content>
+          </mat-card>
+        </section>
+
+        <!-- Settings Section -->
+        <section *ngIf="currentSection === 'settings' && !isLoading" class="profile-section">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Website Settings</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="settingsForm" (ngSubmit)="updateSettings()">
+                <div class="settings-group">
+                  <h3>Notifications</h3>
+                  <mat-slide-toggle formControlName="emailNotifications">
+                    <mat-icon>email</mat-icon>
+                    Email Notifications
+                  </mat-slide-toggle>
+                  <mat-slide-toggle formControlName="smsNotifications">
+                    <mat-icon>sms</mat-icon>
+                    SMS Notifications
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="settings-group">
+                  <h3>Appearance</h3>
+                  <mat-slide-toggle formControlName="darkMode">
+                    <mat-icon>dark_mode</mat-icon>
+                    Dark Mode
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="settings-group">
+                  <h3>Preferences</h3>
+                  <mat-form-field appearance="outline">
+                    <mat-label>Language</mat-label>
+                    <mat-select formControlName="language">
+                      <mat-option *ngFor="let lang of languages" [value]="lang.code">
+                        {{lang.name}}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>language</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Timezone</mat-label>
+                    <mat-select formControlName="timezone">
+                      <mat-option *ngFor="let tz of timezones" [value]="tz.value">
+                        {{tz.label}}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>schedule</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                  <button mat-raised-button color="primary" type="submit" [disabled]="isUpdating">
+                    <mat-icon>save</mat-icon>
+                    Save Settings
+                    <mat-progress-spinner *ngIf="isUpdating" mode="indeterminate" diameter="20" class="button-spinner"></mat-progress-spinner>
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </section>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 </div> 

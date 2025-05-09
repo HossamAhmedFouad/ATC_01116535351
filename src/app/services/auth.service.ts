@@ -4,12 +4,32 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { delay, tap } from 'rxjs/operators';
 
+export interface BookedEvent {
+  id: number;
+  title: string;
+  date: Date;
+  location: string;
+  status: 'upcoming' | 'completed' | 'cancelled';
+  ticketType: string;
+  price: number;
+  category: string;
+  description: string;
+  imageUrl: string;
+  attendees: number;
+  organizer: string;
+  progress: number;
+  tags: string[];
+}
+
 export interface User {
-  id?: string;
+  id: number;
   name: string;
   username: string;
   email: string;
   location?: string;
+  phone?: string;
+  bio?: string;
+  bookedEvents?: BookedEvent[];
 }
 
 export interface AuthResponse {
@@ -40,7 +60,7 @@ export class AuthService {
     // For development, simulate API call
     return of({
       user: {
-        id: '1',
+        id: 1,
         name: 'Test User',
         username: 'testuser',
         email: email,
@@ -63,7 +83,7 @@ export class AuthService {
     // For development, simulate API call
     return of({
       user: {
-        id: '1',
+        id: 1,
         ...userData
       },
       token: 'mock-jwt-token'
@@ -77,7 +97,7 @@ export class AuthService {
     // For development, simulate API call
     return of({
       user: {
-        id: '1',
+        id: 1,
         name: 'Google User',
         username: 'googleuser',
         email: 'google@example.com',
