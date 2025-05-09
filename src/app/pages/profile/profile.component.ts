@@ -24,6 +24,8 @@ import { AuthService, User, BookedEvent } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import moment from 'moment';
 import { SidebarNavComponent, NavItem } from '../../components/sidebar-nav/sidebar-nav.component';
+import { Subscription } from 'rxjs';
+import { DrawerComponent } from '../../components/drawer/drawer.component';
 
 interface ProfileSettings {
   emailNotifications: boolean;
@@ -57,7 +59,8 @@ interface ProfileSettings {
     MatBadgeModule,
     MatChipsModule,
     MatSnackBarModule,
-    SidebarNavComponent
+    SidebarNavComponent,
+    DrawerComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -72,13 +75,16 @@ export class ProfileComponent implements OnInit {
   currentSection = 'personal-info';
   isLoading = false;
   isUpdating = false;
+  userSubscription!: Subscription;
   
   // Navigation items
   navItems: NavItem[] = [
     {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: 'dashboard'
+      id: 'event-history',
+      label: 'Events',
+      icon: 'Events',
+      badge: 0,
+      badgeColor: 'warn'
     },
     {
       id: 'personal-info',
@@ -89,13 +95,6 @@ export class ProfileComponent implements OnInit {
       id: 'security',
       label: 'Security',
       icon: 'security'
-    },
-    {
-      id: 'event-history',
-      label: 'Event History',
-      icon: 'history',
-      badge: 0,
-      badgeColor: 'warn'
     },
     {
       id: 'settings',
@@ -181,6 +180,10 @@ export class ProfileComponent implements OnInit {
     this.updateEventBadge();
   }
 
+  ngOnDestroy() {
+    this.userSubscription.unsubscribe(); // Clean up the subscription
+  }
+
   private setupFormSubscriptions(): void {
     this.settingsForm.get('darkMode')?.valueChanges.subscribe(isDark => {
       document.body.classList.toggle('dark-theme', isDark);
@@ -196,7 +199,7 @@ export class ProfileComponent implements OnInit {
 
   loadUserData() {
     this.isLoading = true;
-    this.authService.currentUser$.subscribe({
+    this.userSubscription = this.authService.currentUser$.subscribe({
       next: (user) => {
         if (user) {
           this.user = user;

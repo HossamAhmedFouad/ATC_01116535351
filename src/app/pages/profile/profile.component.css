@@ -302,15 +302,6 @@ mat-chip:hover:not(.selected) {
   background-color: rgba(0, 0, 0, 0.04);
 }
 
-.total-spent {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--primary-color);
-  padding: 8px 16px;
-  background-color: var(--primary-color-light);
-  border-radius: 8px;
-  align-self: flex-start;
-}
 
 .event-table {
   width: 100%;

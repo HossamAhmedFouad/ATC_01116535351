@@ -1,3 +1,27 @@
+:root {
+  --card-background: #ffffff;
+  --background-color: #f4f4f5;
+  --text-color: #2c2c2c;
+  --text-secondary: #6c757d;
+  --border-color: #e2e8f0;
+  --primary-color: #3f51b5;
+  --primary-color-dark: #303f9f;
+
+  --dark-card-background: #1e1e2f;
+  --dark-background: #121212;
+  --text-color-dark: #e0e0e0;
+  --border-color-dark: #333;
+}
+
+:host-context(.dark-mode) {
+  --card-background: var(--dark-card-background);
+  --background-color: var(--dark-background);
+  --text-color: var(--text-color-dark);
+  --text-secondary: #a0a0a0;
+  --border-color: var(--border-color-dark);
+}
+
+/* Core Styles */
 .profile-sidenav {
   width: 280px;
   height: 100%;
@@ -6,7 +30,7 @@
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.3s ease;
   overflow: hidden;
 }
 
@@ -14,16 +38,27 @@
   width: 72px;
 }
 
+/* Header */
 .sidenav-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 20px 16px;
   border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark, var(--primary-color)) 100%);
-  color: white;
-  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
+  color: rgb(0, 0, 0);
   height: 90px;
+}
+
+
+:host-context(.dark-mode) .sidenav-header {
+  background: #6366f1;
+  color: white;
+}
+
+.profile-sidenav.collapsed .sidenav-header {
+  justify-content: center;
+  padding: 20px 8px;
 }
 
 .header-content {
@@ -32,33 +67,36 @@
   gap: 6px;
 }
 
+.profile-sidenav.collapsed .header-content {
+  display: none;
+}
+
 .header-content h2 {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 600;
   white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: 0.5px;
 }
 
 .user-email {
   margin: 0;
   font-size: 0.9rem;
-  opacity: 0.9;
+  opacity: 0.85;
   font-weight: 400;
 }
 
+/* Toggle Button */
 .toggle-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   width: 36px;
   height: 36px;
+  transition: background 0.3s ease;
 }
 
 .toggle-btn:hover {
@@ -69,20 +107,29 @@
   transform: rotate(180deg);
 }
 
+/* Nav List */
 mat-nav-list {
   flex: 1;
   overflow-y: auto;
   padding: 16px 12px;
 }
 
+:host-context(.dark-mode) mat-nav-list {
+  background-color: #f1f1f1;
+}
+
+.profile-sidenav.collapsed mat-nav-list {
+  padding: 16px 8px;
+}
+
 mat-nav-list a {
-  margin: 8px 0;
-  border-radius: 12px;
-  height: 52px;
   display: flex;
   align-items: center;
+  margin: 8px 0;
   padding: 0 16px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 52px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
   color: var(--text-color);
   position: relative;
   overflow: hidden;
@@ -91,11 +138,17 @@ mat-nav-list a {
 .profile-sidenav.collapsed mat-nav-list a {
   padding: 0;
   justify-content: center;
+  width: 48px;
+  margin: 8px auto;
 }
 
 mat-nav-list a:hover:not(.active) {
-  background-color: var(--background-color);
+  background-color: rgba(0, 0, 0, 0.04);
   transform: translateX(4px);
+}
+
+:host-context(.dark-mode) mat-nav-list a:hover:not(.active) {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .profile-sidenav.collapsed mat-nav-list a:hover:not(.active) {
@@ -103,7 +156,7 @@ mat-nav-list a:hover:not(.active) {
 }
 
 mat-nav-list a.active {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark, var(--primary-color)) 100%);
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
   color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -123,46 +176,44 @@ mat-nav-list a.active::before {
   display: none;
 }
 
+mat-nav-list a mat-icon {
+  margin-right: 16px;
+  color: var(--text-secondary);
+  font-size: 22px;
+  transition: transform 0.3s ease;
+}
+
 mat-nav-list a.active mat-icon {
-  color: white;
+  color: rgb(0, 20, 240);
   transform: scale(1.1);
 }
 
-mat-nav-list a mat-icon {
-  margin-right: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--text-secondary);
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-  flex-shrink: 0;
-}
+
 
 .profile-sidenav.collapsed mat-nav-list a mat-icon {
   margin-right: 0;
+  font-size: 24px;
 }
 
 mat-nav-list a span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
   opacity: 1;
-  width: auto;
+  transition: opacity 0.3s ease;
 }
 
 .profile-sidenav.collapsed mat-nav-list a span {
-  opacity: 0;
-  width: 0;
-  margin: 0;
   display: none;
 }
 
+/* Footer */
 .sidenav-footer {
   padding: 16px;
   border-top: 1px solid var(--border-color);
   background-color: var(--background-color);
+}
+
+.profile-sidenav.collapsed .sidenav-footer {
+  padding: 16px 8px;
 }
 
 .user-info {
@@ -176,6 +227,11 @@ mat-nav-list a span {
   transition: all 0.2s ease;
 }
 
+.profile-sidenav.collapsed .user-info {
+  justify-content: center;
+  padding: 8px;
+}
+
 .user-info:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -184,8 +240,6 @@ mat-nav-list a span {
 .user-info mat-icon {
   color: var(--primary-color);
   font-size: 24px;
-  width: 24px;
-  height: 24px;
 }
 
 .user-info span {
@@ -197,30 +251,11 @@ mat-nav-list a span {
   text-overflow: ellipsis;
 }
 
-/* Dark Mode Overrides */
-:host-context(.dark-theme) {
-  .profile-sidenav {
-    background: linear-gradient(180deg, var(--dark-card-background) 0%, var(--dark-background) 100%);
-  }
-
-  .user-info {
-    background-color: var(--dark-card-background);
-  }
-
-  .user-info mat-icon {
-    color: var(--primary-color-light, var(--primary-color));
-  }
-
-  .user-info span {
-    color: var(--text-color-dark);
-  }
-
-  mat-nav-list a:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
+.profile-sidenav.collapsed .user-info span {
+  display: none;
 }
 
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
   .profile-sidenav {
     position: fixed;
@@ -228,8 +263,4 @@ mat-nav-list a span {
     height: calc(100vh - 56px);
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
   }
-  
-  .profile-sidenav.collapsed {
-    transform: translateX(-72px);
-  }
-} 
+}
