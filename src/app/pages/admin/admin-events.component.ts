@@ -1,0 +1,414 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { EventService } from '../../services/event.service';
+import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
+
+interface Event {
+  id: number;
+  title: string;
+  date: Date;
+  time?: string;
+  location: string;
+  description: string;
+  status: 'active' | 'draft' | 'completed';
+  capacity?: number;
+  image?: string;
+}
+
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+}
+
+@Component({
+  selector: 'app-admin-events',
+  templateUrl: './admin-events.component.html',
+  styleUrls: ['./admin-events.component.css'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    MatIconModule,
+    SearchBarComponent,
+  ],
+})
+export class AdminEventsComponent implements OnInit {
+  // Events data
+  events: Event[] = [];
+  filteredEvents: Event[] = [];
+
+  // Pagination
+  itemsPerPage: number = 10;
+  currentPage: number = 1;
+  totalPages: number = 1;
+
+  // Filters
+  searchTerm: string = '';
+  filterStatus: string = 'all';
+  startDate?: Date;
+  endDate?: Date;
+
+  // Sorting
+  sortColumn: string = 'date';
+  sortDirection: 'asc' | 'desc' = 'desc';
+
+  // Modals
+  showEventModal: boolean = false;
+  showDeleteModal: boolean = false;
+  isEditMode: boolean = false;
+  eventToDelete?: Event;
+
+  // Form
+  eventForm!: FormGroup;
+
+  // Toasts
+  toasts: Toast[] = [];
+  nextToastId: number = 1;
+
+  constructor(private fb: FormBuilder, private eventService: EventService) {}
+
+  ngOnInit(): void {
+    this.initEventForm();
+    this.loadMockEvents();
+    this.filterEvents();
+  }
+
+  // Initialize event form
+  initEventForm(): void {
+    this.eventForm = this.fb.group({
+      id: [null],
+      title: ['', Validators.required],
+      date: ['', Validators.required],
+      time: [''],
+      location: [''],
+      description: [''],
+      status: ['active'],
+      capacity: [null],
+      image: [''],
+    });
+  }
+
+  // Load mock events data
+  loadMockEvents(): void {
+    // This would typically come from a service
+    this.events = [
+      {
+        id: 1,
+        title: 'Annual Tech Conference',
+        date: new Date('2025-06-15'),
+        time: '09:00',
+        location: 'Convention Center',
+        description: 'A gathering of tech professionals from around the world.',
+        status: 'active',
+        capacity: 500,
+        image: 'https://example.com/tech-conference.jpg',
+      },
+      {
+        id: 2,
+        title: 'Product Launch',
+        date: new Date('2025-07-10'),
+        time: '14:00',
+        location: 'Downtown Theater',
+        description: 'Launching our new product line to the market.',
+        status: 'draft',
+        capacity: 200,
+        image: 'https://example.com/product-launch.jpg',
+      },
+      {
+        id: 3,
+        title: 'Summer Workshop Series',
+        date: new Date('2025-08-05'),
+        time: '10:00',
+        location: 'Innovation Hub',
+        description:
+          'A series of workshops focusing on innovation and creativity.',
+        status: 'active',
+        capacity: 50,
+        image: 'https://example.com/workshop.jpg',
+      },
+      {
+        id: 4,
+        title: 'Networking Mixer',
+        date: new Date('2025-05-22'),
+        time: '18:00',
+        location: 'Skyline Lounge',
+        description: 'Evening networking event for industry professionals.',
+        status: 'completed',
+        capacity: 100,
+        image: 'https://example.com/networking.jpg',
+      },
+      {
+        id: 5,
+        title: 'Developer Hackathon',
+        date: new Date('2025-09-12'),
+        time: '09:00',
+        location: 'Tech Campus',
+        description:
+          '48-hour hackathon for developers to build innovative solutions.',
+        status: 'active',
+        capacity: 150,
+        image: 'https://example.com/hackathon.jpg',
+      },
+    ];
+  }
+
+  // Filter events based on search and filters
+  filterEvents(): void {
+    let filtered = [...this.events];
+
+    // Search filter
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (event) =>
+          event.title.toLowerCase().includes(term) ||
+          event.location.toLowerCase().includes(term) ||
+          event.description.toLowerCase().includes(term)
+      );
+    }
+
+    // Status filter
+    if (this.filterStatus !== 'all') {
+      filtered = filtered.filter((event) => event.status === this.filterStatus);
+    }
+
+    // Date range filter
+    if (this.startDate) {
+      const startDate = new Date(this.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      filtered = filtered.filter((event) => new Date(event.date) >= startDate);
+    }
+
+    if (this.endDate) {
+      const endDate = new Date(this.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      filtered = filtered.filter((event) => new Date(event.date) <= endDate);
+    }
+
+    // Apply sorting
+    this.sortEvents(filtered);
+
+    // Calculate pagination
+    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+
+    this.filteredEvents = filtered.slice(startIndex, endIndex);
+  }
+
+  // Sort events
+  sortBy(column: string): void {
+    if (this.sortColumn === column) {
+      // Toggle direction if clicking the same column
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+
+    this.filterEvents();
+  }
+
+  // Get sort icon class
+  getSortIcon(column: string): string {
+    if (this.sortColumn !== column) {
+      return 'fas fa-sort';
+    }
+    return this.sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+  }
+
+  // Apply sorting to events array
+  private sortEvents(events: Event[]): void {
+    events.sort((a: any, b: any) => {
+      const aValue = a[this.sortColumn];
+      const bValue = b[this.sortColumn];
+
+      if (aValue < bValue) {
+        return this.sortDirection === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return this.sortDirection === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  // Pagination methods
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.filterEvents();
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const totalVisible = 5;
+
+    if (this.totalPages <= totalVisible) {
+      // Show all pages if there are fewer than totalVisible
+      for (let i = 1; i <= this.totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show a window of pages around current page
+      let startPage = Math.max(
+        1,
+        this.currentPage - Math.floor(totalVisible / 2)
+      );
+      let endPage = startPage + totalVisible - 1;
+
+      if (endPage > this.totalPages) {
+        endPage = this.totalPages;
+        startPage = Math.max(1, endPage - totalVisible + 1);
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
+  }
+
+  // Modal methods
+  openEventModal(): void {
+    this.isEditMode = false;
+    this.eventForm.reset({
+      status: 'active',
+      date: new Date().toISOString().split('T')[0],
+    });
+    this.showEventModal = true;
+  }
+
+  closeEventModal(): void {
+    this.showEventModal = false;
+  }
+
+  viewEvent(event: Event): void {
+    this.eventService.viewEvent(event.id);
+  }
+
+  editEvent(event: Event): void {
+    this.isEditMode = true;
+    this.eventForm.patchValue({
+      ...event,
+      date: new Date(event.date).toISOString().split('T')[0],
+    });
+    this.showEventModal = true;
+  }
+
+  saveEvent(): void {
+    if (this.eventForm.invalid) {
+      // Mark all fields as touched to trigger validation messages
+      Object.keys(this.eventForm.controls).forEach((key) => {
+        const control = this.eventForm.get(key);
+        control?.markAsTouched();
+      });
+      return;
+    }
+
+    const formData = this.eventForm.value;
+
+    if (this.isEditMode) {
+      // Update existing event
+      const index = this.events.findIndex((e) => e.id === formData.id);
+      if (index !== -1) {
+        this.events[index] = {
+          ...this.events[index],
+          ...formData,
+          date: new Date(formData.date),
+        };
+        this.showToast('Event updated successfully', 'success');
+      }
+    } else {
+      // Create new event
+      const newId = Math.max(...this.events.map((e) => e.id), 0) + 1;
+      const newEvent: Event = {
+        ...formData,
+        id: newId,
+        date: new Date(formData.date),
+      };
+      this.events.push(newEvent);
+      this.showToast('Event created successfully', 'success');
+    }
+
+    this.closeEventModal();
+    this.filterEvents();
+  }
+
+  confirmDelete(event: Event): void {
+    this.eventToDelete = event;
+    this.showDeleteModal = true;
+  }
+
+  cancelDelete(): void {
+    this.eventToDelete = undefined;
+    this.showDeleteModal = false;
+  }
+
+  deleteEvent(): void {
+    if (this.eventToDelete) {
+      this.events = this.events.filter((e) => e.id !== this.eventToDelete!.id);
+      this.showToast(
+        `Event "${this.eventToDelete.title}" has been deleted`,
+        'info'
+      );
+      this.cancelDelete();
+      this.filterEvents();
+    }
+  }
+
+  // Toast notifications
+  showToast(
+    message: string,
+    type: 'success' | 'error' | 'info' | 'warning'
+  ): void {
+    const id = this.nextToastId++;
+    const toast: Toast = { id, message, type };
+    this.toasts.push(toast);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      this.removeToast(toast);
+    }, 5000);
+  }
+
+  removeToast(toast: Toast): void {
+    this.toasts = this.toasts.filter((t) => t.id !== toast.id);
+  }
+
+  getToastIcon(type: string): string {
+    switch (type) {
+      case 'success':
+        return 'fas fa-check-circle';
+      case 'error':
+        return 'fas fa-exclamation-circle';
+      case 'warning':
+        return 'fas fa-exclamation-triangle';
+      case 'info':
+        return 'fas fa-info-circle';
+      default:
+        return 'fas fa-info-circle';
+    }
+  }
+
+  // Update searchTerm when search changes
+  onSearchChange(newValue: string) {
+    this.searchTerm = newValue;
+    this.filterEvents();
+  }
+}

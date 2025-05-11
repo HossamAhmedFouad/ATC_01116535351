@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
-import { MatTableModule, MatTable } from '@angular/material/table';
+import { MatTableModule, MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatDividerModule } from '@angular/material/divider';
@@ -25,12 +25,8 @@ import { Router } from '@angular/router';
 import moment from 'moment';
 import { SidebarNavComponent, NavItem } from '../../components/sidebar-nav/sidebar-nav.component';
 import { Subscription } from 'rxjs';
-import { DrawerComponent } from '../../components/drawer/drawer.component';
 
 interface ProfileSettings {
-  emailNotifications: boolean;
-  smsNotifications: boolean;
-  darkMode: boolean;
   language: string;
   timezone: string;
 }
@@ -60,7 +56,6 @@ interface ProfileSettings {
     MatChipsModule,
     MatSnackBarModule,
     SidebarNavComponent,
-    DrawerComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -113,22 +108,21 @@ export class ProfileComponent implements OnInit {
   eventHistory: BookedEvent[] = [];
   filteredEvents: BookedEvent[] = [];
   eventStatusFilter = 'all';
+  currentPage = 1;
+  itemsPerPage = 5; // Adjust as needed
+  totalPages = 1;
+
+  dataSource = new MatTableDataSource<BookedEvent>(this.filteredEvents);
 
   // Settings
   settings: ProfileSettings = {
-    emailNotifications: true,
-    smsNotifications: false,
-    darkMode: false,
     language: 'en',
     timezone: 'UTC'
   };
 
   languages = [
     { code: 'en', name: 'English' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
-    { code: 'it', name: 'Italian' }
+    { code: 'ar', name: 'Arabic' },
   ];
 
   timezones = [
@@ -165,9 +159,6 @@ export class ProfileComponent implements OnInit {
     }, { validator: this.passwordMatchValidator });
 
     this.settingsForm = this.fb.group({
-      emailNotifications: [true],
-      smsNotifications: [false],
-      darkMode: [false],
       language: ['en'],
       timezone: ['UTC']
     });
@@ -178,6 +169,12 @@ export class ProfileComponent implements OnInit {
     this.loadEventHistory();
     this.setupFormSubscriptions();
     this.updateEventBadge();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+    this.paginator.pageSize = this.itemsPerPage; // Explicitly set the page size
   }
 
   ngOnDestroy() {
@@ -234,6 +231,12 @@ export class ProfileComponent implements OnInit {
     this.filteredEvents = this.eventStatusFilter === 'all'
       ? this.eventHistory
       : this.eventHistory.filter(event => event.status === this.eventStatusFilter);
+
+    this.dataSource.data = this.filteredEvents;
+    this.totalPages = Math.ceil(this.filteredEvents.length / this.itemsPerPage);
+    if (this.paginator) {
+      this.paginator.length = this.filteredEvents.length;
+    }
   }
 
   filterEventsByStatus(status: string) {
@@ -378,6 +381,33 @@ export class ProfileComponent implements OnInit {
       } finally {
         this.isUpdating = false;
       }
+    }
+  }
+
+  get paginatedEvents() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    return this.filteredEvents.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  get pageNumbers() {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  changePage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
     }
   }
 } 

@@ -39,6 +39,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'admin/events',
+    loadComponent: () => import('./pages/admin/admin-events.component').then(m => m.AdminEventsComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     redirectTo: ''
   }

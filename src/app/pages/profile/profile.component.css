@@ -1,3 +1,13 @@
+:root {
+  --profile-card-background: #ffffff;
+  --profile-border-color: #e0e0e0;
+  --profile-primary-color: #3f51b5;
+  --profile-text-color: #333333;
+  --profile-text-secondary: #666666;
+  --profile-background-color: #f5f5f5;
+  --profile-warn-color: #f44336;
+}
+
 .profile-container {
   height: calc(100vh - 64px);
   margin-top: 64px;
@@ -10,32 +20,27 @@ mat-sidenav-container {
   height: 100%;
 }
 
-mat-sidenav {
-  width: 280px;
-  min-width: 280px;
+mat-sidenav,
+.profile-sidenav {
   background-color: transparent;
   border: none;
+  width: 280px;
+  min-width: 280px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-mat-sidenav.collapsed {
+mat-sidenav.collapsed,
+.profile-sidenav.collapsed {
   width: 64px;
   min-width: 64px;
 }
 
 .profile-sidenav {
-  width: 280px;
-  min-width: 280px;
-  background-color: var(--card-background);
-  border-right: 1px solid var(--border-color);
+  background-color: var(--profile-card-background);
+  border-right: 1px solid var(--profile-border-color);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.profile-sidenav.collapsed {
-  width: 64px;
-  min-width: 64px;
 }
 
 .sidenav-header {
@@ -44,7 +49,7 @@ mat-sidenav.collapsed {
   justify-content: space-between;
   padding: 16px;
   border-bottom: 1px solid var(--border-color);
-  background-color: var(--primary-color);
+  background-color: var(--profile-primary-color);
   color: white;
   flex-shrink: 0;
   height: 80px;
@@ -90,14 +95,14 @@ mat-nav-list {
 }
 
 mat-nav-list a {
-  margin: 8px 0;
-  border-radius: 8px;
-  height: 48px;
   display: flex;
   align-items: center;
+  height: 48px;
   padding: 0 16px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--text-color);
+  margin: 4px 0;
+  border-radius: 0 24px 24px 0;
+  color: var(--profile-text-color);
+  transition: all 0.2s ease;
 }
 
 mat-nav-list a:hover:not(.active) {
@@ -105,18 +110,19 @@ mat-nav-list a:hover:not(.active) {
 }
 
 mat-nav-list a.active {
-  background-color: var(--primary-color);
+  background-color: var(--profile-primary-color);
   color: white;
-}
-
-mat-nav-list a.active mat-icon {
-  color: white;
+  margin-right: 16px;
 }
 
 mat-nav-list a mat-icon {
   margin-right: 16px;
+  color: var(--profile-text-secondary);
   transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  color: var(--text-secondary);
+}
+
+mat-nav-list a.active mat-icon {
+  color: white;
 }
 
 .profile-sidenav.collapsed mat-nav-list a mat-icon {
@@ -146,7 +152,7 @@ mat-nav-list a span {
   gap: 12px;
   padding: 8px;
   border-radius: 8px;
-  background-color: var(--background-color);
+  background-color: var(--profile-background-color);
 }
 
 .user-info mat-icon {
@@ -155,7 +161,7 @@ mat-nav-list a span {
 
 .user-info span {
   font-size: 0.875rem;
-  color: var(--text-color);
+  color: var(--profile-text-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -187,8 +193,8 @@ mat-nav-list a span {
 }
 
 mat-card {
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
+  background-color: var(--profile-card-background);
+  border: 1px solid var(--profile-border-color);
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -197,6 +203,7 @@ mat-card {
 
 mat-card-header {
   padding: 24px;
+  background-color: white;
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -207,10 +214,16 @@ mat-card-title {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--profile-text-color);
 }
 
 mat-card-content {
+  background-color: white;
+  padding: 32px;
+}
+
+:host-context(.dark-mode) mat-card-content {
+  background-color: white;
   padding: 32px;
 }
 
@@ -255,7 +268,7 @@ mat-form-field {
   margin: 0 0 16px 0;
   font-size: 1.2rem;
   font-weight: 500;
-  color: var(--text-color);
+  color: var(--profile-text-color);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -268,7 +281,6 @@ mat-slide-toggle {
   gap: 8px;
 }
 
-/* Event History Table Styles */
 .event-stats {
   display: flex;
   flex-direction: column;
@@ -294,14 +306,13 @@ mat-chip {
 }
 
 mat-chip.selected {
-  background-color: var(--primary-color);
-  color: white;
+  background-color: #1c56f5;
+  color: white
 }
 
 mat-chip:hover:not(.selected) {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(244, 239, 239, 0.862);
 }
-
 
 .event-table {
   width: 100%;
@@ -311,22 +322,24 @@ mat-chip:hover:not(.selected) {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.event-table th {
-  background-color: var(--card-background);
-  color: var(--text-color);
-  font-weight: 500;
+.event-table th,
+.event-table td {
   padding: 16px 24px;
   white-space: nowrap;
+  color: var(--profile-text-color);
+}
+
+.event-table th {
+  background-color: var(--profile-card-background);
+  font-weight: 500;
 }
 
 .event-table td {
-  color: var(--text-color);
-  padding: 16px 24px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .event-table tr:hover {
-  background-color: var(--background-color);
+  background-color: rgb(214, 214, 214)
 }
 
 .event-actions {
@@ -336,7 +349,7 @@ mat-chip:hover:not(.selected) {
 }
 
 .cancel-booking-btn {
-  color: var(--warn-color);
+  color: var(--profile-warn-color);
 }
 
 .cancel-booking-btn:hover {
@@ -374,29 +387,6 @@ mat-chip:hover:not(.selected) {
   color: #2196f3;
 }
 
-/* Active Navigation Item */
-mat-nav-list a.active {
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 0 24px 24px 0;
-  margin-right: 16px;
-}
-
-mat-nav-list a.active mat-icon {
-  color: white;
-}
-
-mat-nav-list a {
-  margin: 4px 0;
-  border-radius: 0 24px 24px 0;
-  transition: all 0.2s ease;
-}
-
-mat-nav-list a:hover:not(.active) {
-  background-color: var(--background-color);
-}
-
-/* Loading Spinner */
 .loading-spinner {
   position: fixed;
   top: 50%;
@@ -405,7 +395,77 @@ mat-nav-list a:hover:not(.active) {
   z-index: 1000;
 }
 
-/* Responsive Design */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination button {
+  min-width: 36px;
+}
+
+.pagination button.active {
+  background-color: #3f51b5;
+  color: white;
+}
+
+.event-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.event-name {
+  font-weight: 500;
+  color: var(--profile-text-color);
+}
+
+.event-category {
+  font-size: 0.875rem;
+  color: var(--profile-text-secondary);
+  background-color: var(--profile-background-color);
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.event-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--profile-text-secondary);
+}
+
+.event-date mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.event-price {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.price-amount {
+  font-weight: 500;
+  color: var(--profile-text-color);
+}
+
+.ticket-type {
+  font-size: 0.875rem;
+  color: var(--profile-text-secondary);
+}
+
 @media (max-width: 768px) {
   .profile-container {
     height: calc(100vh - 56px);
@@ -443,46 +503,7 @@ mat-nav-list a:hover:not(.active) {
   }
 }
 
-/* Dark Mode Overrides */
-:host-context(.dark-theme) {
-  .profile-sidenav {
-    background-color: var(--dark-card-background);
-  }
-
-  mat-card {
-    background-color: var(--dark-card-background);
-  }
-
-  .event-table th {
-    background-color: var(--dark-card-background);
-  }
-
-  .settings-group {
-    background-color: var(--dark-background);
-  }
-
-  .total-spent {
-    background-color: var(--primary-color-dark);
-  }
-
-  .user-info {
-    background-color: var(--dark-background);
-  }
-
-  .user-info mat-icon {
-    color: var(--text-secondary-dark);
-  }
-
-  .user-info span {
-    color: var(--text-color-dark);
-  }
-
-  mat-nav-list a:hover:not(.active) {
-    background-color: var(--dark-background);
-  }
-}
-
-/* Success and Error Snackbar Styles */
+/* Snackbar styles */
 ::ng-deep .success-snackbar {
   background-color: #4caf50;
   color: white;
@@ -492,52 +513,3 @@ mat-nav-list a:hover:not(.active) {
   background-color: #f44336;
   color: white;
 }
-
-.event-title {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.event-name {
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-.event-category {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  background-color: var(--background-color);
-  padding: 2px 8px;
-  border-radius: 12px;
-  display: inline-block;
-}
-
-.event-date {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-secondary);
-}
-
-.event-date mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
-.event-price {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.price-amount {
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-.ticket-type {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-} 

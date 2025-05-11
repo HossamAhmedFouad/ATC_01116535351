@@ -5,7 +5,7 @@
   <div class="event-content">
     <h2>{{event.title}}</h2>
     <div class="event-meta">
-      <span class="event-date">📅 {{event.date}}</span>
+      <span class="event-date">📅 {{event.date | date:'mediumDate'}}</span>
       <span class="event-duration">⏱️ {{event.duration}}</span>
     </div>
     <p class="event-location">📍 {{event.location}}</p>

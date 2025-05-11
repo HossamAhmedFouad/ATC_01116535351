@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EventCardComponent, Event } from '../../components/event-card/event-card.component';
+import { EventCardComponent} from '../../components/event-card/event-card.component';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
 import { HttpClient } from '@angular/common/http';
+import { Event } from '../../services/event.service';
+import { EventService } from '../../services/event.service';
 
 @Component({
   selector: 'app-events',
@@ -24,58 +26,36 @@ export class EventsComponent implements OnInit {
   itemsPerPage = 6;
   totalPages = 1;
 
-  locations: string[] = [
-    'San Francisco, CA',
-    'Los Angeles, CA',
-    'New York, NY',
-    'Chicago, IL',
-    'Miami, FL',
-    'Seattle, WA',
-    'Austin, TX',
-    'New Orleans, LA',
-    'Portland, OR',
-    'San Jose, CA',
-    'Las Vegas, NV',
-    'Napa Valley, CA',
-    'Denver, CO',
-    'Boston, MA',
-    'Bali, Indonesia'
-  ];
-
-  categories: string[] = [
-    'Technology',
-    'Music',
-    'Food & Drink',
-    'Business',
-    'Arts & Culture',
-    'Sports',
-    'Networking',
-    'Health & Wellness'
-  ];
-
+  locations: string[] = [];
+  categories: string[] = [];
+  
   events: Event[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private eventService: EventService) {}
 
   ngOnInit() {
     this.loadEvents();
+    this.loadMetadata();
   }
 
   loadEvents() {
-    console.log('Loading events...');
-    this.http.get<{ events: Event[] }>('./assets/data/events.json')
-      .subscribe({
-        next: (data) => {
-          console.log('Events loaded:', data);
-          this.events = data.events;
-          this.totalPages = Math.ceil(this.events.length / this.itemsPerPage);
-          console.log('Total events:', this.events.length);
-          console.log('Total pages:', this.totalPages);
-        },
-        error: (error) => {
-          console.error('Error loading events:', error);
-        }
-      });
+    this.eventService.getEvents().subscribe({
+      next: (events) => {
+        this.events = events;
+        this.totalPages = Math.ceil(this.events.length / this.itemsPerPage);
+      },
+      error: (error) => console.error('Error loading events:', error)
+    });
+  }
+
+  loadMetadata() {
+    this.eventService.getEventMetadata().subscribe({
+      next: (metadata) => {
+        this.locations = metadata.locations;
+        this.categories = metadata.categories;
+      },
+      error: (error) => console.error('Error loading metadata:', error)
+    });
   }
 
   get filteredEvents() {
@@ -140,7 +120,7 @@ export class EventsComponent implements OnInit {
     }
   }
 
-  private matchDateFilter(eventDate: string, filter: string): boolean {
+  private matchDateFilter(eventDate: string | Date, filter: string): boolean {
     const today = new Date();
     const eventDateTime = new Date(eventDate);
     

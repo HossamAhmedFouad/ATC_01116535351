@@ -1,0 +1,355 @@
+<div class="admin-container">
+  <header class="admin-header">
+    <h1>Event Management</h1>
+    <button class="btn-primary" (click)="openEventModal()">
+      <mat-icon>add</mat-icon> Add New Event
+    </button>
+  </header>
+
+  <!-- Event filters -->
+  <div class="filters-container">
+    <app-search-bar
+      [searchText]="searchTerm"
+      (searchTextChange)="onSearchChange($event)"
+      placeholder="Search events by title, location, or description..."
+    ></app-search-bar>
+
+    <div class="filter-options">
+      <select [(ngModel)]="filterStatus" (change)="filterEvents()">
+        <option value="all">All Status</option>
+        <option value="active">Active</option>
+        <option value="draft">Draft</option>
+        <option value="completed">Completed</option>
+      </select>
+
+      <div class="date-filter">
+        <input type="date" [(ngModel)]="startDate" (change)="filterEvents()" />
+        <span>to</span>
+        <input type="date" [(ngModel)]="endDate" (change)="filterEvents()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Events Table -->
+  <div class="table-container">
+    <table class="events-table" *ngIf="filteredEvents.length > 0">
+      <thead>
+        <tr>
+          <th (click)="sortBy('id')" class="sortable">
+            ID
+            <mat-icon>{{
+              sortColumn === "id"
+                ? sortDirection === "asc"
+                  ? "arrow_upward"
+                  : "arrow_downward"
+                : "unfold_more"
+            }}</mat-icon>
+          </th>
+          <th (click)="sortBy('title')" class="sortable">
+            Event Title
+            <mat-icon>{{
+              sortColumn === "title"
+                ? sortDirection === "asc"
+                  ? "arrow_upward"
+                  : "arrow_downward"
+                : "unfold_more"
+            }}</mat-icon>
+          </th>
+          <th (click)="sortBy('date')" class="sortable">
+            Date
+            <mat-icon>{{
+              sortColumn === "date"
+                ? sortDirection === "asc"
+                  ? "arrow_upward"
+                  : "arrow_downward"
+                : "unfold_more"
+            }}</mat-icon>
+          </th>
+          <th (click)="sortBy('location')" class="sortable">
+            Location
+            <mat-icon>{{
+              sortColumn === "location"
+                ? sortDirection === "asc"
+                  ? "arrow_upward"
+                  : "arrow_downward"
+                : "unfold_more"
+            }}</mat-icon>
+          </th>
+          <th (click)="sortBy('status')" class="sortable">
+            Status
+            <mat-icon>{{
+              sortColumn === "status"
+                ? sortDirection === "asc"
+                  ? "arrow_upward"
+                  : "arrow_downward"
+                : "unfold_more"
+            }}</mat-icon>
+          </th>
+          <th><mat-icon>settings</mat-icon> Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let event of filteredEvents">
+          <td [title]="event.id">{{ event.id }}</td>
+          <td [title]="event.title">{{ event.title }}</td>
+          <td [title]="event.date | date : 'mediumDate'">
+            {{ event.date | date : "mediumDate" }}
+          </td>
+          <td [title]="event.location">{{ event.location }}</td>
+          <td>
+            <span
+              class="status-badge"
+              [class.active]="event.status === 'active'"
+              [class.draft]="event.status === 'draft'"
+              [class.completed]="event.status === 'completed'"
+            >
+              {{ event.status }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button
+              class="btn-icon"
+              (click)="viewEvent(event)"
+              title="View Event"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button
+              class="btn-icon"
+              (click)="editEvent(event)"
+              title="Edit Event"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              class="btn-icon delete"
+              (click)="confirmDelete(event)"
+              title="Delete Event"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="filteredEvents.length === 0">
+      <mat-icon>event_busy</mat-icon>
+      <h3>No events found</h3>
+      <p>Try adjusting your filters or create a new event</p>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <div class="page-numbers">
+      <button
+        *ngFor="let page of getPageNumbers()"
+        [class.active]="page === currentPage"
+        (click)="goToPage(page)"
+      >
+        {{ page }}
+      </button>
+    </div>
+
+    <button
+      [disabled]="currentPage === totalPages"
+      (click)="goToPage(currentPage + 1)"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <!-- Event Modal -->
+  <div class="modal" *ngIf="showEventModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>{{ isEditMode ? "Edit Event" : "Create New Event" }}</h2>
+        <button class="btn-close" (click)="closeEventModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="eventForm" (ngSubmit)="saveEvent()">
+          <div class="form-group">
+            <label for="title">Event Title</label>
+            <input
+              type="text"
+              id="title"
+              formControlName="title"
+              placeholder="Enter event title"
+            />
+            <div
+              class="error-message"
+              *ngIf="
+                eventForm.get('title')?.invalid &&
+                eventForm.get('title')?.touched
+              "
+            >
+              Event title is required
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="date">Event Date</label>
+              <input type="date" id="date" formControlName="date" />
+              <div
+                class="error-message"
+                *ngIf="
+                  eventForm.get('date')?.invalid &&
+                  eventForm.get('date')?.touched
+                "
+              >
+                Valid date is required
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="time">Event Time</label>
+              <input type="time" id="time" formControlName="time" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input
+              type="text"
+              id="location"
+              formControlName="location"
+              placeholder="Enter event location"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="4"
+              placeholder="Enter event description"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" formControlName="status">
+                <option value="active">Active</option>
+                <option value="draft">Draft</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="capacity">Capacity</label>
+              <input
+                type="number"
+                id="capacity"
+                formControlName="capacity"
+                min="1"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="image">Image URL</label>
+            <input
+              type="text"
+              id="image"
+              formControlName="image"
+              placeholder="Enter image URL"
+            />
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="closeEventModal()"
+            >
+              <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="eventForm.invalid"
+            >
+              <mat-icon>save</mat-icon>
+              {{ isEditMode ? "Update Event" : "Create Event" }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" *ngIf="showDeleteModal">
+    <div class="modal-content delete-modal">
+      <div class="modal-header">
+        <h2>Confirm Delete</h2>
+        <button class="btn-close" (click)="cancelDelete()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="delete-warning">
+          <mat-icon class="warning-icon">warning</mat-icon>
+          <p>
+            Are you sure you want to delete the event "<strong>{{
+              eventToDelete?.title
+            }}</strong
+            >"?
+          </p>
+          <p class="warning-text">This action cannot be undone.</p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="cancelDelete()">
+            <mat-icon>close</mat-icon> Cancel
+          </button>
+          <button type="button" class="btn-danger" (click)="deleteEvent()">
+            <mat-icon>delete</mat-icon> Delete Event
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div
+      class="toast"
+      *ngFor="let toast of toasts"
+      [class.success]="toast.type === 'success'"
+      [class.error]="toast.type === 'error'"
+      [class.info]="toast.type === 'info'"
+      [class.warning]="toast.type === 'warning'"
+    >
+      <div class="toast-content">
+        <mat-icon [class]="toast.type">
+          {{
+            toast.type === "success"
+              ? "check_circle"
+              : toast.type === "error"
+              ? "error"
+              : toast.type === "warning"
+              ? "warning"
+              : "info"
+          }}
+        </mat-icon>
+        <span>{{ toast.message }}</span>
+      </div>
+      <button class="toast-close" (click)="removeToast(toast)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

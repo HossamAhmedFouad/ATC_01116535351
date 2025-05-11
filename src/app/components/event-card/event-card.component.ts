@@ -1,27 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-
-export interface Event {
-  id: number;
-  title: string;
-  date: string;
-  location: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  category: string;
-  duration: string;
-  organizer: string;
-  availableTickets: number;
-  schedule: {
-    day: string;
-    events: {
-      time: string;
-      title: string;
-    }[];
-  }[];
-}
+import { Event } from '../../services/event.service';
 
 @Component({
   selector: 'app-event-card',

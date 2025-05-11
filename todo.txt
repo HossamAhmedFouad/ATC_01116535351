@@ -1,0 +1,4 @@
+1 - Clean up project to use apis correctly
+2 - make sure routing guards are proper and redirected
+3 - add role based access redirect (user)
+4 - implement unique design palette across website

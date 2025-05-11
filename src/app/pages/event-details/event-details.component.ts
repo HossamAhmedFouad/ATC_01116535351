@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Event } from '../../components/event-card/event-card.component';
+import { Event } from '../../services/event.service';
 
 @Component({
   selector: 'app-event-details',
