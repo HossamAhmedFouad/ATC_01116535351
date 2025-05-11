@@ -19,23 +19,17 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import moment from 'moment';
+import { Booking } from '../../services/booking.service';
+import { Event } from '../../services/event.service';
+import { EventService } from '../../services/event.service';
+import { forkJoin, Observable, of } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
 
-interface BookedEvent {
-  id: number;
-  title: string;
-  date: Date;
-  location: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  ticketType: string;
-  price: number;
-  category: string;
-  description: string;
-  imageUrl: string;
-  attendees: number;
-  organizer: string;
-  progress?: number;
-  tags?: string[];
+
+interface BookedEvent extends Booking {
+  eventDetails: Event;
 }
+
 
 interface EventStats {
   totalEvents: number;
@@ -156,6 +150,7 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private eventService: EventService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -163,212 +158,49 @@ export class DashboardComponent implements OnInit {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
       if (user) {
-        this.loadUserEvents();
-        this.calculateStats();
-        this.calculateCategoryStats();
-        this.updateUpcomingEventsPreview();
-        this.generateRecentActivity();
-        this.calculateMonthlyStats();
+        this.loadUserEvents().subscribe({
+          next: () => {
+            this.calculateStats();
+            this.calculateCategoryStats();
+            this.updateUpcomingEventsPreview();
+            this.generateRecentActivity();
+            this.calculateMonthlyStats();
+          },
+          error: (err) => console.error('Failed to load events:', err)
+        });
       }
     });
   }
 
-  loadUserEvents() {
-    // Mock data with diverse dates and spending patterns
-    this.bookedEvents = [
-      {
-        id: 1,
-        title: 'Tech Conference 2024',
-        date: new Date('2024-03-15'),
-        location: 'San Francisco, CA',
-        status: 'upcoming',
-        ticketType: 'VIP Pass',
-        price: 599,
-        category: 'Technology',
-        description: 'Join us for the biggest tech conference of the year featuring AI, Cloud Computing, and more.',
-        imageUrl: 'assets/images/tech-conference.jpg',
-        attendees: 1500,
-        organizer: 'Tech Events Inc.',
-        progress: 75,
-        tags: ['AI', 'Cloud', 'Networking']
-      },
-      {
-        id: 2,
-        title: 'Summer Music Festival',
-        date: new Date('2024-04-20'),
-        location: 'Austin, TX',
-        status: 'upcoming',
-        ticketType: 'General Admission',
-        price: 299,
-        category: 'Music',
-        description: 'A three-day music festival featuring top artists from around the world.',
-        imageUrl: 'assets/images/music-festival.jpg',
-        attendees: 5000,
-        organizer: 'Music Festivals Co.',
-        progress: 60,
-        tags: ['Live Music', 'Festival', 'Outdoor']
-      },
-      {
-        id: 3,
-        title: 'Food & Wine Expo',
-        date: new Date('2024-05-05'),
-        location: 'Chicago, IL',
-        status: 'upcoming',
-        ticketType: 'Premium Pass',
-        price: 249,
-        category: 'Food',
-        description: 'Experience the finest cuisines and wines from renowned chefs and wineries.',
-        imageUrl: 'assets/images/food-expo.jpg',
-        attendees: 2000,
-        organizer: 'Gourmet Events',
-        progress: 45,
-        tags: ['Food', 'Wine', 'Culinary']
-      },
-      {
-        id: 4,
-        title: 'Basketball Championship',
-        date: new Date('2024-03-10'),
-        location: 'Los Angeles, CA',
-        status: 'completed',
-        ticketType: 'Courtside',
-        price: 850,
-        category: 'Sports',
-        description: 'Watch the final championship game with courtside seats.',
-        imageUrl: 'assets/images/basketball.jpg',
-        attendees: 18000,
-        organizer: 'Sports Events LLC',
-        progress: 100,
-        tags: ['Sports', 'Basketball', 'Championship']
-      },
-      {
-        id: 5,
-        title: 'Art Exhibition',
-        date: new Date('2024-04-15'),
-        location: 'New York, NY',
-        status: 'upcoming',
-        ticketType: 'VIP Access',
-        price: 175,
-        category: 'Arts',
-        description: 'Exclusive exhibition featuring contemporary artists from around the world.',
-        imageUrl: 'assets/images/art-exhibition.jpg',
-        attendees: 800,
-        organizer: 'Modern Art Gallery',
-        progress: 30,
-        tags: ['Art', 'Exhibition', 'Contemporary']
-      },
-      {
-        id: 6,
-        title: 'Winter Music Festival',
-        date: new Date('2023-12-15'),
-        location: 'Denver, CO',
-        status: 'completed',
-        ticketType: 'VIP Pass',
-        price: 450,
-        category: 'Music',
-        description: 'Annual winter music festival with top artists.',
-        imageUrl: 'assets/images/winter-festival.jpg',
-        attendees: 3000,
-        organizer: 'Winter Events Co.',
-        progress: 100,
-        tags: ['Music', 'Winter', 'Festival']
-      },
-      {
-        id: 7,
-        title: 'Tech Startup Summit',
-        date: new Date('2024-01-20'),
-        location: 'Seattle, WA',
-        status: 'completed',
-        ticketType: 'Early Bird',
-        price: 299,
-        category: 'Technology',
-        description: 'Connect with innovative startups and investors.',
-        imageUrl: 'assets/images/startup-summit.jpg',
-        attendees: 1200,
-        organizer: 'Tech Ventures',
-        progress: 100,
-        tags: ['Startup', 'Technology', 'Networking']
-      },
-      {
-        id: 8,
-        title: 'Food Truck Festival',
-        date: new Date('2024-02-10'),
-        location: 'Portland, OR',
-        status: 'completed',
-        ticketType: 'Foodie Pass',
-        price: 75,
-        category: 'Food',
-        description: 'Sample cuisine from the best food trucks in the region.',
-        imageUrl: 'assets/images/food-truck.jpg',
-        attendees: 5000,
-        organizer: 'Food Festivals Inc.',
-        progress: 100,
-        tags: ['Food', 'Street Food', 'Festival']
-      },
-      {
-        id: 9,
-        title: 'Modern Art Gallery Opening',
-        date: new Date('2024-02-25'),
-        location: 'Miami, FL',
-        status: 'completed',
-        ticketType: 'Opening Night',
-        price: 150,
-        category: 'Arts',
-        description: 'Exclusive opening night of the new modern art gallery.',
-        imageUrl: 'assets/images/art-gallery.jpg',
-        attendees: 300,
-        organizer: 'Miami Arts',
-        progress: 100,
-        tags: ['Art', 'Gallery', 'Opening']
-      },
-      {
-        id: 10,
-        title: 'Soccer Championship',
-        date: new Date('2024-01-05'),
-        location: 'Boston, MA',
-        status: 'completed',
-        ticketType: 'Premium',
-        price: 200,
-        category: 'Sports',
-        description: 'Championship match with premium seating.',
-        imageUrl: 'assets/images/soccer.jpg',
-        attendees: 25000,
-        organizer: 'Sports Events LLC',
-        progress: 100,
-        tags: ['Sports', 'Soccer', 'Championship']
-      },
-      {
-        id: 11,
-        title: 'Jazz Night',
-        date: new Date('2024-03-01'),
-        location: 'New Orleans, LA',
-        status: 'upcoming',
-        ticketType: 'Standard',
-        price: 85,
-        category: 'Music',
-        description: 'Evening of jazz with renowned artists.',
-        imageUrl: 'assets/images/jazz-night.jpg',
-        attendees: 500,
-        organizer: 'Jazz Club',
-        progress: 40,
-        tags: ['Music', 'Jazz', 'Night']
-      },
-      {
-        id: 12,
-        title: 'Cooking Masterclass',
-        date: new Date('2024-03-20'),
-        location: 'San Francisco, CA',
-        status: 'upcoming',
-        ticketType: 'Participant',
-        price: 195,
-        category: 'Food',
-        description: 'Learn from master chefs in this hands-on cooking class.',
-        imageUrl: 'assets/images/cooking-class.jpg',
-        attendees: 20,
-        organizer: 'Culinary Arts Academy',
-        progress: 25,
-        tags: ['Food', 'Cooking', 'Class']
-      }
-    ];
+  loadUserEvents(): Observable<void> {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser?.bookedEvents) {
+      this.bookedEvents = [];
+      return of(undefined);
+    }
+
+    const observables = currentUser.bookedEvents.map(booking => 
+      this.eventService.getEvent(booking.event_id).pipe(
+        map(eventDetails => ({
+          ...booking,
+          eventDetails
+        })),
+        catchError(error => {
+          console.error('Failed to load event details:', error);
+          return of({
+            ...booking,
+            eventDetails: {} as Event
+          });
+        })
+      )
+    );
+
+    return forkJoin(observables).pipe(
+      tap(bookedEvents => {
+        this.bookedEvents = bookedEvents;
+      }),
+      map(() => undefined)
+    );
   }
 
   calculateStats() {
@@ -378,34 +210,44 @@ export class DashboardComponent implements OnInit {
 
     this.eventStats = {
       totalEvents: this.bookedEvents.length,
-      upcomingEvents: this.bookedEvents.filter(e => e.status === 'upcoming').length,
-      completedEvents: this.bookedEvents.filter(e => e.status === 'completed').length,
+      upcomingEvents: this.bookedEvents.filter(e => 
+        new Date(e.booking_time) > now && e.status === 'booked'
+      ).length,
+      completedEvents: this.bookedEvents.filter(e => 
+        new Date(e.booking_time) <= now && e.status === 'booked'
+      ).length,
       cancelledEvents: this.bookedEvents.filter(e => e.status === 'cancelled').length,
-      totalSpent: this.bookedEvents.reduce((sum, event) => sum + event.price, 0),
+      totalSpent: this.bookedEvents.reduce((sum, event) => sum + event.total_price, 0),
       favoriteCategory: this.getFavoriteCategory(),
       monthlySpending: this.bookedEvents
-        .filter(e => e.date >= monthStart)
-        .reduce((sum, event) => sum + event.price, 0),
+        .filter(e => new Date(e.booking_time) >= monthStart)
+        .reduce((sum, event) => sum + event.total_price, 0),
       yearlySpending: this.bookedEvents
-        .filter(e => e.date >= yearStart)
-        .reduce((sum, event) => sum + event.price, 0),
-      averageTicketPrice: this.bookedEvents.reduce((sum, event) => sum + event.price, 0) / this.bookedEvents.length,
+        .filter(e => new Date(e.booking_time) >= yearStart)
+        .reduce((sum, event) => sum + event.total_price, 0),
+      averageTicketPrice: this.bookedEvents.length > 0 
+        ? this.bookedEvents.reduce((sum, event) => sum + event.total_price, 0) / this.bookedEvents.length 
+        : 0,
       mostExpensiveEvent: this.bookedEvents.reduce((max, event) => 
-        event.price > max.price ? event : max, this.bookedEvents[0]),
+        event.total_price > max.total_price ? event : max, 
+        { total_price: 0 } as BookedEvent
+      ),
       upcomingSpending: this.bookedEvents
-        .filter(e => e.status === 'upcoming')
-        .reduce((sum, event) => sum + event.price, 0)
+        .filter(e => new Date(e.booking_time) > now && e.status === 'booked')
+        .reduce((sum, event) => sum + event.total_price, 0)
     };
+    console.log(this.eventStats);
+    console.log(this.bookedEvents);
   }
 
   calculateCategoryStats() {
     const categoryMap = new Map<string, { count: number; totalSpent: number }>();
     
     this.bookedEvents.forEach(event => {
-      const current = categoryMap.get(event.category) || { count: 0, totalSpent: 0 };
-      categoryMap.set(event.category, {
+      const current = categoryMap.get(event.eventDetails?.category || 'Unknown') || { count: 0, totalSpent: 0 };
+      categoryMap.set(event.eventDetails?.category || 'Unknown', {
         count: current.count + 1,
-        totalSpent: current.totalSpent + event.price
+        totalSpent: current.totalSpent + event.total_price
       });
     });
 
@@ -422,7 +264,7 @@ export class DashboardComponent implements OnInit {
 
   getFavoriteCategory(): string {
     const categoryCount = this.bookedEvents.reduce((acc, event) => {
-      acc[event.category] = (acc[event.category] || 0) + 1;
+      acc[event.eventDetails?.category || 'Unknown'] = (acc[event.eventDetails?.category || 'Unknown'] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
@@ -441,13 +283,13 @@ export class DashboardComponent implements OnInit {
     // Apply date filter if a date is selected
     if (this.isDateFiltered && this.selectedDate) {
       events = events.filter(event => 
-        moment(event.date).isSame(this.selectedDate, 'day')
+        moment(event.eventDetails?.date).isSame(this.selectedDate, 'day')
       );
     }
     
     // Apply category filter
     if (this.selectedCategory !== 'All') {
-      events = events.filter(event => event.category === this.selectedCategory);
+      events = events.filter(event => event.eventDetails?.category === this.selectedCategory);
     }
 
     // Sort events
@@ -455,13 +297,13 @@ export class DashboardComponent implements OnInit {
       let comparison = 0;
       switch (this.sortBy) {
         case 'date':
-          comparison = a.date.getTime() - b.date.getTime();
+          comparison = a.eventDetails.date.getTime() - b.eventDetails.date.getTime();
           break;
         case 'price':
-          comparison = a.price - b.price;
+          comparison = a.total_price - b.total_price;
           break;
         case 'name':
-          comparison = a.title.localeCompare(b.title);
+          comparison = a.eventDetails.title.localeCompare(b.eventDetails.title);
           break;
       }
       return this.sortOrder === 'asc' ? comparison : -comparison;
@@ -533,7 +375,7 @@ export class DashboardComponent implements OnInit {
 
   getEventsForDate(date: Date): BookedEvent[] {
     return this.bookedEvents.filter(event => 
-      moment(event.date).isSame(date, 'day')
+      moment(event.eventDetails.date).isSame(date, 'day')
     );
   }
 
@@ -617,8 +459,8 @@ export class DashboardComponent implements OnInit {
   updateUpcomingEventsPreview() {
     const now = new Date();
     this.upcomingEventsPreview = this.bookedEvents
-      .filter(event => event.status === 'upcoming' && event.date > now)
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
+      .filter(event => event.status === 'booked' && event.eventDetails.date > now)
+      .sort((a, b) => a.eventDetails.date.getTime() - b.eventDetails.date.getTime())
       .slice(0, 3);
   }
 
@@ -627,16 +469,17 @@ export class DashboardComponent implements OnInit {
     this.recentActivity = this.bookedEvents
       .map(event => {
         const activities = [];
-        if (event.status === 'completed') {
-          activities.push({ type: 'completed', event, date: event.date });
-        }
-        if (event.status === 'cancelled') {
-          activities.push({ type: 'cancelled', event, date: event.date });
+        if (event.status === 'booked' || event.status === 'cancelled') {
+          activities.push({ 
+            type: event.status, 
+            event, 
+            date: event.eventDetails?.date || now
+          });
         }
         return activities;
       })
       .flat()
-      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0))
       .slice(0, 5);
   }
 
@@ -652,8 +495,8 @@ export class DashboardComponent implements OnInit {
     }).reverse();
 
     this.bookedEvents.forEach(event => {
-      const eventMonth = event.date.getMonth();
-      const eventYear = event.date.getFullYear();
+      const eventMonth = event.eventDetails.date.getMonth();
+      const eventYear = event.eventDetails.date.getFullYear();
       const monthIndex = months.findIndex(m => {
         const monthDate = new Date(eventYear, eventMonth, 1);
         return monthDate.getMonth() === eventMonth && monthDate.getFullYear() === eventYear;
@@ -661,7 +504,7 @@ export class DashboardComponent implements OnInit {
 
       if (monthIndex !== -1) {
         months[monthIndex].count++;
-        months[monthIndex].spending += event.price;
+        months[monthIndex].spending += event.total_price;
       }
     });
 

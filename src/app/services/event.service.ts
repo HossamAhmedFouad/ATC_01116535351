@@ -7,7 +7,7 @@ import { catchError, map } from 'rxjs/operators';
 export interface Event {
   id: number;
   title: string;
-  date: Date | string;
+  date: Date;
   location: string;
   description: string;
   imageUrl: string;

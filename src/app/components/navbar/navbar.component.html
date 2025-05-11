@@ -32,9 +32,9 @@
       <div class="user-menu" *ngIf="currentUser">
         <button class="user-button" (click)="toggleUserMenu()">
           <div class="user-avatar">
-            {{ currentUser.name.charAt(0).toUpperCase() }}
+            {{ currentUser.username.charAt(0).toUpperCase() }}
           </div>
-          <span class="user-name">{{ currentUser.name }}</span>
+          <span class="user-name">{{ currentUser.username }}</span>
         </button>
         
         <div class="user-dropdown" *ngIf="isUserMenuOpen">

@@ -113,11 +113,11 @@
           <mat-card-content>
             <mat-list>
               <mat-list-item *ngFor="let event of upcomingEventsPreview">
-                <mat-icon matListItemIcon [style.color]="getCategoryColor(event.category)">
-                  {{ getCategoryIcon(event.category) }}
+                <mat-icon matListItemIcon [style.color]="getCategoryColor(event.eventDetails.category)">
+                  {{ getCategoryIcon(event.eventDetails.category) }}
                 </mat-icon>
-                <div matListItemTitle>{{ event.title }}</div>
-                <div matListItemLine>{{ formatDate(event.date) }}</div>
+                <div matListItemTitle>{{ event.eventDetails.title }}</div>
+                <div matListItemLine>{{ formatDate(event.eventDetails.date) }}</div>
               </mat-list-item>
             </mat-list>
           </mat-card-content>
@@ -137,7 +137,7 @@
                 <mat-icon matListItemIcon [style.color]="getActivityColor(activity.type)">
                   {{ getActivityIcon(activity.type) }}
                 </mat-icon>
-                <div matListItemTitle>{{ activity.event.title }}</div>
+                <div matListItemTitle>{{ activity.event.eventDetails.title }}</div>
                 <div matListItemLine>
                   {{ activity.type | titlecase }} on {{ formatDate(activity.date) }}
                 </div>
@@ -173,7 +173,7 @@
             <div class="events-list">
               <mat-card *ngFor="let event of getPaginatedEvents()" class="event-card">
                 <mat-card-header>
-                  <mat-card-title>{{ event.title }}</mat-card-title>
+                  <mat-card-title>{{ event.eventDetails.title }}</mat-card-title>
                   <mat-card-subtitle>
                     <span class="event-status" [class]="getEventStatusClass(event.status)">
                       <mat-icon>{{ getStatusIcon(event.status) }}</mat-icon>
@@ -185,45 +185,37 @@
                   <div class="event-info">
                     <p>
                       <mat-icon>calendar_month</mat-icon>
-                      {{ formatDate(event.date) }}
+                      {{ formatDate(event.eventDetails.date) }}
                     </p>
                     <p>
                       <mat-icon>schedule</mat-icon>
-                      {{ formatTime(event.date) }}
+                      {{ formatTime(event.eventDetails.date) }}
                     </p>
                     <p>
                       <mat-icon>place</mat-icon>
-                      {{ event.location }}
-                    </p>
-                    <p>
-                      <mat-icon>local_activity</mat-icon>
-                      {{ event.ticketType }}
+                        {{ event.eventDetails.location }}
                     </p>
                     <p>
                       <mat-icon>payments</mat-icon>
-                      {{ formatCurrency(event.price) }}
+                      {{ formatCurrency(event.eventDetails.price) }}
                     </p>
                     <p>
                       <mat-icon>label</mat-icon>
-                      {{ event.category }}
-                    </p>
-                    <p>
-                      <mat-icon>people</mat-icon>
-                      {{ event.attendees }} attendees
+                      {{ event.eventDetails.category }}
                     </p>
                     <p>
                       <mat-icon>business</mat-icon>
-                      {{ event.organizer }}
+                      {{ event.eventDetails.organizer }}
                     </p>
                   </div>
-                  <p class="event-description">{{ event.description }}</p>
+                  <p class="event-description">{{ event.eventDetails.description }}</p>
                 </mat-card-content>
                 <mat-card-actions>
-                  <button mat-raised-button color="primary" [routerLink]="['/events', event.id]">
+                  <button mat-raised-button color="primary" [routerLink]="['/events', event.eventDetails.id]">
                     <mat-icon>visibility</mat-icon>
                     View Details
                   </button>
-                  <button mat-raised-button color="warn" *ngIf="event.status === 'upcoming'" (click)="cancelEvent(event)">
+                  <button mat-raised-button color="warn" *ngIf="event.status === 'booked'" (click)="cancelEvent(event)">
                     <mat-icon>cancel</mat-icon>
                     Cancel Booking
                   </button>

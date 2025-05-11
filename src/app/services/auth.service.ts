@@ -3,33 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { delay, tap, map, catchError } from 'rxjs/operators';
-
-export interface BookedEvent {
-  id: number;
-  title: string;
-  date: Date;
-  location: string;
-  status: 'upcoming' | 'completed' | 'cancelled';
-  ticketType: string;
-  price: number;
-  category: string;
-  description: string;
-  imageUrl: string;
-  attendees: number;
-  organizer: string;
-  progress: number;
-  tags: string[];
-}
+import { Booking, BookingService } from './booking.service';
 
 export interface User {
   id: number;
-  name: string;
   username: string;
   email: string;
-  location?: string;
   phone?: string;
+  location?: string;
   bio?: string;
-  bookedEvents?: BookedEvent[];
+  role?: string;
+  profilePicUrl?: string;
+  bookedEvents?: Booking[];
 }
 
 export interface AuthResponse {
@@ -49,7 +34,8 @@ export class AuthService {
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private bookingService: BookingService
   ) {
     // Check for stored user data on service initialization
     const storedUser = localStorage.getItem('currentUser');
@@ -60,15 +46,14 @@ export class AuthService {
 
   signIn(email: string, password: string): Observable<AuthResponse> {
     // For development, simulate API call
-    return this.loadEventsFromJson().pipe(
-      map(events => ({
+    return this.bookingService.getUserBookings(1).pipe(
+      map(bookings => ({
         user: {
           id: 1,
-          name: 'Test User',
           username: 'testuser',
           email: email,
           location: 'San Francisco, CA',
-          bookedEvents: events
+          bookedEvents: bookings
         },
         token: 'mock-jwt-token'
       })),
@@ -78,19 +63,18 @@ export class AuthService {
   }
 
   signUp(userData: {
-    name: string;
     username: string;
     email: string;
     password: string;
     location: string;
   }): Observable<AuthResponse> {
     // For development, simulate API call
-    return this.loadEventsFromJson().pipe(
-      map(events => ({
+    return this.bookingService.getUserBookings(1).pipe(
+      map(bookings => ({
         user: {
           id: 1,
           ...userData,
-          bookedEvents: events
+          bookedEvents: bookings
         },
         token: 'mock-jwt-token'
       })),
@@ -100,16 +84,15 @@ export class AuthService {
   }
 
   signInWithGoogle(): Observable<AuthResponse> {
-    // For development, simulate API call
-    return this.loadEventsFromJson().pipe(
-      map(events => ({
+    // Fetch the user's bookings from BookingService
+    return this.bookingService.getUserBookings(1).pipe(
+      map(bookings => ({
         user: {
-          id: 1,
-          name: 'Google User',
+          id: 1, // Mock user ID (replace with real data later)
           username: 'googleuser',
           email: 'google@example.com',
           location: 'San Francisco, CA',
-          bookedEvents: events
+          bookedEvents: bookings // Use actual bookings
         },
         token: 'mock-jwt-token'
       })),
@@ -137,30 +120,5 @@ export class AuthService {
 
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
-  }
-
-  private loadEventsFromJson(): Observable<BookedEvent[]> {
-    return this.http.get<{ events: any[] }>(this.eventsUrl).pipe(
-      map(data => data.events.map(event => ({
-        id: event.id,
-        title: event.title,
-        date: new Date(event.date), // Convert string date to Date object
-        location: event.location,
-        status: 'completed' as 'upcoming' | 'completed' | 'cancelled', // Default status
-        ticketType: 'Standard', // Default ticket type
-        price: event.price,
-        category: event.category,
-        description: event.description,
-        imageUrl: event.imageUrl,
-        attendees: 0, // Default attendees
-        organizer: event.organizer || 'Unknown Organizer', // Use organizer from JSON or default
-        progress: 100, // Default progress
-        tags: event.tags || [], // Use tags from JSON or empty array
-      }))),
-      catchError(error => {
-        console.error('Error loading events from JSON:', error);
-        return of([]); // Return empty array on error
-      })
-    );
   }
 } 

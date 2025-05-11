@@ -1,0 +1,37 @@
+[
+    {
+      "id": 1,
+      "username": "tech_guru",
+      "email": "techguru@example.com",
+      "password": "hashed_password_1",
+      "phone": "+1-555-1234",
+      "location": "New York, NY",
+      "bio": "Tech enthusiast and conference junkie.",
+      "role": "user",
+      "profilePicUrl": "https://randomuser.me/api/portraits/men/45.jpg"
+    },
+    {
+      "id": 2,
+      "username": "ai_queen",
+      "email": "aiqueen@example.com",
+      "password": "hashed_password_2",
+      "phone": "+1-555-5678",
+      "location": "Los Angeles, CA",
+      "bio": "AI researcher and public speaker.",
+      "role": "user",
+      "profilePicUrl": "https://randomuser.me/api/portraits/women/68.jpg"
+    },
+    {
+        "id": 3,
+        "username": "admin_master",
+        "email": "admin@example.com",
+        "password": "hashed_password_3",
+        "phone": "+1-555-9012",
+        "role": "admin",
+        "location": "Seattle, WA",
+        "bio": "Event organizer and admin.",
+        "profilePicUrl": "https://randomuser.me/api/portraits/men/55.jpg"
+      }
+      
+  ]
+  
