@@ -1,0 +1,222 @@
+<div class="payment-container">
+  <div class="payment-header">
+    <h1>Complete Your Payment</h1>
+    <div class="order-summary">
+      <div class="order-info">
+        <span class="tickets">{{ ticketCount }} tickets</span>
+        <span class="total-amount">${{ totalAmount }}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-step completed">
+          <div class="step-icon"><i class="fas fa-ticket-alt"></i></div>
+          <span>Select</span>
+        </div>
+        <div class="progress-line"></div>
+        <div
+          class="progress-step"
+          [class.completed]="currentStep === 'complete'"
+          [class.active]="currentStep === 'payment'"
+        >
+          <div class="step-icon"><i class="fas fa-credit-card"></i></div>
+          <span>Payment</span>
+        </div>
+        <div class="progress-line"></div>
+        <div class="progress-step" [class.active]="currentStep === 'complete'">
+          <div class="step-icon"><i class="fas fa-check-circle"></i></div>
+          <span>Confirm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="payment-content" *ngIf="currentStep === 'payment'">
+    <div class="payment-form-container">
+      <form
+        [formGroup]="paymentForm"
+        (ngSubmit)="onSubmit()"
+        class="payment-form"
+        aria-label="Payment Form"
+      >
+        <div class="form-section personal-info">
+          <h2>Personal Information</h2>
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              formControlName="name"
+              placeholder="Enter your full name"
+              aria-required="true"
+              [attr.aria-invalid]="
+                paymentForm.get('name')?.invalid &&
+                paymentForm.get('name')?.touched
+              "
+              [class.error]="
+                paymentForm.get('name')?.invalid &&
+                paymentForm.get('name')?.touched
+              "
+            />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              aria-required="true"
+              [attr.aria-invalid]="
+                paymentForm.get('email')?.invalid &&
+                paymentForm.get('email')?.touched
+              "
+              [class.error]="
+                paymentForm.get('email')?.invalid &&
+                paymentForm.get('email')?.touched
+              "
+            />
+          </div>
+        </div>
+
+        <div class="form-section payment-details">
+          <h2>Payment Details</h2>
+          <div class="card-input-container">
+            <div class="form-group card-number">
+              <label for="cardNumber">Card Number</label>
+              <input
+                type="text"
+                id="cardNumber"
+                formControlName="cardNumber"
+                placeholder="1234 5678 9012 3456"
+                aria-required="true"
+                [attr.aria-invalid]="
+                  paymentForm.get('cardNumber')?.invalid &&
+                  paymentForm.get('cardNumber')?.touched
+                "
+                [class.error]="
+                  paymentForm.get('cardNumber')?.invalid &&
+                  paymentForm.get('cardNumber')?.touched
+                "
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group expiry">
+                <label for="expiryDate">Expiry Date</label>
+                <input
+                  type="text"
+                  id="expiryDate"
+                  formControlName="expiryDate"
+                  placeholder="MM/YY"
+                  aria-required="true"
+                  [attr.aria-invalid]="
+                    paymentForm.get('expiryDate')?.invalid &&
+                    paymentForm.get('expiryDate')?.touched
+                  "
+                  [class.error]="
+                    paymentForm.get('expiryDate')?.invalid &&
+                    paymentForm.get('expiryDate')?.touched
+                  "
+                />
+              </div>
+              <div class="form-group cvv">
+                <label for="cvv">CVV</label>
+                <input
+                  type="password"
+                  id="cvv"
+                  formControlName="cvv"
+                  placeholder="123"
+                  maxlength="4"
+                  aria-required="true"
+                  [attr.aria-invalid]="
+                    paymentForm.get('cvv')?.invalid &&
+                    paymentForm.get('cvv')?.touched
+                  "
+                  [class.error]="
+                    paymentForm.get('cvv')?.invalid &&
+                    paymentForm.get('cvv')?.touched
+                  "
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section order-details">
+          <h2>Order Summary</h2>
+          <div class="summary-item">
+            <span>Tickets ({{ ticketCount }}x)</span>
+            <span>${{ totalAmount }}</span>
+          </div>
+          <div class="summary-item">
+            <span>Processing Fee</span>
+            <span>$2.00</span>
+          </div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span>${{ totalAmount ? totalAmount + 2 : 2 }}</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            [disabled]="paymentForm.invalid || loading"
+            class="pay-button"
+            aria-label="Pay Now"
+          >
+            <span *ngIf="!loading">Pay Now</span>
+            <span *ngIf="loading" class="loading-spinner">
+              <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+              Processing...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="secure-payment-info">
+      <div class="security-badge">
+        <i class="fas fa-lock"></i>
+        <span>Secure Payment</span>
+      </div>
+      <p>Your payment information is encrypted and secure.</p>
+      <div class="payment-logos">
+        <div class="card-logos">
+          <i class="fab fa-cc-visa"></i>
+          <i class="fab fa-cc-mastercard"></i>
+          <i class="fab fa-cc-amex"></i>
+          <i class="fab fa-cc-discover"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="payment-content" *ngIf="currentStep === 'complete'">
+    <div class="success-container">
+      <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <h2>Payment Successful!</h2>
+      <div class="success-details">
+        <p>Thank you for your purchase. Your tickets have been confirmed.</p>
+        <div class="ticket-id">
+          <span>Ticket ID:</span>
+          <strong>{{ ticketId }}</strong>
+        </div>
+        <p class="info-text">
+          A confirmation email has been sent to
+          {{ paymentForm.get("email")?.value }}
+        </p>
+      </div>
+      <div class="success-actions">
+        <button
+          class="view-ticket-button"
+          (click)="router.navigate(['/tickets'])"
+        >
+          <i class="fas fa-ticket-alt"></i>
+          View My Tickets
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

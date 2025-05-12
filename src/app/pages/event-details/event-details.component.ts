@@ -9,7 +9,7 @@ import { Event } from '../../services/event.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './event-details.component.html',
-  styleUrls: ['./event-details.component.css']
+  styleUrls: ['./event-details.component.css'],
 })
 export class EventDetailsComponent implements OnInit {
   event: Event | null = null;
@@ -34,21 +34,20 @@ export class EventDetailsComponent implements OnInit {
   }
 
   loadEventDetails(eventId: string) {
-    this.http.get<{ events: Event[] }>('./assets/data/events.json')
-      .subscribe({
-        next: (data) => {
-          this.event = data.events.find(e => e.id === +eventId) || null;
-          this.loading = false;
-          if (!this.event) {
-            this.error = true;
-          }
-        },
-        error: (error) => {
-          console.error('Error loading event details:', error);
+    this.http.get<{ events: Event[] }>('./assets/data/events.json').subscribe({
+      next: (data) => {
+        this.event = data.events.find((e) => e.id === +eventId) || null;
+        this.loading = false;
+        if (!this.event) {
           this.error = true;
-          this.loading = false;
         }
-      });
+      },
+      error: (error) => {
+        console.error('Error loading event details:', error);
+        this.error = true;
+        this.loading = false;
+      },
+    });
   }
 
   incrementTickets() {
@@ -66,17 +65,20 @@ export class EventDetailsComponent implements OnInit {
   get totalPrice(): number {
     return this.event ? this.event.price * this.ticketsToBook : 0;
   }
-
   onBookNow() {
     if (this.event) {
-      // TODO: Implement booking logic
-      console.log('Booking', this.ticketsToBook, 'tickets for event:', this.event.id);
-      // After successful booking, you might want to redirect to a confirmation page
-      // this.router.navigate(['/booking-confirmation', this.event.id]);
+      this.router.navigate(['/payment'], {
+        queryParams: {
+          eventId: this.event.id,
+          ticketCount: this.ticketsToBook,
+          totalAmount: this.totalPrice,
+          eventTitle: this.event.title,
+        },
+      });
     }
   }
 
   navigateToEvents() {
     this.router.navigate(['/events']);
   }
-} 
+}

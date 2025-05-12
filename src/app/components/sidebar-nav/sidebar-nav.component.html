@@ -1,38 +1,67 @@
-<div class="profile-sidenav" [class.collapsed]="!isOpen">
+<div
+  class="profile-sidenav elevation-transition"
+  [class.collapsed]="!isOpen"
+  [ngStyle]="{
+    width: isOpen ? '280px' : '72px',
+    'min-width': isOpen ? '280px' : '72px'
+  }"
+>
   <div class="sidenav-header">
     <div class="header-content" *ngIf="isOpen">
-      <h2>Profile</h2>
-      <p class="user-email">{{userEmail}}</p>
+      <h2>Event Manager</h2>
+      <p class="user-email">{{ userEmail || "guest@example.com" }}</p>
     </div>
-    <button mat-icon-button (click)="onToggleSidenav()" class="toggle-btn" [class.rotated]="!isOpen">
-      <mat-icon>{{isOpen ? 'chevron_left' : 'chevron_right'}}</mat-icon>
+    <button
+      mat-icon-button
+      (click)="onToggleSidenav()"
+      class="toggle-btn"
+      [class.rotated]="!isOpen"
+      matTooltip="{{ isOpen ? 'Collapse sidebar' : 'Expand sidebar' }}"
+      matTooltipPosition="right"
+    >
+      <mat-icon>{{ isOpen ? "chevron_left" : "menu" }}</mat-icon>
     </button>
   </div>
-  
   <mat-nav-list>
-    <a mat-list-item 
-       *ngFor="let item of navItems"
-       (click)="onSectionChange(item.id)"
-       [class.active]="currentSection === item.id"
-       [matTooltip]="!isOpen ? item.label : ''"
-       [matTooltipPosition]="'right'">
-      <mat-icon>{{item.icon}}</mat-icon>
-      <span *ngIf="isOpen">{{item.label}}</span>
-      <span *ngIf="isOpen && item.badge !== undefined">
-        <mat-icon matBadge="{{item.badge}}" 
-                 [matBadgeColor]="item.badgeColor"
-                 *ngIf="item.badge > 0">
-          notifications
+    <a
+      mat-list-item
+      *ngFor="let item of navItems"
+      (click)="onSectionChange(item.id)"
+      [class.active]="currentSection === item.id"
+      [matTooltip]="!isOpen ? item.label : ''"
+      [matTooltipPosition]="'right'"
+    >
+      <mat-icon class="nav-icon" aria-hidden="true">{{ item.icon }}</mat-icon>
+      <span *ngIf="isOpen" class="nav-item-text">{{ item.label }}</span>
+      <span
+        *ngIf="isOpen && item.badge !== undefined"
+        class="notification-icon"
+      >
+        <mat-icon
+          matBadge="{{ item.badge }}"
+          [matBadgeColor]="item.badgeColor || 'accent'"
+          [matBadgeOverlap]="true"
+          *ngIf="item.badge > 0"
+        >
+          notifications_none
         </mat-icon>
       </span>
     </a>
   </mat-nav-list>
-
   <div class="sidenav-footer">
-    <mat-divider></mat-divider>
-    <div class="user-info">
-      <mat-icon>account_circle</mat-icon>
-      <span *ngIf="isOpen">{{username}}</span>
+    <div class="user-info elevation-transition">
+      <mat-icon class="user-icon">account_circle</mat-icon>
+      <span *ngIf="isOpen" class="user-name">{{
+        username || "Guest User"
+      }}</span>
     </div>
   </div>
-</div> 
+</div>
+
+<!-- Mobile overlay backdrop -->
+<div
+  class="sidenav-overlay"
+  [class.show]="isOpen"
+  (click)="onToggleSidenav()"
+  *ngIf="isOpen"
+></div>
