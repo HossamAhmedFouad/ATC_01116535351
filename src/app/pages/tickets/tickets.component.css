@@ -184,6 +184,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   text-transform: capitalize;
+  vertical-align: middle;
 }
 
 .status-badge.confirmed {
@@ -200,6 +201,8 @@
   font-size: 16px;
   height: 16px;
   width: 16px;
+  display: inline-flex;
+  vertical-align: middle;
 }
 
 .booking-link {
@@ -274,11 +277,17 @@
 ::ng-deep .confirmed-chip.mat-mdc-chip-selected {
   background-color: rgba(16, 185, 129, 0.1) !important;
   color: var(--status-confirmed) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
 }
 
 ::ng-deep .cancelled-chip.mat-mdc-chip-selected {
   background-color: rgba(239, 68, 68, 0.1) !important;
   color: var(--status-cancelled) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
 }
 
 /* Responsive styles */

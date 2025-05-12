@@ -38,7 +38,9 @@
             class="confirmed-chip"
             color="primary"
           >
-            <mat-icon>check_circle</mat-icon> Confirmed
+            <div style="display: flex; align-items: center; gap: 4px">
+              <mat-icon>check_circle</mat-icon> Confirmed
+            </div>
           </mat-chip-option>
           <mat-chip-option
             [selected]="selectedStatusFilter === 'cancelled'"
@@ -46,7 +48,9 @@
             class="cancelled-chip"
             color="warn"
           >
-            <mat-icon>cancel</mat-icon> Cancelled
+            <div style="display: flex; align-items: center; gap: 4px">
+              <mat-icon>cancel</mat-icon> Cancelled
+            </div>
           </mat-chip-option>
         </mat-chip-listbox>
       </div>
@@ -135,11 +139,15 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
           <td mat-cell *matCellDef="let ticket">
             <span class="status-badge" [ngClass]="ticket.status">
-              <mat-icon *ngIf="ticket.status === 'confirmed'"
-                >check_circle</mat-icon
-              >
-              <mat-icon *ngIf="ticket.status === 'cancelled'">cancel</mat-icon>
-              {{ ticket.status }}
+              <div style="display: flex; align-items: center; gap: 4px">
+                <mat-icon *ngIf="ticket.status === 'confirmed'"
+                  >check_circle</mat-icon
+                >
+                <mat-icon *ngIf="ticket.status === 'cancelled'"
+                  >cancel</mat-icon
+                >
+                {{ ticket.status }}
+              </div>
             </span>
           </td>
         </ng-container>

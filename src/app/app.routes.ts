@@ -42,6 +42,22 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'tickets',
+    loadComponent: () =>
+      import('./pages/tickets/tickets.component').then(
+        (m) => m.TicketsComponent
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'bookings',
+    loadComponent: () =>
+      import('./pages/bookings/bookings.component').then(
+        (m) => m.BookingsComponent
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: 'auth/signin',
     loadComponent: () =>
       import('./pages/auth/signin/signin.component').then(

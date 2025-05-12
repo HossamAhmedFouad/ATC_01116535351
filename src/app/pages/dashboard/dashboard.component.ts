@@ -7,11 +7,21 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDatepickerModule, MatCalendar } from '@angular/material/datepicker';
-import { MatNativeDateModule, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import {
+  MatNativeDateModule,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE,
+} from '@angular/material/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
-import { DateAdapter, MAT_DATE_LOCALE as MAT_DATE_LOCALE_2 } from '@angular/material/core';
+import {
+  MomentDateAdapter,
+  MAT_MOMENT_DATE_ADAPTER_OPTIONS,
+} from '@angular/material-moment-adapter';
+import {
+  DateAdapter,
+  MAT_DATE_LOCALE as MAT_DATE_LOCALE_2,
+} from '@angular/material/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -25,11 +35,9 @@ import { EventService } from '../../services/event.service';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map, tap, catchError } from 'rxjs/operators';
 
-
 interface BookedEvent extends Booking {
   eventDetails: Event;
 }
-
 
 interface EventStats {
   totalEvents: number;
@@ -71,6 +79,11 @@ export const MY_FORMATS = {
   },
 };
 
+import {
+  SidebarNavComponent,
+  NavItem,
+} from '../../components/sidebar-nav/sidebar-nav.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -89,20 +102,20 @@ export const MY_FORMATS = {
     MatTooltipModule,
     MatDividerModule,
     MatListModule,
-    MatMenuModule
+    MatMenuModule,
   ],
   providers: [
     {
       provide: DateAdapter,
       useClass: MomentDateAdapter,
-      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS]
+      deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS],
     },
     { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
     { provide: MAT_DATE_LOCALE, useValue: 'en-US' },
-    { provide: MAT_DATE_LOCALE_2, useValue: 'en-US' }
+    { provide: MAT_DATE_LOCALE_2, useValue: 'en-US' },
   ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
   @ViewChild('calendar') calendar?: MatCalendar<Date>;
@@ -123,9 +136,16 @@ export class DashboardComponent implements OnInit {
     yearlySpending: 0,
     averageTicketPrice: 0,
     mostExpensiveEvent: {} as BookedEvent,
-    upcomingSpending: 0
+    upcomingSpending: 0,
   };
-  categories: string[] = ['All', 'Music', 'Sports', 'Technology', 'Food', 'Arts'];
+  categories: string[] = [
+    'All',
+    'Music',
+    'Sports',
+    'Technology',
+    'Food',
+    'Arts',
+  ];
   selectedCategory: string = 'All';
   categoryStats: CategoryStats[] = [];
   viewMode: 'grid' | 'list' = 'grid';
@@ -141,7 +161,7 @@ export class DashboardComponent implements OnInit {
     { name: 'Sports', count: 0, color: '#16a34a', icon: 'sports_soccer' },
     { name: 'Technology', count: 0, color: '#2563eb', icon: 'computer' },
     { name: 'Food', count: 0, color: '#ea580c', icon: 'restaurant' },
-    { name: 'Arts', count: 0, color: '#db2777', icon: 'palette' }
+    { name: 'Arts', count: 0, color: '#db2777', icon: 'palette' },
   ];
 
   upcomingEventsPreview: BookedEvent[] = [];
@@ -155,7 +175,7 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
       if (user) {
         this.loadUserEvents().subscribe({
@@ -166,7 +186,7 @@ export class DashboardComponent implements OnInit {
             this.generateRecentActivity();
             this.calculateMonthlyStats();
           },
-          error: (err) => console.error('Failed to load events:', err)
+          error: (err) => console.error('Failed to load events:', err),
         });
       }
     });
@@ -179,24 +199,24 @@ export class DashboardComponent implements OnInit {
       return of(undefined);
     }
 
-    const observables = currentUser.bookedEvents.map(booking => 
+    const observables = currentUser.bookedEvents.map((booking) =>
       this.eventService.getEvent(booking.event_id).pipe(
-        map(eventDetails => ({
+        map((eventDetails) => ({
           ...booking,
-          eventDetails
+          eventDetails,
         })),
-        catchError(error => {
+        catchError((error) => {
           console.error('Failed to load event details:', error);
           return of({
             ...booking,
-            eventDetails: {} as Event
+            eventDetails: {} as Event,
           });
         })
       )
     );
 
     return forkJoin(observables).pipe(
-      tap(bookedEvents => {
+      tap((bookedEvents) => {
         this.bookedEvents = bookedEvents;
       }),
       map(() => undefined)
@@ -210,66 +230,84 @@ export class DashboardComponent implements OnInit {
 
     this.eventStats = {
       totalEvents: this.bookedEvents.length,
-      upcomingEvents: this.bookedEvents.filter(e => 
-        new Date(e.booking_time) > now && e.status === 'booked'
+      upcomingEvents: this.bookedEvents.filter(
+        (e) => new Date(e.booking_time) > now && e.status === 'booked'
       ).length,
-      completedEvents: this.bookedEvents.filter(e => 
-        new Date(e.booking_time) <= now && e.status === 'booked'
+      completedEvents: this.bookedEvents.filter(
+        (e) => new Date(e.booking_time) <= now && e.status === 'booked'
       ).length,
-      cancelledEvents: this.bookedEvents.filter(e => e.status === 'cancelled').length,
-      totalSpent: this.bookedEvents.reduce((sum, event) => sum + event.total_price, 0),
+      cancelledEvents: this.bookedEvents.filter((e) => e.status === 'cancelled')
+        .length,
+      totalSpent: this.bookedEvents.reduce(
+        (sum, event) => sum + event.total_price,
+        0
+      ),
       favoriteCategory: this.getFavoriteCategory(),
       monthlySpending: this.bookedEvents
-        .filter(e => new Date(e.booking_time) >= monthStart)
+        .filter((e) => new Date(e.booking_time) >= monthStart)
         .reduce((sum, event) => sum + event.total_price, 0),
       yearlySpending: this.bookedEvents
-        .filter(e => new Date(e.booking_time) >= yearStart)
+        .filter((e) => new Date(e.booking_time) >= yearStart)
         .reduce((sum, event) => sum + event.total_price, 0),
-      averageTicketPrice: this.bookedEvents.length > 0 
-        ? this.bookedEvents.reduce((sum, event) => sum + event.total_price, 0) / this.bookedEvents.length 
-        : 0,
-      mostExpensiveEvent: this.bookedEvents.reduce((max, event) => 
-        event.total_price > max.total_price ? event : max, 
+      averageTicketPrice:
+        this.bookedEvents.length > 0
+          ? this.bookedEvents.reduce(
+              (sum, event) => sum + event.total_price,
+              0
+            ) / this.bookedEvents.length
+          : 0,
+      mostExpensiveEvent: this.bookedEvents.reduce(
+        (max, event) => (event.total_price > max.total_price ? event : max),
         { total_price: 0 } as BookedEvent
       ),
       upcomingSpending: this.bookedEvents
-        .filter(e => new Date(e.booking_time) > now && e.status === 'booked')
-        .reduce((sum, event) => sum + event.total_price, 0)
+        .filter((e) => new Date(e.booking_time) > now && e.status === 'booked')
+        .reduce((sum, event) => sum + event.total_price, 0),
     };
     console.log(this.eventStats);
     console.log(this.bookedEvents);
   }
 
   calculateCategoryStats() {
-    const categoryMap = new Map<string, { count: number; totalSpent: number }>();
-    
-    this.bookedEvents.forEach(event => {
-      const current = categoryMap.get(event.eventDetails?.category || 'Unknown') || { count: 0, totalSpent: 0 };
+    const categoryMap = new Map<
+      string,
+      { count: number; totalSpent: number }
+    >();
+
+    this.bookedEvents.forEach((event) => {
+      const current = categoryMap.get(
+        event.eventDetails?.category || 'Unknown'
+      ) || { count: 0, totalSpent: 0 };
       categoryMap.set(event.eventDetails?.category || 'Unknown', {
         count: current.count + 1,
-        totalSpent: current.totalSpent + event.total_price
+        totalSpent: current.totalSpent + event.total_price,
       });
     });
 
     const totalEvents = this.bookedEvents.length;
     const totalSpent = this.eventStats.totalSpent;
 
-    this.categoryStats = Array.from(categoryMap.entries()).map(([category, stats]) => ({
-      category,
-      count: stats.count,
-      totalSpent: stats.totalSpent,
-      percentage: (stats.count / totalEvents) * 100
-    })).sort((a, b) => b.count - a.count);
+    this.categoryStats = Array.from(categoryMap.entries())
+      .map(([category, stats]) => ({
+        category,
+        count: stats.count,
+        totalSpent: stats.totalSpent,
+        percentage: (stats.count / totalEvents) * 100,
+      }))
+      .sort((a, b) => b.count - a.count);
   }
 
   getFavoriteCategory(): string {
     const categoryCount = this.bookedEvents.reduce((acc, event) => {
-      acc[event.eventDetails?.category || 'Unknown'] = (acc[event.eventDetails?.category || 'Unknown'] || 0) + 1;
+      acc[event.eventDetails?.category || 'Unknown'] =
+        (acc[event.eventDetails?.category || 'Unknown'] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
 
-    return Object.entries(categoryCount)
-      .sort(([, a], [, b]) => b - a)[0]?.[0] || 'None';
+    return (
+      Object.entries(categoryCount).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+      'None'
+    );
   }
 
   filterEventsByCategory(category: string) {
@@ -279,17 +317,19 @@ export class DashboardComponent implements OnInit {
 
   getFilteredEvents(): BookedEvent[] {
     let events = this.bookedEvents;
-    
+
     // Apply date filter if a date is selected
     if (this.isDateFiltered && this.selectedDate) {
-      events = events.filter(event => 
+      events = events.filter((event) =>
         moment(event.eventDetails?.date).isSame(this.selectedDate, 'day')
       );
     }
-    
+
     // Apply category filter
     if (this.selectedCategory !== 'All') {
-      events = events.filter(event => event.eventDetails?.category === this.selectedCategory);
+      events = events.filter(
+        (event) => event.eventDetails?.category === this.selectedCategory
+      );
     }
 
     // Sort events
@@ -297,7 +337,8 @@ export class DashboardComponent implements OnInit {
       let comparison = 0;
       switch (this.sortBy) {
         case 'date':
-          comparison = a.eventDetails.date.getTime() - b.eventDetails.date.getTime();
+          comparison =
+            a.eventDetails.date.getTime() - b.eventDetails.date.getTime();
           break;
         case 'price':
           comparison = a.total_price - b.total_price;
@@ -363,7 +404,7 @@ export class DashboardComponent implements OnInit {
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
     }).format(amount);
   }
 
@@ -374,18 +415,18 @@ export class DashboardComponent implements OnInit {
   }
 
   getEventsForDate(date: Date): BookedEvent[] {
-    return this.bookedEvents.filter(event => 
+    return this.bookedEvents.filter((event) =>
       moment(event.eventDetails.date).isSame(date, 'day')
     );
   }
 
   hasEventsOnDate = (date: Date): string => {
     return this.getEventsForDate(date).length > 0 ? 'has-events' : '';
-  }
+  };
 
   cancelEvent(event: BookedEvent) {
     // TODO: Implement actual cancellation logic with API call
-    const index = this.bookedEvents.findIndex(e => e.id === event.id);
+    const index = this.bookedEvents.findIndex((e) => e.id === event.id);
     if (index !== -1) {
       this.bookedEvents[index].status = 'cancelled';
       this.calculateStats();
@@ -393,7 +434,7 @@ export class DashboardComponent implements OnInit {
       this.snackBar.open('Event booking cancelled successfully', 'Close', {
         duration: 3000,
         horizontalPosition: 'end',
-        verticalPosition: 'top'
+        verticalPosition: 'top',
       });
     }
   }
@@ -436,12 +477,12 @@ export class DashboardComponent implements OnInit {
     this.selectedDate = today;
     this.isDateFiltered = true;
     this.currentPage = 1;
-    
+
     // Force calendar to update to current month and date
     if (this.calendar) {
       // First set the active date to trigger the view update
       this.calendar.activeDate = today;
-      
+
       // Force a re-render by temporarily setting selected to null and back
       setTimeout(() => {
         if (this.calendar) {
@@ -459,21 +500,25 @@ export class DashboardComponent implements OnInit {
   updateUpcomingEventsPreview() {
     const now = new Date();
     this.upcomingEventsPreview = this.bookedEvents
-      .filter(event => event.status === 'booked' && event.eventDetails.date > now)
-      .sort((a, b) => a.eventDetails.date.getTime() - b.eventDetails.date.getTime())
+      .filter(
+        (event) => event.status === 'booked' && event.eventDetails.date > now
+      )
+      .sort(
+        (a, b) => a.eventDetails.date.getTime() - b.eventDetails.date.getTime()
+      )
       .slice(0, 3);
   }
 
   generateRecentActivity() {
     const now = new Date();
     this.recentActivity = this.bookedEvents
-      .map(event => {
+      .map((event) => {
         const activities = [];
         if (event.status === 'booked' || event.status === 'cancelled') {
-          activities.push({ 
-            type: event.status, 
-            event, 
-            date: event.eventDetails?.date || now
+          activities.push({
+            type: event.status,
+            event,
+            date: event.eventDetails?.date || now,
           });
         }
         return activities;
@@ -490,16 +535,19 @@ export class DashboardComponent implements OnInit {
       return {
         month: date.toLocaleString('default', { month: 'short' }),
         count: 0,
-        spending: 0
+        spending: 0,
       };
     }).reverse();
 
-    this.bookedEvents.forEach(event => {
+    this.bookedEvents.forEach((event) => {
       const eventMonth = event.eventDetails.date.getMonth();
       const eventYear = event.eventDetails.date.getFullYear();
-      const monthIndex = months.findIndex(m => {
+      const monthIndex = months.findIndex((m) => {
         const monthDate = new Date(eventYear, eventMonth, 1);
-        return monthDate.getMonth() === eventMonth && monthDate.getFullYear() === eventYear;
+        return (
+          monthDate.getMonth() === eventMonth &&
+          monthDate.getFullYear() === eventYear
+        );
       });
 
       if (monthIndex !== -1) {
@@ -538,17 +586,19 @@ export class DashboardComponent implements OnInit {
   }
 
   getCategoryColor(category: string): string {
-    const categoryInfo = this.eventCategories.find(c => c.name === category);
+    const categoryInfo = this.eventCategories.find((c) => c.name === category);
     return categoryInfo?.color || 'var(--primary-color)';
   }
 
   getCategoryIcon(category: string): string {
-    const categoryInfo = this.eventCategories.find(c => c.name === category);
+    const categoryInfo = this.eventCategories.find((c) => c.name === category);
     return categoryInfo?.icon || 'event';
   }
 
   getBarHeight(spending: number): number {
-    const maxSpending = Math.max(...this.monthlyStats.map(stat => stat.spending));
+    const maxSpending = Math.max(
+      ...this.monthlyStats.map((stat) => stat.spending)
+    );
     if (maxSpending === 0) return 0;
     // Calculate height as a percentage of the maximum spending
     // Using 80% of the chart height as maximum to leave space for labels
@@ -565,7 +615,9 @@ export class DashboardComponent implements OnInit {
 
   getAverageSpending(): number {
     const totalSpending = this.getTotalSpending();
-    const monthsWithSpending = this.monthlyStats.filter(stat => stat.spending > 0).length;
+    const monthsWithSpending = this.monthlyStats.filter(
+      (stat) => stat.spending > 0
+    ).length;
     return monthsWithSpending > 0 ? totalSpending / monthsWithSpending : 0;
   }
-} 
+}
