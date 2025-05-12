@@ -14,13 +14,13 @@ import { ReactiveFormsModule } from '@angular/forms';
   styleUrls: ['./payment.component.css'],
 })
 export class PaymentComponent implements OnInit {
-  paymentForm: FormGroup;
+  paymentForm!: FormGroup;
   loading = false;
   eventId: string | undefined;
   ticketCount: number | undefined;
   totalAmount: number | undefined;
   event: any;
-  currentStep = 'payment'; // 'payment' | 'complete'
+  currentStep: 'payment' | 'complete' = 'payment';
   ticketId: string | undefined;
 
   constructor(
@@ -58,20 +58,21 @@ export class PaymentComponent implements OnInit {
           amount: this.totalAmount,
         };
 
-        // Mocking the Paymob API call for now
-        const response = await new Promise((resolve) => {
+        // Mocking the payment API call
+        await new Promise((resolve) => {
           setTimeout(() => {
             resolve({ success: true });
-          }, 1000); // Simulate a 1-second delay
+          }, 1500); // Simulate a 1.5-second delay
         });
 
-        // Generate a ticket ID
+        // Generate a random ticket ID        // Generate ticket ID
         this.ticketId = `TKT-${Math.random()
           .toString(36)
-          .substr(2, 9)
+          .substring(2, 11)
           .toUpperCase()}`;
+
+        // Update step to show success state
         this.currentStep = 'complete';
-        this.router.navigate(['/events']);
       } catch (error) {
         console.error('Payment failed:', error);
         alert('Payment failed. Please try again.');

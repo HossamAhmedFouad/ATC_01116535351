@@ -1,35 +1,77 @@
 <div class="payment-container">
   <div class="payment-header">
-    <h1>Complete Your Payment</h1>
-    <div class="order-summary">
-      <div class="order-info">
-        <span class="tickets">{{ ticketCount }} tickets</span>
-        <span class="total-amount">${{ totalAmount }}</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-step completed">
-          <div class="step-icon"><i class="fas fa-ticket-alt"></i></div>
-          <span>Select</span>
+    <div class="header-content">
+      <h1>Checkout</h1>
+      <div class="order-preview">
+        <div class="order-amount">
+          <span class="amount-label">Total Amount</span>
+          <span class="amount-value"
+            >${{ totalAmount ? totalAmount + 2 : 2 }}</span
+          >
         </div>
-        <div class="progress-line"></div>
-        <div
-          class="progress-step"
-          [class.completed]="currentStep === 'complete'"
-          [class.active]="currentStep === 'payment'"
-        >
-          <div class="step-icon"><i class="fas fa-credit-card"></i></div>
-          <span>Payment</span>
-        </div>
-        <div class="progress-line"></div>
-        <div class="progress-step" [class.active]="currentStep === 'complete'">
-          <div class="step-icon"><i class="fas fa-check-circle"></i></div>
-          <span>Confirm</span>
+        <div class="ticket-preview">
+          <i class="fas fa-ticket-alt"></i>
+          <span
+            >{{ ticketCount }}
+            {{ ticketCount === 1 ? "ticket" : "tickets" }}</span
+          >
         </div>
       </div>
     </div>
   </div>
+  <div class="progress-tracker">
+    <div class="progress-step completed">
+      <div class="step-connector">
+        <div class="connector-line"></div>
+      </div>
+      <div class="step-content">
+        <div class="step-icon">
+          <i class="fas fa-ticket-alt"></i>
+        </div>
+        <div class="step-info">
+          <span class="step-label">Select</span>
+          <span class="step-subtitle">Choose your tickets</span>
+        </div>
+      </div>
+    </div>
 
-  <div class="payment-content" *ngIf="currentStep === 'payment'">
+    <div
+      class="progress-step"
+      [class.completed]="currentStep === 'complete'"
+      [class.active]="currentStep === 'payment'"
+    >
+      <div class="step-connector">
+        <div class="connector-line"></div>
+      </div>
+      <div class="step-content">
+        <div class="step-icon">
+          <i class="fas fa-credit-card"></i>
+        </div>
+        <div class="step-info">
+          <span class="step-label">Payment</span>
+          <span class="step-subtitle">Secure checkout</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-step" [class.active]="currentStep === 'complete'">
+      <div class="step-connector">
+        <div class="connector-line"></div>
+      </div>
+      <div class="step-content">
+        <div class="step-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="step-info">
+          <span class="step-label">Confirm</span>
+          <span class="step-subtitle">Get your tickets</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="payment-content" *ngIf="currentStep === 'payment'">
+  <div class="content-grid">
     <div class="payment-form-container">
       <form
         [formGroup]="paymentForm"
@@ -37,8 +79,13 @@
         class="payment-form"
         aria-label="Payment Form"
       >
-        <div class="form-section personal-info">
-          <h2>Personal Information</h2>
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="fas fa-user"></i>
+            </div>
+            <h2>Personal Information</h2>
+          </div>
           <div class="form-group">
             <label for="name">Full Name</label>
             <input
@@ -76,9 +123,13 @@
             />
           </div>
         </div>
-
-        <div class="form-section payment-details">
-          <h2>Payment Details</h2>
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="fas fa-credit-card"></i>
+            </div>
+            <h2>Payment Details</h2>
+          </div>
           <div class="card-input-container">
             <div class="form-group card-number">
               <label for="cardNumber">Card Number</label>
@@ -140,9 +191,13 @@
             </div>
           </div>
         </div>
-
-        <div class="form-section order-details">
-          <h2>Order Summary</h2>
+        <div class="form-section">
+          <div class="section-header">
+            <div class="section-icon">
+              <i class="fas fa-receipt"></i>
+            </div>
+            <h2>Order Summary</h2>
+          </div>
           <div class="summary-item">
             <span>Tickets ({{ ticketCount }}x)</span>
             <span>${{ totalAmount }}</span>
@@ -190,33 +245,38 @@
       </div>
     </div>
   </div>
+</div>
 
-  <div class="payment-content" *ngIf="currentStep === 'complete'">
-    <div class="success-container">
-      <div class="success-icon">
-        <i class="fas fa-check-circle"></i>
+<!-- Success Section -->
+<div class="success-view" *ngIf="currentStep === 'complete'">
+  <div class="success-container">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h2>Payment Successful!</h2>
+    <div class="success-details">
+      <p>Thank you for your purchase. Your tickets have been confirmed.</p>
+      <div class="ticket-id">
+        <span>Ticket ID:</span>
+        <strong>{{ ticketId }}</strong>
       </div>
-      <h2>Payment Successful!</h2>
-      <div class="success-details">
-        <p>Thank you for your purchase. Your tickets have been confirmed.</p>
-        <div class="ticket-id">
-          <span>Ticket ID:</span>
-          <strong>{{ ticketId }}</strong>
-        </div>
-        <p class="info-text">
-          A confirmation email has been sent to
-          {{ paymentForm.get("email")?.value }}
-        </p>
-      </div>
-      <div class="success-actions">
-        <button
-          class="view-ticket-button"
-          (click)="router.navigate(['/tickets'])"
-        >
-          <i class="fas fa-ticket-alt"></i>
-          View My Tickets
-        </button>
-      </div>
+      <p class="info-text">
+        A confirmation email has been sent to
+        {{ paymentForm.get("email")?.value }}
+      </p>
+    </div>
+    <div class="success-actions">
+      <button
+        class="view-ticket-button"
+        (click)="router.navigate(['/tickets'])"
+      >
+        <i class="fas fa-ticket-alt"></i>
+        View My Tickets
+      </button>
+      <button class="home-button" (click)="router.navigate(['/'])">
+        <i class="fas fa-home"></i>
+        Return to Home
+      </button>
     </div>
   </div>
 </div>
