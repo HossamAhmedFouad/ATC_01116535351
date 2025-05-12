@@ -523,7 +523,6 @@
   background: #f0fdf4;
   border-radius: var(--radius-lg);
   margin: 1.5rem 0;
-  border: 2px solid rgba(5, 150, 105, 0.1);
 }
 
 .ticket-id strong {
@@ -1310,5 +1309,110 @@ mat-icon {
     flex-direction: row;
     justify-content: flex-start;
     gap: 1rem;
+  }
+}
+
+/* Ticket List Styles */
+.tickets-container {
+  margin: 1.5rem 0;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.tickets-container h3 {
+  padding: 1rem 1.5rem;
+  margin: 0;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.tickets-scroll-container {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 1rem;
+  /* Custom scrollbar styles */
+  scrollbar-width: thin;
+  scrollbar-color: #4f46e5 #f1f5f9;
+}
+
+.tickets-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tickets-scroll-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.tickets-scroll-container::-webkit-scrollbar-thumb {
+  background: #4f46e5;
+  border-radius: 10px;
+}
+
+.ticket-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
+}
+
+.ticket-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  background: #f0fdf4;
+  border-color: #a7f3d0;
+}
+
+.ticket-item:last-child {
+  margin-bottom: 0;
+}
+
+.ticket-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #4f46e5;
+  color: white;
+  font-weight: 600;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ticket-item .ticket-id {
+  flex: 1;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+/* Responsive styles for ticket list */
+@media (max-width: 768px) {
+  .tickets-container {
+    max-width: 100%;
+  }
+
+  .ticket-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ticket-item .ticket-id {
+    width: 100%;
+    margin-top: 0.5rem;
   }
 }

@@ -22,7 +22,7 @@ export class PaymentComponent implements OnInit {
   totalAmount: number | undefined;
   event: any;
   currentStep: 'payment' | 'complete' = 'payment';
-  ticketId: string | undefined;
+  ticketIds: string[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -57,20 +57,23 @@ export class PaymentComponent implements OnInit {
           expiryDate: this.paymentForm.get('expiryDate')?.value,
           cvv: this.paymentForm.get('cvv')?.value,
           amount: this.totalAmount,
-        };
-
-        // Mocking the payment API call
+        }; // Mocking the payment API call
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve({ success: true });
           }, 1500); // Simulate a 1.5-second delay
         });
 
-        // Generate a random ticket ID        // Generate ticket ID
-        this.ticketId = `TKT-${Math.random()
-          .toString(36)
-          .substring(2, 11)
-          .toUpperCase()}`;
+        // Generate random ticket IDs for each ticket purchased
+        this.ticketIds = [];
+        const count = this.ticketCount || 1;
+        for (let i = 0; i < count; i++) {
+          const ticketId = `TKT-${Math.random()
+            .toString(36)
+            .substring(2, 11)
+            .toUpperCase()}`;
+          this.ticketIds.push(ticketId);
+        }
 
         // Update step to show success state
         this.currentStep = 'complete';

@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "booking_id": 1,
+    "ticket_code": "TKT-JF72GHD9L1",
+    "price": 50,
+    "issued_date": "2024-02-20T10:05:00Z",
+    "status": "confirmed"
+  },
+  {
+    "id": 2,
+    "booking_id": 1,
+    "ticket_code": "TKT-K83LP6MN4B",
+    "price": 50,
+    "issued_date": "2024-02-20T10:05:00Z",
+    "status": "confirmed"
+  },
+  {
+    "id": 3,
+    "booking_id": 2,
+    "ticket_code": "TKT-9P5Q7RT2SX",
+    "price": 25,
+    "issued_date": "2024-02-20T10:10:00Z",
+    "status": "cancelled"
+  },
+  {
+    "id": 4,
+    "booking_id": 2,
+    "ticket_code": "TKT-F3DMH6VY7Z",
+    "price": 25,
+    "issued_date": "2024-02-20T10:10:00Z",
+    "status": "cancelled"
+  },
+  {
+    "id": 5,
+    "booking_id": 3,
+    "ticket_code": "TKT-U8N2X4WA9C",
+    "price": 35,
+    "issued_date": "2024-02-25T15:35:00Z",
+    "status": "confirmed"
+  }
+]

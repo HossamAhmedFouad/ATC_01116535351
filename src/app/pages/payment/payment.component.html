@@ -267,10 +267,23 @@
     <h2>Payment Successful!</h2>
     <div class="success-details">
       <p>Thank you for your purchase. Your tickets have been confirmed.</p>
-      <div class="ticket-id">
-        <mat-icon>confirmation_number</mat-icon>
-        <strong>{{ ticketId }}</strong>
+
+      <div class="tickets-container">
+        <h3>Your Tickets</h3>
+        <div class="tickets-scroll-container">
+          <div
+            *ngFor="let ticketId of ticketIds; let i = index"
+            class="ticket-item"
+          >
+            <div class="ticket-number">{{ i + 1 }}</div>
+            <div class="ticket-id">
+              <mat-icon>confirmation_number</mat-icon>
+              <strong>{{ ticketId }}</strong>
+            </div>
+          </div>
+        </div>
       </div>
+
       <p class="info-text">
         A confirmation email has been sent to your email address.
       </p>
