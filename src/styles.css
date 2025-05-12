@@ -5,7 +5,9 @@
   --background-color: #f8f9fa;
   --text-color: #333;
   --primary-color: #007bff;
+  --primary-color-rgb: 0, 123, 255;
   --secondary-color: #6c757d;
+  --secondary-color-rgb: 108, 117, 125;
   --border-color: #dee2e6;
   --card-background: #ffffff;
   --hover-color: #e9ecef;
@@ -20,7 +22,9 @@
   --background-color: #1a1a1a;
   --text-color: #f8f9fa;
   --primary-color: #0d6efd;
+  --primary-color-rgb: 13, 110, 253;
   --secondary-color: #adb5bd;
+  --secondary-color-rgb: 173, 181, 189;
   --border-color: #2d2d2d;
   --card-background: #2d2d2d;
   --hover-color: #3d3d3d;
@@ -31,7 +35,9 @@
 }
 
 /* Modern CSS Reset */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -43,7 +49,8 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
   line-height: 1.5;
   color: var(--text-color);
   background-color: var(--background-color);
@@ -61,7 +68,8 @@ button {
 }
 
 /* Remove list styles */
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -89,5 +97,11 @@ select {
   }
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}

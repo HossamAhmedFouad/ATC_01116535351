@@ -1,279 +1,395 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatListModule } from '@angular/material/list';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ThemePalette } from '@angular/material/core';
-import { AuthService, User } from '../../services/auth.service';
-import { Router } from '@angular/router';
-import {
-  SidebarNavComponent,
-  NavItem,
-} from '../../components/sidebar-nav/sidebar-nav.component';
-import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { User, AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service';
 
-interface ProfileSettings {
-  language: string;
-  timezone: string;
+interface AccountSetting {
+  name: string;
+  description: string;
+  icon: string;
+  action: () => void;
+}
+
+interface Language {
+  code: string;
+  name: string;
+  flag: string;
+}
+
+interface ActivityItem {
+  id: number;
+  type: 'booking' | 'event' | 'payment';
+  title: string;
+  date: string;
+  description: string;
+  icon: string;
 }
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSidenavModule,
-    MatListModule,
-    MatDividerModule,
-    MatTooltipModule,
-    MatSelectModule,
-    MatSlideToggleModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule,
-    SidebarNavComponent,
-  ],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent implements OnInit {
-  user: User | null = null;
-  isSidenavOpen = true;
-  currentSection = 'personal-info';
+  currentUser: User | null = null;
+  isEditing = false;
+  userForm: Partial<User> = {};
   isLoading = false;
-  isUpdating = false;
-  userSubscription!: Subscription;
-
-  // Navigation items
-  navItems: NavItem[] = [
-    {
-      id: 'personal-info',
-      label: 'Personal Info',
-      icon: 'person',
-    },
-    {
-      id: 'security',
-      label: 'Security',
-      icon: 'security',
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: 'settings',
-    },
-  ];
-
-  // Forms
-  personalInfoForm!: FormGroup;
-  securityForm!: FormGroup;
-  settingsForm!: FormGroup;
-
-  // Settings
-  settings: ProfileSettings = {
-    language: 'en',
-    timezone: 'UTC',
+  successMessage = '';
+  errorMessage = '';
+  selectedTab: 'profile' | 'activity' | 'settings' = 'profile';
+  isChangingPassword = false;
+  isChangingLanguage = false;
+  passwordForm = {
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
   };
 
-  languages = [
-    { code: 'en', name: 'English' },
-    { code: 'ar', name: 'Arabic' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
+  // Extended profile properties
+  memberSince: string = '2023-01-15';
+  totalEvents: number = 0;
+  totalBookings: number = 0;
+  lastLoginDate: string = '2023-05-10';
+
+  // Language settings
+  currentLanguage: string = 'en';
+  availableLanguages: Language[] = [
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+    { code: 'zh', name: '中文', flag: '🇨🇳' },
   ];
 
-  timezones = [
-    { value: 'UTC', label: 'UTC' },
-    { value: 'EST', label: 'Eastern Time' },
-    { value: 'PST', label: 'Pacific Time' },
-    { value: 'GMT', label: 'Greenwich Mean Time' },
-    { value: 'CET', label: 'Central European Time' },
-    { value: 'IST', label: 'Indian Standard Time' },
-  ];
+  // Mock activity data
+  recentActivity: ActivityItem[] = [];
+
+  // Account settings options
+  accountSettings: AccountSetting[] = [];
 
   constructor(
-    private fb: FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar,
-    private router: Router
-  ) {
-    this.initializeForms();
+    private userService: UserService
+  ) {}
+  ngOnInit(): void {
+    this.currentUser = this.authService.getCurrentUser();
+    if (this.currentUser) {
+      this.resetForm();
+      this.loadMockData();
+      this.setupAccountSettings();
+      this.calculateUserStats();
+    }
+
+    // Check for saved language preference
+    const savedLanguage = localStorage.getItem('preferredLanguage');
+    if (savedLanguage) {
+      this.currentLanguage = savedLanguage;
+    }
+  }
+  calculateUserStats(): void {
+    if (this.currentUser?.bookedEvents) {
+      this.totalBookings = this.currentUser.bookedEvents.length;
+
+      // Calculate unique events (for demo purposes)
+      const uniqueEventIds = new Set();
+      this.currentUser.bookedEvents.forEach((booking) => {
+        if (booking.event_id) {
+          uniqueEventIds.add(booking.event_id);
+        }
+      });
+      this.totalEvents = uniqueEventIds.size;
+    }
   }
 
-  private initializeForms(): void {
-    this.personalInfoForm = this.fb.group({
-      username: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.pattern('^[0-9-+()]*$')]],
-      location: [''],
-      bio: ['', [Validators.maxLength(500)]],
-    });
-
-    this.securityForm = this.fb.group(
+  loadMockData(): void {
+    // Create some mock activity data
+    this.recentActivity = [
       {
-        currentPassword: ['', [Validators.required]],
-        newPassword: ['', [Validators.required, Validators.minLength(8)]],
-        confirmPassword: ['', [Validators.required]],
+        id: 1,
+        type: 'booking',
+        title: 'Booked a ticket',
+        date: '2025-05-10',
+        description: 'Booked a ticket for Tech Conference 2025',
+        icon: 'event_available',
       },
-      { validator: this.passwordMatchValidator }
-    );
-
-    this.settingsForm = this.fb.group({
-      language: ['en'],
-      timezone: ['UTC'],
-    });
+      {
+        id: 2,
+        type: 'payment',
+        title: 'Payment completed',
+        date: '2025-05-10',
+        description: 'Payment for Tech Conference 2025',
+        icon: 'payments',
+      },
+      {
+        id: 3,
+        type: 'event',
+        title: 'Attended an event',
+        date: '2025-04-15',
+        description: 'Attended Spring Music Festival',
+        icon: 'event_note',
+      },
+    ];
+  }
+  setupAccountSettings(): void {
+    this.accountSettings = [
+      {
+        name: 'Change Password',
+        description: 'Update your account password',
+        icon: 'lock',
+        action: () => this.togglePasswordForm(),
+      },
+      {
+        name: 'Download Your Data',
+        description: 'Get a copy of your personal data',
+        icon: 'cloud_download',
+        action: () => this.downloadUserData(),
+      },
+      {
+        name: 'Change Language',
+        description: 'Select your preferred language',
+        icon: 'language',
+        action: () => this.toggleLanguageSelector(),
+      },
+    ];
+  }
+  // Tab navigation
+  switchTab(tab: 'profile' | 'activity' | 'settings'): void {
+    this.selectedTab = tab;
+    // Close any open forms when switching tabs
+    this.isEditing = false;
+    this.isChangingPassword = false;
+    this.isChangingLanguage = false;
+    this.resetMessages();
   }
 
-  ngOnInit() {
-    this.loadUserData();
-    this.setupFormSubscriptions();
-  }
-
-  ngOnDestroy() {
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe(); // Clean up the subscription
+  // Password management
+  togglePasswordForm(): void {
+    this.isChangingPassword = !this.isChangingPassword;
+    if (this.isChangingPassword) {
+      this.passwordForm = {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      };
     }
+    this.resetMessages();
   }
 
-  private setupFormSubscriptions(): void {
-    // Add any form subscriptions if needed
-  }
+  changePassword(): void {
+    // Validate form
+    if (
+      !this.passwordForm.currentPassword ||
+      !this.passwordForm.newPassword ||
+      !this.passwordForm.confirmPassword
+    ) {
+      this.errorMessage = 'All password fields are required';
+      return;
+    }
 
-  loadUserData() {
+    if (this.passwordForm.newPassword !== this.passwordForm.confirmPassword) {
+      this.errorMessage = 'New passwords do not match';
+      return;
+    }
+
+    // In a real app, this would call an API
     this.isLoading = true;
-    this.userSubscription = this.authService.currentUser$.subscribe({
-      next: (user) => {
-        if (user) {
-          this.user = user;
-          this.personalInfoForm.patchValue({
-            username: user.username,
-            email: user.email,
-            phone: user.phone || '',
-            location: user.location || '',
-            bio: user.bio || '',
-          });
 
-          // Load settings from user preferences if they exist
-          if (user.phone) this.settingsForm.get('language')?.setValue('en');
-          if (user.location) this.settingsForm.get('timezone')?.setValue('UTC');
+    setTimeout(() => {
+      this.isLoading = false;
+      this.successMessage = 'Password changed successfully';
+      this.isChangingPassword = false;
+      this.passwordForm = {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      };
+    }, 1000);
+  }
+
+  // Settings methods
+  openNotificationSettings(): void {
+    this.successMessage = 'Notification settings feature coming soon';
+  }
+
+  openPrivacySettings(): void {
+    this.successMessage = 'Privacy settings feature coming soon';
+  }
+
+  downloadUserData(): void {
+    this.successMessage = 'Your data is being prepared for download';
+
+    // In a real app, this would trigger a backend process to compile user data
+    setTimeout(() => {
+      if (this.currentUser) {
+        // Create a JSON blob with user data
+        const userData = JSON.stringify(this.currentUser, null, 2);
+        const blob = new Blob([userData], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        // Create a download link and trigger it
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `user-data-${this.currentUser.username}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    }, 1500);
+  }
+
+  // File upload handler
+  handleFileInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length) {
+      const file = input.files[0];
+
+      // In a real app, you would upload to a server
+      // For now, we'll use FileReader to create a data URL
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          this.userForm.profilePicUrl = reader.result;
         }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  resetMessages(): void {
+    this.successMessage = '';
+    this.errorMessage = '';
+  }
+  resetForm(): void {
+    if (this.currentUser) {
+      this.userForm = {
+        username: this.currentUser.username,
+        email: this.currentUser.email,
+        phone: this.currentUser.phone || '',
+        location: this.currentUser.location || '',
+        bio: this.currentUser.bio || '',
+        profilePicUrl: this.currentUser.profilePicUrl || '',
+        // Add any additional fields you want to include
+      };
+
+      // Calculate statistics based on current user data
+      if (this.currentUser.bookedEvents) {
+        this.totalBookings = this.currentUser.bookedEvents.length;
+      }
+    }
+  }
+
+  startEditing(): void {
+    this.isEditing = true;
+  }
+
+  cancelEditing(): void {
+    this.isEditing = false;
+    this.resetForm();
+    this.successMessage = '';
+    this.errorMessage = '';
+  }
+
+  saveProfile(): void {
+    if (!this.currentUser) return;
+
+    this.isLoading = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    // In a real app, this would send data to the backend
+    // For this demo, we'll simulate an API call
+    setTimeout(() => {
+      if (this.currentUser) {
+        // Update the current user with form values
+        const updatedUser: User = {
+          ...this.currentUser,
+          ...this.userForm,
+        };
+
+        // Update in local storage (simulating backend update)
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+        // Update the auth service
+        this.authService['currentUserSubject'].next(updatedUser);
+        this.currentUser = updatedUser;
+
         this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading user data:', error);
-        this.showNotification('Error loading user data', 'error');
-        this.isLoading = false;
-      },
-    });
-  }
-
-  passwordMatchValidator(g: FormGroup) {
-    return g.get('newPassword')?.value === g.get('confirmPassword')?.value
-      ? null
-      : { mismatch: true };
-  }
-
-  async updatePersonalInfo() {
-    if (this.personalInfoForm.valid) {
-      this.isUpdating = true;
-      try {
-        const updatedInfo = this.personalInfoForm.value;
-        // TODO: Implement API call to update user info
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
-        // Update local user data
-        if (this.user) {
-          this.user = {
-            ...this.user,
-            ...updatedInfo,
-          };
-        }
-
-        this.showNotification('Profile updated successfully', 'success');
-      } catch (error) {
-        console.error('Error updating profile:', error);
-        this.showNotification('Error updating profile', 'error');
-      } finally {
-        this.isUpdating = false;
+        this.isEditing = false;
+        this.successMessage = 'Profile updated successfully!';
       }
+    }, 1000);
+  }
+
+  // Helper to generate initials for avatar
+  getInitials(): string {
+    if (!this.currentUser?.username) return '?';
+
+    const nameParts = this.currentUser.username.split(' ');
+    if (nameParts.length > 1) {
+      return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
     }
+    return this.currentUser.username.substring(0, 2).toUpperCase();
   }
 
-  async updatePassword() {
-    if (this.securityForm.valid) {
-      this.isUpdating = true;
-      try {
-        // TODO: Implement API call to update password
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-        this.showNotification('Password updated successfully', 'success');
-        this.securityForm.reset();
-      } catch (error) {
-        console.error('Error updating password:', error);
-        this.showNotification('Error updating password', 'error');
-      } finally {
-        this.isUpdating = false;
-      }
+  // Generate a random color based on username for avatar
+  getAvatarColor(): string {
+    if (!this.currentUser?.username) return '#007bff';
+
+    // Simple hash function to generate color from username
+    let hash = 0;
+    for (let i = 0; i < this.currentUser.username.length; i++) {
+      hash = this.currentUser.username.charCodeAt(i) + ((hash << 5) - hash);
     }
-  }
 
-  async updateSettings() {
-    if (this.settingsForm.valid) {
-      this.isUpdating = true;
-      try {
-        this.settings = this.settingsForm.value;
-        // TODO: Implement API call to update settings
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
-        this.showNotification('Settings updated successfully', 'success');
-      } catch (error) {
-        console.error('Error updating settings:', error);
-        this.showNotification('Error updating settings', 'error');
-      } finally {
-        this.isUpdating = false;
-      }
+    // Convert to hex color
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+      const value = (hash >> (i * 8)) & 0xff;
+      color += ('00' + value.toString(16)).substr(-2);
     }
+
+    return color;
   }
 
-  toggleSidenav() {
-    this.isSidenavOpen = !this.isSidenavOpen;
+  // Language selector
+  toggleLanguageSelector(): void {
+    this.isChangingLanguage = !this.isChangingLanguage;
+    this.resetMessages();
   }
 
-  navigateToSection(section: string) {
-    this.currentSection = section;
-    if (window.innerWidth < 768) {
-      this.isSidenavOpen = false;
-    }
+  changeLanguage(languageCode: string): void {
+    this.isLoading = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    // In a real app, this would call an API and update app settings
+    setTimeout(() => {
+      this.currentLanguage = languageCode;
+      this.isLoading = false;
+      this.isChangingLanguage = false;
+
+      // Get the language name for the message
+      const selectedLanguage = this.availableLanguages.find(
+        (lang) => lang.code === languageCode
+      );
+      this.successMessage = `Language changed to ${
+        selectedLanguage?.name || languageCode
+      }`;
+
+      // In a real app, this would update a language service
+      localStorage.setItem('preferredLanguage', languageCode);
+    }, 1000);
   }
 
-  private showNotification(
-    message: string,
-    type: 'success' | 'error' = 'success'
-  ) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000,
-      panelClass:
-        type === 'success' ? ['success-snackbar'] : ['error-snackbar'],
-    });
+  // Helper to get language name by code
+  getLanguageName(code: string): string {
+    const language = this.availableLanguages.find((l) => l.code === code);
+    return language ? language.name : 'English';
   }
 }

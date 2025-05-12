@@ -1,336 +1,429 @@
 <div class="profile-container">
-  <mat-sidenav-container>
-    <mat-sidenav
-      #sidenav
-      mode="side"
-      [opened]="isSidenavOpen"
-      [class.collapsed]="!isSidenavOpen"
+  <div class="profile-header">
+    <h1>My Profile</h1>
+    <p class="subtitle">
+      Manage your personal information and account settings
+    </p>
+  </div>
+
+  <!-- Success or error messages -->
+  <div class="message success" *ngIf="successMessage">
+    <span class="material-icons">check_circle</span>
+    {{ successMessage }}
+  </div>
+
+  <div class="message error" *ngIf="errorMessage">
+    <span class="material-icons">error</span>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Tab navigation -->
+  <div class="profile-tabs" *ngIf="currentUser">
+    <button
+      class="tab-button"
+      [class.active]="selectedTab === 'profile'"
+      (click)="switchTab('profile')"
     >
-      <app-sidebar-nav
-        [isOpen]="isSidenavOpen"
-        [currentSection]="currentSection"
-        [navItems]="navItems"
-        [userEmail]="user?.email"
-        [username]="user?.username"
-        (toggleSidenav)="toggleSidenav()"
-        (sectionChange)="navigateToSection($event)"
-      >
-      </app-sidebar-nav>
-    </mat-sidenav>
-
-    <mat-sidenav-content
-      [ngStyle]="{ 'margin-left': isSidenavOpen ? '280px' : '72px' }"
+      <span class="material-icons">person</span>
+      Profile
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="selectedTab === 'activity'"
+      (click)="switchTab('activity')"
     >
-      <div class="profile-content">
-        <!-- Floating button to reopen sidenav -->
-        <button
-          mat-fab
-          color="primary"
-          class="reopen-sidenav-btn"
-          *ngIf="!isSidenavOpen"
-          (click)="toggleSidenav()"
-        >
-          <mat-icon>menu</mat-icon>
-        </button>
-
-        <mat-progress-spinner
-          *ngIf="isLoading"
-          mode="indeterminate"
-          diameter="40"
-          class="loading-spinner"
-        ></mat-progress-spinner>
-
-        <!-- Personal Info Section -->
-        <section
-          *ngIf="currentSection === 'personal-info' && !isLoading"
-          class="profile-section"
-        >
-          <mat-card class="modern-card">
-            <mat-card-header>
-              <div class="profile-header">
-                <div class="profile-avatar">
-                  <div class="avatar-placeholder">
-                    <mat-icon>account_circle</mat-icon>
-                  </div>
-                </div>
-                <div class="profile-title">
-                  <mat-card-title>Personal Information</mat-card-title>
-                  <mat-card-subtitle
-                    >Update your profile details</mat-card-subtitle
-                  >
-                </div>
-              </div>
-              <button
-                mat-icon-button
-                color="primary"
-                (click)="personalInfoForm.reset()"
-                matTooltip="Reset Form"
+      <span class="material-icons">history</span>
+      Activity
+    </button>
+    <button
+      class="tab-button"
+      [class.active]="selectedTab === 'settings'"
+      (click)="switchTab('settings')"
+    >
+      <span class="material-icons">settings</span>
+      Settings
+    </button>
+  </div>
+  <div class="profile-card" *ngIf="currentUser">
+    <!-- PROFILE TAB -->
+    <ng-container *ngIf="selectedTab === 'profile'">
+      <!-- Profile View Mode -->
+      <div class="profile-view" *ngIf="!isEditing">
+        <div class="profile-content">
+          <!-- Left: Avatar and basic info -->
+          <div class="profile-main">
+            <!-- User avatar - either profile pic or initials -->
+            <div class="avatar-container">
+              <div
+                *ngIf="!currentUser.profilePicUrl"
+                class="avatar-initials"
+                [style.background-color]="getAvatarColor()"
               >
-                <mat-icon>refresh</mat-icon>
-              </button>
-            </mat-card-header>
-            <mat-card-content>
-              <form
-                [formGroup]="personalInfoForm"
-                (ngSubmit)="updatePersonalInfo()"
+                {{ getInitials() }}
+              </div>
+              <img
+                *ngIf="currentUser.profilePicUrl"
+                [src]="currentUser.profilePicUrl"
+                alt="Profile picture"
+                class="avatar-image"
+              />
+            </div>
+
+            <div class="user-info">
+              <h2 class="username">{{ currentUser.username }}</h2>
+              <p class="email">{{ currentUser.email }}</p>
+              <p class="role" *ngIf="currentUser.role">
+                {{ currentUser.role }}
+              </p>
+
+              <!-- User stats badges -->
+              <div class="user-stats">
+                <div class="stat-badge">
+                  <span class="material-icons">event</span>
+                  <span class="stat-value">{{ totalBookings }}</span>
+                  <span class="stat-label">Bookings</span>
+                </div>
+                <div class="stat-badge">
+                  <span class="material-icons">calendar_today</span>
+                  <span class="stat-value">{{ totalEvents }}</span>
+                  <span class="stat-label">Events</span>
+                </div>
+              </div>
+
+              <!-- Member since info -->
+              <div class="member-info">
+                <p class="member-since">
+                  Member since {{ memberSince | date : "mediumDate" }}
+                </p>
+                <p class="last-login">
+                  Last login: {{ lastLoginDate | date : "mediumDate" }}
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- Right: Additional info -->
+          <div class="profile-details">
+            <h3 class="details-title">Contact Information</h3>
+            <div class="detail-item" *ngIf="currentUser.location">
+              <span class="material-icons">location_on</span>
+              <span>{{ currentUser.location }}</span>
+            </div>
+            <div class="detail-item" *ngIf="currentUser.phone">
+              <span class="material-icons">phone</span>
+              <span>{{ currentUser.phone }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="material-icons">language</span>
+              <span>Language: {{ getLanguageName(currentLanguage) }}</span>
+            </div>
+
+            <h3 class="details-title account-info">Account Information</h3>
+            <div class="detail-item">
+              <span class="material-icons">vpn_key</span>
+              <span>Account ID: #{{ currentUser.id }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="material-icons">verified_user</span>
+              <span
+                >Status: <span class="status-badge active">Active</span></span
               >
-                <div class="form-grid">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Username</mat-label>
-                    <input matInput formControlName="username" required />
-                    <mat-icon matSuffix>person</mat-icon>
-                    <mat-error
-                      *ngIf="
-                        personalInfoForm.get('username')?.hasError('required')
-                      "
-                    >
-                      Username is required
-                    </mat-error>
-                    <mat-error
-                      *ngIf="
-                        personalInfoForm.get('username')?.hasError('minlength')
-                      "
-                    >
-                      Username must be at least 3 characters
-                    </mat-error>
-                  </mat-form-field>
+            </div>
 
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Email</mat-label>
-                    <input
-                      matInput
-                      formControlName="email"
-                      type="email"
-                      required
-                    />
-                    <mat-icon matSuffix>email</mat-icon>
-                    <mat-error
-                      *ngIf="
-                        personalInfoForm.get('email')?.hasError('required')
-                      "
-                    >
-                      Email is required
-                    </mat-error>
-                    <mat-error
-                      *ngIf="personalInfoForm.get('email')?.hasError('email')"
-                    >
-                      Please enter a valid email
-                    </mat-error>
-                  </mat-form-field>
+            <div class="bio-section" *ngIf="currentUser.bio">
+              <h3 class="details-title">About Me</h3>
+              <p>{{ currentUser.bio }}</p>
+            </div>
+          </div>
+        </div>
 
-                  <mat-form-field appearance="outline">
-                    <mat-label>Phone Number</mat-label>
-                    <input matInput formControlName="phone" />
-                    <mat-icon matSuffix>phone</mat-icon>
-                    <mat-error
-                      *ngIf="personalInfoForm.get('phone')?.hasError('pattern')"
-                    >
-                      Please enter a valid phone number
-                    </mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Location</mat-label>
-                    <input matInput formControlName="location" />
-                    <mat-icon matSuffix>location_on</mat-icon>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Bio</mat-label>
-                    <textarea
-                      matInput
-                      formControlName="bio"
-                      rows="4"
-                      maxlength="500"
-                    ></textarea>
-                    <mat-hint align="end"
-                      >{{
-                        personalInfoForm.get("bio")?.value?.length || 0
-                      }}/500</mat-hint
-                    >
-                  </mat-form-field>
-                </div>
-
-                <div class="form-actions">
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    type="submit"
-                    [disabled]="!personalInfoForm.valid || isUpdating"
-                  >
-                    <mat-icon>save</mat-icon>
-                    Update Profile
-                    <mat-progress-spinner
-                      *ngIf="isUpdating"
-                      mode="indeterminate"
-                      diameter="20"
-                      class="button-spinner"
-                    ></mat-progress-spinner>
-                  </button>
-                </div>
-              </form>
-            </mat-card-content>
-          </mat-card>
-        </section>
-
-        <!-- Security Section -->
-        <section
-          *ngIf="currentSection === 'security' && !isLoading"
-          class="profile-section"
-        >
-          <mat-card class="modern-card">
-            <mat-card-header>
-              <div class="profile-title">
-                <mat-card-title>Security Settings</mat-card-title>
-                <mat-card-subtitle
-                  >Manage your account security</mat-card-subtitle
-                >
-              </div>
-            </mat-card-header>
-            <mat-card-content>
-              <form [formGroup]="securityForm" (ngSubmit)="updatePassword()">
-                <div class="form-grid">
-                  <mat-form-field appearance="outline" class="full-width">
-                    <mat-label>Current Password</mat-label>
-                    <input
-                      matInput
-                      formControlName="currentPassword"
-                      type="password"
-                      required
-                    />
-                    <mat-icon matSuffix>lock</mat-icon>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>New Password</mat-label>
-                    <input
-                      matInput
-                      formControlName="newPassword"
-                      type="password"
-                      required
-                    />
-                    <mat-icon matSuffix>vpn_key</mat-icon>
-                    <mat-error
-                      *ngIf="
-                        securityForm.get('newPassword')?.hasError('minlength')
-                      "
-                    >
-                      Password must be at least 8 characters
-                    </mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline">
-                    <mat-label>Confirm New Password</mat-label>
-                    <input
-                      matInput
-                      formControlName="confirmPassword"
-                      type="password"
-                      required
-                    />
-                    <mat-icon matSuffix>vpn_key</mat-icon>
-                    <mat-error *ngIf="securityForm.hasError('mismatch')">
-                      Passwords do not match
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="security-info">
-                  <mat-icon color="primary">info</mat-icon>
-                  <p>
-                    Password must be at least 8 characters and include a mix of
-                    letters, numbers, and special characters.
-                  </p>
-                </div>
-
-                <div class="form-actions">
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    type="submit"
-                    [disabled]="!securityForm.valid || isUpdating"
-                  >
-                    <mat-icon>security</mat-icon>
-                    Update Password
-                    <mat-progress-spinner
-                      *ngIf="isUpdating"
-                      mode="indeterminate"
-                      diameter="20"
-                      class="button-spinner"
-                    ></mat-progress-spinner>
-                  </button>
-                </div>
-              </form>
-            </mat-card-content>
-          </mat-card>
-        </section>
-
-        <!-- Settings Section -->
-        <section
-          *ngIf="currentSection === 'settings' && !isLoading"
-          class="profile-section"
-        >
-          <mat-card class="modern-card">
-            <mat-card-header>
-              <div class="profile-title">
-                <mat-card-title>Website Settings</mat-card-title>
-                <mat-card-subtitle>Customize your experience</mat-card-subtitle>
-              </div>
-            </mat-card-header>
-            <mat-card-content>
-              <form [formGroup]="settingsForm" (ngSubmit)="updateSettings()">
-                <div class="settings-group">
-                  <h3>Preferences</h3>
-                  <div class="form-grid">
-                    <mat-form-field appearance="outline">
-                      <mat-label>Language</mat-label>
-                      <mat-select formControlName="language">
-                        <mat-option
-                          *ngFor="let lang of languages"
-                          [value]="lang.code"
-                        >
-                          {{ lang.name }}
-                        </mat-option>
-                      </mat-select>
-                      <mat-icon matSuffix>language</mat-icon>
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                      <mat-label>Timezone</mat-label>
-                      <mat-select formControlName="timezone">
-                        <mat-option
-                          *ngFor="let tz of timezones"
-                          [value]="tz.value"
-                        >
-                          {{ tz.label }}
-                        </mat-option>
-                      </mat-select>
-                      <mat-icon matSuffix>schedule</mat-icon>
-                    </mat-form-field>
-                  </div>
-                </div>
-
-                <div class="form-actions">
-                  <button
-                    mat-raised-button
-                    color="primary"
-                    type="submit"
-                    [disabled]="isUpdating"
-                  >
-                    <mat-icon>save</mat-icon>
-                    Save Settings
-                    <mat-progress-spinner
-                      *ngIf="isUpdating"
-                      mode="indeterminate"
-                      diameter="20"
-                      class="button-spinner"
-                    ></mat-progress-spinner>
-                  </button>
-                </div>
-              </form>
-            </mat-card-content>
-          </mat-card>
-        </section>
+        <div class="profile-actions">
+          <button class="edit-button" (click)="startEditing()">
+            <span class="material-icons">edit</span>
+            Edit Profile
+          </button>
+        </div>
       </div>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
+
+      <!-- Profile Edit Mode -->
+      <div class="profile-edit" *ngIf="isEditing">
+        <form (submit)="saveProfile()">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="username">Username</label>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                [(ngModel)]="userForm.username"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                [(ngModel)]="userForm.email"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Phone Number</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                [(ngModel)]="userForm.phone"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="location">Location</label>
+              <input
+                type="text"
+                id="location"
+                name="location"
+                [(ngModel)]="userForm.location"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="profilePic">Profile Picture</label>
+            <div class="file-input-container">
+              <input
+                type="file"
+                id="profilePic"
+                name="profilePic"
+                accept="image/*"
+                (change)="handleFileInput($event)"
+                class="file-input"
+              />
+              <label for="profilePic" class="file-input-label">
+                <span class="material-icons">cloud_upload</span>
+                Choose Photo
+              </label>
+              <span class="file-name">{{
+                userForm.profilePicUrl ? "Image selected" : "No file chosen"
+              }}</span>
+            </div>
+
+            <!-- Preview image if available -->
+            <div class="image-preview" *ngIf="userForm.profilePicUrl">
+              <img [src]="userForm.profilePicUrl" alt="Profile preview" />
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="bio">About Me</label>
+            <textarea
+              id="bio"
+              name="bio"
+              [(ngModel)]="userForm.bio"
+              rows="4"
+              placeholder="Tell us a bit about yourself..."
+            ></textarea>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="cancel-button"
+              (click)="cancelEditing()"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="save-button" [disabled]="isLoading">
+              <span *ngIf="isLoading" class="spinner"></span>
+              <span *ngIf="!isLoading">Save Changes</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </ng-container>
+
+    <!-- ACTIVITY TAB -->
+    <ng-container *ngIf="selectedTab === 'activity'">
+      <div class="activity-container">
+        <h2 class="section-title">Recent Activity</h2>
+
+        <div class="activity-empty" *ngIf="recentActivity.length === 0">
+          <span class="material-icons">history</span>
+          <p>No recent activity to display</p>
+        </div>
+
+        <ul class="activity-list" *ngIf="recentActivity.length > 0">
+          <li class="activity-item" *ngFor="let item of recentActivity">
+            <div class="activity-icon" [ngClass]="item.type">
+              <span class="material-icons">{{ item.icon }}</span>
+            </div>
+            <div class="activity-content">
+              <div class="activity-header">
+                <h3 class="activity-title">{{ item.title }}</h3>
+                <span class="activity-date">{{
+                  item.date | date : "mediumDate"
+                }}</span>
+              </div>
+              <p class="activity-description">{{ item.description }}</p>
+            </div>
+          </li>
+        </ul>
+
+        <div class="activity-footer">
+          <a routerLink="/bookings" class="view-all-link">
+            <span>View all bookings</span>
+            <span class="material-icons">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- SETTINGS TAB -->
+    <ng-container *ngIf="selectedTab === 'settings'">
+      <div class="settings-container">
+        <h2 class="section-title">Account Settings</h2>
+
+        <!-- Password change form -->
+        <div class="password-form-container" *ngIf="isChangingPassword">
+          <h3 class="subsection-title">Change Password</h3>
+
+          <form (submit)="changePassword()" class="settings-form">
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="currentPassword"
+                  name="currentPassword"
+                  [(ngModel)]="passwordForm.currentPassword"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="newPassword"
+                  name="newPassword"
+                  [(ngModel)]="passwordForm.newPassword"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm New Password</label>
+              <div class="password-input-wrapper">
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  [(ngModel)]="passwordForm.confirmPassword"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button
+                type="button"
+                class="cancel-button"
+                (click)="togglePasswordForm()"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="save-button" [disabled]="isLoading">
+                <span *ngIf="isLoading" class="spinner"></span>
+                <span *ngIf="!isLoading">Change Password</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Language selector -->
+        <div class="language-selector-container" *ngIf="isChangingLanguage">
+          <h3 class="subsection-title">Select Language</h3>
+
+          <div class="language-options">
+            <div
+              class="language-option"
+              *ngFor="let language of availableLanguages"
+              [class.active]="currentLanguage === language.code"
+              (click)="changeLanguage(language.code)"
+            >
+              <span class="language-flag">{{ language.flag }}</span>
+              <span class="language-name">{{ language.name }}</span>
+              <span
+                class="material-icons check-icon"
+                *ngIf="currentLanguage === language.code"
+                >check_circle</span
+              >
+            </div>
+          </div>
+
+          <div class="form-actions language-actions">
+            <button
+              type="button"
+              class="cancel-button"
+              (click)="toggleLanguageSelector()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+        <!-- Settings list -->
+        <ul
+          class="settings-list"
+          *ngIf="!isChangingPassword && !isChangingLanguage"
+        >
+          <li
+            class="settings-item"
+            *ngFor="let setting of accountSettings"
+            (click)="setting.action()"
+          >
+            <div class="settings-icon">
+              <span class="material-icons">{{ setting.icon }}</span>
+            </div>
+            <div class="settings-content">
+              <h3 class="settings-title">{{ setting.name }}</h3>
+              <p class="settings-description">{{ setting.description }}</p>
+            </div>
+            <div class="settings-arrow">
+              <span class="material-icons">chevron_right</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </ng-container>
+  </div>
+  <!-- Bookings Summary Section -->
+  <div
+    class="profile-section"
+    *ngIf="
+      selectedTab === 'profile' &&
+      currentUser?.bookedEvents &&
+      currentUser?.bookedEvents.length > 0
+    "
+  >
+    <h2 class="section-title">Recent Bookings</h2>
+    <div class="bookings-summary">
+      <p>You have {{ currentUser?.bookedEvents?.length }} event bookings</p>
+      <a routerLink="/bookings" class="view-all-link">View all bookings</a>
+    </div>
+  </div>
+
+  <!-- Not Logged In State -->
+  <div class="not-logged-in" *ngIf="!currentUser">
+    <span class="material-icons">account_circle</span>
+    <h2>Please sign in to view your profile</h2>
+    <a routerLink="/auth/signin" class="signin-link">Sign In</a>
+  </div>
 </div>

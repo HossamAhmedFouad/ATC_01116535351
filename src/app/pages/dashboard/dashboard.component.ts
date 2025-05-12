@@ -79,11 +79,6 @@ export const MY_FORMATS = {
   },
 };
 
-import {
-  SidebarNavComponent,
-  NavItem,
-} from '../../components/sidebar-nav/sidebar-nav.component';
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
