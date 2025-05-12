@@ -10,7 +10,7 @@
           >
         </div>
         <div class="ticket-preview">
-          <i class="fas fa-ticket-alt"></i>
+          <mat-icon>local_activity</mat-icon>
           <span
             >{{ ticketCount }}
             {{ ticketCount === 1 ? "ticket" : "tickets" }}</span
@@ -26,7 +26,7 @@
       </div>
       <div class="step-content">
         <div class="step-icon">
-          <i class="fas fa-ticket fa-lg"></i>
+          <mat-icon>local_activity</mat-icon>
         </div>
         <div class="step-info">
           <span class="step-label">Select</span>
@@ -48,7 +48,7 @@
       </div>
       <div class="step-content">
         <div class="step-icon">
-          <i class="fas fa-credit-card"></i>
+          <mat-icon>credit_card</mat-icon>
         </div>
         <div class="step-info">
           <span class="step-label">Payment</span>
@@ -67,7 +67,7 @@
       </div>
       <div class="step-content">
         <div class="step-icon">
-          <i class="fas fa-check-circle"></i>
+          <mat-icon>check_circle</mat-icon>
         </div>
         <div class="step-info">
           <span class="step-label">Confirm</span>
@@ -89,7 +89,7 @@
         <div class="form-section">
           <div class="section-header">
             <div class="section-icon">
-              <i class="fas fa-user-circle fa-lg"></i>
+              <mat-icon>person</mat-icon>
             </div>
             <h2>Personal Information</h2>
           </div>
@@ -133,7 +133,7 @@
         <div class="form-section">
           <div class="section-header">
             <div class="section-icon">
-              <i class="fas fa-credit-card fa-lg"></i>
+              <mat-icon>credit_card</mat-icon>
             </div>
             <h2>Payment Details</h2>
           </div>
@@ -201,7 +201,7 @@
         <div class="form-section">
           <div class="section-header">
             <div class="section-icon">
-              <i class="fas fa-receipt"></i>
+              <mat-icon>receipt</mat-icon>
             </div>
             <h2>Order Summary</h2>
           </div>
@@ -228,7 +228,7 @@
           >
             <span *ngIf="!loading">Pay Now</span>
             <span *ngIf="loading" class="loading-spinner">
-              <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+              <mat-icon class="spin">sync</mat-icon>
               Processing...
             </span>
           </button>
@@ -238,16 +238,20 @@
 
     <div class="secure-payment-info">
       <div class="security-badge">
-        <i class="fas fa-lock"></i>
+        <mat-icon>lock</mat-icon>
         <span>Secure Payment</span>
       </div>
       <p>Your payment information is encrypted and secure.</p>
       <div class="payment-logos">
-        <div class="card-logos">
-          <i class="fab fa-cc-visa"></i>
-          <i class="fab fa-cc-mastercard"></i>
-          <i class="fab fa-cc-amex"></i>
-          <i class="fab fa-cc-discover"></i>
+        <div class="modern-payment-methods">
+          <div class="payment-method-item">
+            <mat-icon>credit_card</mat-icon>
+            <span>Credit Card</span>
+          </div>
+          <div class="payment-method-item">
+            <mat-icon>payment</mat-icon>
+            <span>Debit Card</span>
+          </div>
         </div>
       </div>
     </div>
@@ -258,18 +262,17 @@
 <div class="success-view" *ngIf="currentStep === 'complete'">
   <div class="success-container">
     <div class="success-icon">
-      <i class="fas fa-check-circle"></i>
+      <mat-icon>check_circle</mat-icon>
     </div>
     <h2>Payment Successful!</h2>
     <div class="success-details">
       <p>Thank you for your purchase. Your tickets have been confirmed.</p>
       <div class="ticket-id">
-        <span>Ticket ID:</span>
+        <mat-icon>confirmation_number</mat-icon>
         <strong>{{ ticketId }}</strong>
       </div>
       <p class="info-text">
-        A confirmation email has been sent to
-        {{ paymentForm.get("email")?.value }}
+        A confirmation email has been sent to your email address.
       </p>
     </div>
     <div class="success-actions">
@@ -277,12 +280,12 @@
         class="view-ticket-button"
         (click)="router.navigate(['/tickets'])"
       >
-        <i class="fas fa-ticket-alt"></i>
-        View My Tickets
+        <mat-icon>local_activity</mat-icon>
+        View Tickets
       </button>
       <button class="home-button" (click)="router.navigate(['/'])">
-        <i class="fas fa-home"></i>
-        Return to Home
+        <mat-icon>home</mat-icon>
+        Back to Home
       </button>
     </div>
   </div>
