@@ -26,7 +26,7 @@
       </div>
       <div class="step-content">
         <div class="step-icon">
-          <i class="fas fa-ticket-alt"></i>
+          <i class="fas fa-ticket fa-lg"></i>
         </div>
         <div class="step-info">
           <span class="step-label">Select</span>
@@ -41,7 +41,10 @@
       [class.active]="currentStep === 'payment'"
     >
       <div class="step-connector">
-        <div class="connector-line"></div>
+        <div
+          class="connector-line"
+          [class.completed]="currentStep === 'complete'"
+        ></div>
       </div>
       <div class="step-content">
         <div class="step-icon">
@@ -54,7 +57,11 @@
       </div>
     </div>
 
-    <div class="progress-step" [class.active]="currentStep === 'complete'">
+    <div
+      class="progress-step"
+      [class.active]="currentStep === 'complete'"
+      [class.completed]="currentStep === 'complete'"
+    >
       <div class="step-connector">
         <div class="connector-line"></div>
       </div>
@@ -82,7 +89,7 @@
         <div class="form-section">
           <div class="section-header">
             <div class="section-icon">
-              <i class="fas fa-user"></i>
+              <i class="fas fa-user-circle fa-lg"></i>
             </div>
             <h2>Personal Information</h2>
           </div>
@@ -126,7 +133,7 @@
         <div class="form-section">
           <div class="section-header">
             <div class="section-icon">
-              <i class="fas fa-credit-card"></i>
+              <i class="fas fa-credit-card fa-lg"></i>
             </div>
             <h2>Payment Details</h2>
           </div>
