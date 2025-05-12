@@ -64,10 +64,17 @@ export class PaymentComponent implements OnInit {
           }, 1500); // Simulate a 1.5-second delay
         });
 
+        // Create booking and generate tickets
+        // In a real app, this would call the BookingService to create a booking with tickets
+        const eventId = this.eventId ? parseInt(this.eventId, 10) : 1;
+        const ticketCount = this.ticketCount || 1;
+        const ticketPrice = this.totalAmount
+          ? this.totalAmount / ticketCount
+          : 0;
+
         // Generate random ticket IDs for each ticket purchased
         this.ticketIds = [];
-        const count = this.ticketCount || 1;
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < ticketCount; i++) {
           const ticketId = `TKT-${Math.random()
             .toString(36)
             .substring(2, 11)
