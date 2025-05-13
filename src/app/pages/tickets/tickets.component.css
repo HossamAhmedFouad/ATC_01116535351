@@ -17,6 +17,21 @@
   background: #f8fafc;
 }
 
+/* Dark mode variables */
+:host-context(.dark-mode) {
+  --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  --success-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);
+  --danger-gradient: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  --surface-color: #2d2d2d;
+  --surface-hover: #3d3d3d;
+  --border-color: #444444;
+  --text-primary: #f1f5f9;
+  --text-secondary: #adb5bd;
+  --status-confirmed: #34d399;
+  --status-cancelled: #f87171;
+  background: #1a1a1a;
+}
+
 .tickets-container {
   width: 100%;
   max-width: 1400px;
@@ -101,6 +116,10 @@
   gap: 1rem;
 }
 
+:host-context(.dark-mode) .no-tickets-message {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .no-tickets-message mat-icon {
   font-size: 4rem;
   height: 4rem;
@@ -131,6 +150,10 @@
   overflow: hidden;
 }
 
+:host-context(.dark-mode) .ticket-table-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .table-responsive {
   overflow-x: auto;
   max-width: 100%;
@@ -148,13 +171,26 @@
   padding: 1rem;
 }
 
+:host-context(.dark-mode) .tickets-table th {
+  background: #2a2a2a;
+}
+
 .tickets-table td {
   padding: 1rem;
   font-size: 0.95rem;
   color: var(--text-primary);
+  background-color: var(--surface-color);
+}
+
+.tickets-table tr.mat-row {
+  background-color: var(--surface-color);
 }
 
 .tickets-table tr.mat-row:hover {
+  background-color: var(--surface-hover);
+}
+
+:host-context(.dark-mode) .tickets-table tr.mat-row:hover td {
   background-color: var(--surface-hover);
 }
 
@@ -162,8 +198,16 @@
   background-color: rgba(239, 68, 68, 0.05);
 }
 
+:host-context(.dark-mode) .tickets-table tr.cancelled-row td {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
 .tickets-table tr.cancelled-row:hover {
   background-color: rgba(239, 68, 68, 0.1);
+}
+
+:host-context(.dark-mode) .tickets-table tr.cancelled-row:hover td {
+  background-color: rgba(239, 68, 68, 0.2);
 }
 
 .ticket-code {
@@ -173,6 +217,10 @@
   padding: 0.5rem;
   border-radius: 4px;
   display: inline-block;
+}
+
+:host-context(.dark-mode) .ticket-code {
+  background: #3d3d3d;
 }
 
 .status-badge {
@@ -192,9 +240,17 @@
   color: var(--status-confirmed);
 }
 
+:host-context(.dark-mode) .status-badge.confirmed {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
 .status-badge.cancelled {
   background-color: rgba(239, 68, 68, 0.1);
   color: var(--status-cancelled);
+}
+
+:host-context(.dark-mode) .status-badge.cancelled {
+  background-color: rgba(239, 68, 68, 0.2);
 }
 
 .status-badge mat-icon {
@@ -212,8 +268,16 @@
   font-weight: 500;
 }
 
+:host-context(.dark-mode) .booking-link {
+  color: #6366f1;
+}
+
 .booking-link:hover {
   color: #6366f1;
+}
+
+:host-context(.dark-mode) .booking-link:hover {
+  color: #818cf8;
 }
 
 .action-button {
@@ -236,12 +300,28 @@
 .tickets-summary mat-card {
   border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: var(--surface-color);
+}
+
+:host-context(.dark-mode) .tickets-summary mat-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
 }
 
 .tickets-summary mat-card-content {
   display: flex;
   justify-content: space-between;
   padding: 1rem;
+}
+
+.tickets-summary mat-card-title {
+  color: var(--text-primary);
+}
+
+.tickets-summary mat-card-header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .summary-item {
@@ -274,6 +354,11 @@
   background-color: #f1f5f9 !important;
 }
 
+:host-context(.dark-mode) ::ng-deep .all-chip {
+  background-color: #3d3d3d !important;
+  color: var(--text-primary) !important;
+}
+
 ::ng-deep .confirmed-chip.mat-mdc-chip-selected {
   background-color: rgba(16, 185, 129, 0.1) !important;
   color: var(--status-confirmed) !important;
@@ -282,12 +367,58 @@
   gap: 4px !important;
 }
 
+:host-context(.dark-mode) ::ng-deep .confirmed-chip.mat-mdc-chip-selected {
+  background-color: rgba(16, 185, 129, 0.2) !important;
+}
+
 ::ng-deep .cancelled-chip.mat-mdc-chip-selected {
   background-color: rgba(239, 68, 68, 0.1) !important;
   color: var(--status-cancelled) !important;
   display: flex !important;
   align-items: center !important;
   gap: 4px !important;
+}
+
+:host-context(.dark-mode) ::ng-deep .cancelled-chip.mat-mdc-chip-selected {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Paginator styles for dark mode */
+:host-context(.dark-mode) ::ng-deep .mat-mdc-paginator {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-paginator-outer-container {
+  background-color: var(--surface-color);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-paginator-page-size-label,
+:host-context(.dark-mode) ::ng-deep .mat-mdc-paginator-range-label {
+  color: var(--text-secondary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-paginator-icon {
+  fill: var(--text-secondary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mdc-select__selected-text {
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-select-value {
+  color: var(--text-primary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-select-arrow {
+  color: var(--text-secondary);
+}
+
+:host-context(.dark-mode)
+  ::ng-deep
+  .mat-mdc-form-field-type-mat-select
+  .mat-mdc-form-field-infix {
+  color: var(--text-primary);
 }
 
 /* Responsive styles */
