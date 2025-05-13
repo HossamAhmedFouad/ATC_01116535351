@@ -61,6 +61,9 @@ export class AdminEventsComponent implements OnInit {
   startDate?: Date;
   endDate?: Date;
 
+  // Date range preset
+  dateRangePreset: string = 'all';
+
   // Sorting
   sortColumn: string = 'date';
   sortDirection: 'asc' | 'desc' = 'desc';
@@ -77,6 +80,10 @@ export class AdminEventsComponent implements OnInit {
   // Toasts
   toasts: Toast[] = [];
   nextToastId: number = 1;
+
+  // Bulk actions
+  selectedEvents: Event[] = [];
+  bulkAction: string = '';
 
   constructor(private fb: FormBuilder, private eventService: EventService) {}
 
@@ -390,17 +397,16 @@ export class AdminEventsComponent implements OnInit {
   removeToast(toast: Toast): void {
     this.toasts = this.toasts.filter((t) => t.id !== toast.id);
   }
-
   getToastIcon(type: string): string {
     switch (type) {
       case 'success':
-        return 'fas fa-check-circle';
+        return 'check_circle';
       case 'error':
-        return 'fas fa-exclamation-circle';
+        return 'error';
       case 'warning':
-        return 'fas fa-exclamation-triangle';
+        return 'warning';
       case 'info':
-        return 'fas fa-info-circle';
+        return 'info';
       default:
         return 'fas fa-info-circle';
     }
@@ -410,5 +416,271 @@ export class AdminEventsComponent implements OnInit {
   onSearchChange(newValue: string) {
     this.searchTerm = newValue;
     this.filterEvents();
+  }
+
+  // Count events by status
+  getEventCountByStatus(status: 'active' | 'draft' | 'completed'): number {
+    return this.events.filter((event) => event.status === status).length;
+  }
+
+  // Export events to CSV
+  exportEvents(): void {
+    if (this.filteredEvents.length === 0) {
+      this.showToast('No events to export', 'warning');
+      return;
+    }
+
+    // CSV header
+    const header = [
+      'ID',
+      'Title',
+      'Date',
+      'Time',
+      'Location',
+      'Status',
+      'Capacity',
+    ];
+
+    // Convert each event to CSV row format
+    const rows = this.filteredEvents.map((event) => {
+      const date = new Date(event.date).toLocaleDateString();
+      const time = event.time || 'N/A';
+
+      return [
+        event.id.toString(),
+        event.title,
+        date,
+        time,
+        event.location,
+        event.status,
+        event.capacity ? event.capacity.toString() : 'N/A',
+      ];
+    });
+
+    // Combine header and rows
+    const csvContent = [
+      header.join(','),
+      ...rows.map((row) => row.join(',')),
+    ].join('\n');
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `events-export-${new Date().toISOString().split('T')[0]}.csv`
+    );
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    this.showToast('Events exported successfully', 'success');
+  }
+
+  // Apply preset date ranges
+  applyDateRangePreset(): void {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Reset dates
+    this.startDate = undefined;
+    this.endDate = undefined;
+
+    switch (this.dateRangePreset) {
+      case 'today':
+        this.startDate = new Date(today);
+        this.endDate = new Date(today);
+        break;
+
+      case 'yesterday':
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        this.startDate = yesterday;
+        this.endDate = yesterday;
+        break;
+
+      case 'thisWeek':
+        const thisWeekStart = new Date(today);
+        const dayOfWeek = thisWeekStart.getDay();
+        const diff =
+          thisWeekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // adjust when day is Sunday
+        thisWeekStart.setDate(diff);
+        this.startDate = new Date(thisWeekStart);
+
+        const thisWeekEnd = new Date(thisWeekStart);
+        thisWeekEnd.setDate(thisWeekEnd.getDate() + 6);
+        this.endDate = thisWeekEnd;
+        break;
+
+      case 'lastWeek':
+        const lastWeekStart = new Date(today);
+        lastWeekStart.setDate(
+          lastWeekStart.getDate() -
+            7 -
+            lastWeekStart.getDay() +
+            (lastWeekStart.getDay() === 0 ? -6 : 1)
+        );
+        this.startDate = new Date(lastWeekStart);
+
+        const lastWeekEnd = new Date(lastWeekStart);
+        lastWeekEnd.setDate(lastWeekEnd.getDate() + 6);
+        this.endDate = lastWeekEnd;
+        break;
+
+      case 'thisMonth':
+        const thisMonthStart = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1
+        );
+        this.startDate = new Date(thisMonthStart);
+
+        const thisMonthEnd = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          0
+        );
+        this.endDate = thisMonthEnd;
+        break;
+
+      case 'lastMonth':
+        const lastMonthStart = new Date(
+          today.getFullYear(),
+          today.getMonth() - 1,
+          1
+        );
+        this.startDate = new Date(lastMonthStart);
+
+        const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+        this.endDate = lastMonthEnd;
+        break;
+
+      case 'custom':
+        // Don't set anything, let user choose
+        break;
+
+      default: // 'all'
+        // Reset dates, include all
+        break;
+    }
+
+    // Apply the filter
+    this.filterEvents();
+  }
+
+  // Check if all events are selected
+  isAllSelected(): boolean {
+    return (
+      this.filteredEvents.length > 0 &&
+      this.selectedEvents.length === this.filteredEvents.length
+    );
+  }
+
+  // Toggle selection of all events
+  toggleAllSelection(): void {
+    if (this.isAllSelected()) {
+      this.selectedEvents = [];
+    } else {
+      this.selectedEvents = [...this.filteredEvents];
+    }
+  }
+
+  // Toggle selection of a single event
+  toggleEventSelection(event: Event): void {
+    const index = this.selectedEvents.findIndex((e) => e.id === event.id);
+    if (index === -1) {
+      this.selectedEvents.push(event);
+    } else {
+      this.selectedEvents.splice(index, 1);
+    }
+  }
+
+  // Check if an event is selected
+  isEventSelected(event: Event): boolean {
+    return this.selectedEvents.some((e) => e.id === event.id);
+  }
+
+  // Apply bulk action to selected events
+  applyBulkAction(): void {
+    if (this.selectedEvents.length === 0) {
+      this.showToast('No events selected', 'warning');
+      return;
+    }
+
+    switch (this.bulkAction) {
+      case 'setActive':
+        this.setStatusForSelected('active');
+        break;
+      case 'setDraft':
+        this.setStatusForSelected('draft');
+        break;
+      case 'setCompleted':
+        this.setStatusForSelected('completed');
+        break;
+      case 'delete':
+        this.confirmBulkDelete();
+        break;
+      default:
+        this.showToast('Please select an action', 'warning');
+    }
+  }
+
+  // Set status for selected events
+  setStatusForSelected(status: 'active' | 'draft' | 'completed'): void {
+    const count = this.selectedEvents.length;
+
+    // Update status for each selected event
+    this.selectedEvents.forEach((event) => {
+      const index = this.events.findIndex((e) => e.id === event.id);
+      if (index !== -1) {
+        this.events[index].status = status;
+      }
+    });
+
+    // Update filtered events
+    this.filterEvents();
+
+    // Clear selection
+    this.selectedEvents = [];
+    this.bulkAction = '';
+
+    this.showToast(`Status updated for ${count} events`, 'success');
+  }
+
+  // Confirm bulk delete
+  confirmBulkDelete(): void {
+    const count = this.selectedEvents.length;
+    if (
+      confirm(
+        `Are you sure you want to delete ${count} events? This action cannot be undone.`
+      )
+    ) {
+      this.bulkDeleteEvents();
+    }
+  }
+
+  // Delete selected events
+  bulkDeleteEvents(): void {
+    const count = this.selectedEvents.length;
+    const selectedIds = this.selectedEvents.map((event) => event.id);
+
+    // Remove selected events
+    this.events = this.events.filter(
+      (event) => !selectedIds.includes(event.id)
+    );
+
+    // Update filtered events
+    this.filterEvents();
+
+    // Clear selection
+    this.selectedEvents = [];
+    this.bulkAction = '';
+
+    this.showToast(`${count} events deleted successfully`, 'success');
   }
 }
