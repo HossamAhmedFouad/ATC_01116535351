@@ -11,10 +11,9 @@ router.post("/login", userController.login);
 
 // Protected routes
 router.get("/profile", authenticate, userController.getProfile);
+router.patch("/profile", authenticate, userController.updateProfile);
 
-// Admin only routes - example
-router.get("/admin", authenticate, authorize(["ADMIN"]), (req, res) => {
-  res.status(200).json({ message: "Admin access granted" });
-});
+// Admin only routes
+router.get("/", authenticate, authorize(["ADMIN"]), userController.getAllUsers);
 
 export default router;

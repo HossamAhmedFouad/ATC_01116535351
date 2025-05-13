@@ -2,16 +2,28 @@ import prisma from "../prisma/client";
 import { hashPassword, comparePassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
 import { AppError } from "../middleware/error";
+import { users } from "../generated/prisma";
 
 export interface CreateUserInput {
+  username: string;
   email: string;
   password: string;
-  name: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
 }
 
 export interface LoginInput {
   email: string;
   password: string;
+}
+
+export interface UpdateUserInput {
+  username?: string;
+  phone?: string;
+  location?: string;
+  bio?: string;
+  profile_url?: string;
 }
 
 export class UserService {
@@ -22,7 +34,7 @@ export class UserService {
    */
   async register(userData: CreateUserInput) {
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma.users.findFirst({
       where: { email: userData.email },
     });
 
@@ -34,19 +46,22 @@ export class UserService {
     const hashedPassword = await hashPassword(userData.password);
 
     // Create the user
-    const user = await prisma.user.create({
+    const user = await prisma.users.create({
       data: {
+        username: userData.username,
         email: userData.email,
         password: hashedPassword,
-        name: userData.name,
+        phone: userData.phone || null,
+        location: userData.location || null,
+        bio: userData.bio || null,
+        role: "USER", // Default role
+        profile_url: null,
       },
-    });
-
-    // Generate JWT token
+    }); // Generate JWT token
     const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
+      userId: user.id.toString(),
+      email: user.email || "",
+      role: user.role || "USER",
     });
 
     // Return user without password and token
@@ -61,7 +76,7 @@ export class UserService {
    */
   async login(loginData: LoginInput) {
     // Find the user
-    const user = await prisma.user.findUnique({
+    const user = await prisma.users.findFirst({
       where: { email: loginData.email },
     });
 
@@ -70,6 +85,10 @@ export class UserService {
     }
 
     // Check password
+    if (!user.password) {
+      throw new AppError("User has no password set", 401);
+    }
+
     const isPasswordValid = await comparePassword(
       loginData.password,
       user.password
@@ -81,12 +100,10 @@ export class UserService {
 
     // Generate JWT token
     const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
-    // Return user without password and token
+      userId: user.id.toString(),
+      email: user.email || "",
+      role: user.role || "USER",
+    }); // Return user without password and token
     const { password, ...userWithoutPassword } = user;
     return { user: userWithoutPassword, token };
   }
@@ -97,8 +114,8 @@ export class UserService {
    * @returns The user data without password
    */
   async getUserById(userId: string) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
+    const user = await prisma.users.findUnique({
+      where: { id: BigInt(userId) },
     });
 
     if (!user) {
@@ -108,5 +125,33 @@ export class UserService {
     // Return user without password
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
+  }
+
+  /**
+   * Update user profile
+   * @param userId The ID of the user to update
+   * @param userData The data to update
+   * @returns The updated user without password
+   */
+  async updateUser(userId: string, userData: UpdateUserInput) {
+    const user = await prisma.users.update({
+      where: { id: BigInt(userId) },
+      data: userData,
+    });
+
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  /**
+   * Get all users (admin only)
+   * @returns List of all users without passwords
+   */
+  async getAllUsers() {
+    const users = await prisma.users.findMany();
+    return users.map((user) => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
   }
 }

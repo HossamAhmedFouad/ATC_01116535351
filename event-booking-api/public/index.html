@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Booking API Tester</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      h1 {
+        color: #2c3e50;
+        border-bottom: 2px solid #ecf0f1;
+        padding-bottom: 10px;
+      }
+      .nav {
+        display: flex;
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .nav button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        margin-right: 10px;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .nav button:hover {
+        background-color: #45a049;
+      }
+      .section {
+        display: none;
+        margin-top: 20px;
+      }
+      .active {
+        display: block;
+      }
+      .request-form {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      textarea {
+        height: 150px;
+        font-family: monospace;
+      }
+      button[type="submit"] {
+        background-color: #2196f3;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button[type="submit"]:hover {
+        background-color: #0b7dda;
+      }
+      .response {
+        background-color: #f1f1f1;
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .response-area {
+        width: 100%;
+        height: 300px;
+        font-family: monospace;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #fff;
+        box-sizing: border-box;
+      }
+      .code {
+        font-family: monospace;
+        background-color: #f8f9fa;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+      .token-display {
+        background-color: #e3f2fd;
+        padding: 15px;
+        border-radius: 5px;
+        margin-top: 20px;
+        border-left: 5px solid #2196f3;
+      }
+      .token-value {
+        font-family: monospace;
+        word-break: break-all;
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 3px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Event Booking API Tester</h1>
+
+    <div class="nav">
+      <button onclick="showSection('auth')">Authentication</button>
+      <button onclick="showSection('events')">Events</button>
+      <button onclick="showSection('bookings')">Bookings</button>
+    </div>
+
+    <div id="token-container" class="token-display" style="display: none">
+      <h3>JWT Token (saved for requests)</h3>
+      <div id="token" class="token-value">No token saved</div>
+    </div>
+
+    <!-- Authentication Section -->
+    <div id="auth" class="section active">
+      <h2>Authentication</h2>
+
+      <div class="request-form">
+        <h3>Register New User</h3>
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="registerUsername">Username</label>
+            <input type="text" id="registerUsername" required />
+          </div>
+          <div class="form-group">
+            <label for="registerEmail">Email</label>
+            <input type="email" id="registerEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" required />
+          </div>
+          <div class="form-group">
+            <label for="registerPhone">Phone</label>
+            <input type="text" id="registerPhone" />
+          </div>
+          <div class="form-group">
+            <label for="registerLocation">Location</label>
+            <input type="text" id="registerLocation" />
+          </div>
+          <div class="form-group">
+            <label for="registerBio">Bio</label>
+            <textarea id="registerBio"></textarea>
+          </div>
+          <button type="submit">Register</button>
+        </form>
+      </div>
+
+      <div class="request-form">
+        <h3>Login</h3>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" required />
+          </div>
+          <button type="submit">Login</button>
+        </form>
+      </div>
+
+      <div class="request-form">
+        <h3>Get User Profile</h3>
+        <form id="profileForm">
+          <button type="submit">Get My Profile</button>
+        </form>
+      </div>
+
+      <div class="response">
+        <h3>Response</h3>
+        <textarea id="authResponse" class="response-area" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Events Section -->
+    <div id="events" class="section">
+      <h2>Events</h2>
+
+      <div class="request-form">
+        <h3>Get All Events</h3>
+        <form id="getAllEventsForm">
+          <div class="form-group">
+            <label for="eventCategory">Category (optional)</label>
+            <input type="text" id="eventCategory" />
+          </div>
+          <button type="submit">Get Events</button>
+        </form>
+      </div>
+
+      <div class="request-form">
+        <h3>Get Event by ID</h3>
+        <form id="getEventForm">
+          <div class="form-group">
+            <label for="eventId">Event ID</label>
+            <input type="text" id="eventId" required />
+          </div>
+          <button type="submit">Get Event</button>
+        </form>
+      </div>
+
+      <div class="request-form">
+        <h3>Create New Event</h3>
+        <form id="createEventForm">
+          <div class="form-group">
+            <label for="eventTitle">Title</label>
+            <input type="text" id="eventTitle" required />
+          </div>
+          <div class="form-group">
+            <label for="eventDate">Date</label>
+            <input type="datetime-local" id="eventDate" required />
+          </div>
+          <div class="form-group">
+            <label for="eventLocation">Location</label>
+            <input type="text" id="eventLocation" />
+          </div>
+          <div class="form-group">
+            <label for="eventDescription">Description</label>
+            <textarea id="eventDescription"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="eventPrice">Price</label>
+            <input type="number" id="eventPrice" />
+          </div>
+          <div class="form-group">
+            <label for="eventCategory">Category</label>
+            <input type="text" id="eventCategory" />
+          </div>
+          <div class="form-group">
+            <label for="eventDuration">Duration</label>
+            <input type="text" id="eventDuration" />
+          </div>
+          <div class="form-group">
+            <label for="eventOrganizer">Organizer</label>
+            <input type="text" id="eventOrganizer" />
+          </div>
+          <div class="form-group">
+            <label for="eventTickets">Available Tickets</label>
+            <input type="number" id="eventTickets" />
+          </div>
+          <div class="form-group">
+            <label for="eventSchedule">Schedule (JSON)</label>
+            <textarea
+              id="eventSchedule"
+              placeholder='{
+  "morning": [
+    {"time": "10:00 AM", "activity": "Registration"},
+    {"time": "11:00 AM", "activity": "Keynote"}
+  ],
+  "afternoon": [
+    {"time": "1:00 PM", "activity": "Workshop"}
+  ]
+}'
+            ></textarea>
+          </div>
+          <button type="submit">Create Event</button>
+        </form>
+      </div>
+
+      <div class="response">
+        <h3>Response</h3>
+        <textarea id="eventsResponse" class="response-area" readonly></textarea>
+      </div>
+    </div>
+
+    <!-- Bookings Section -->
+    <div id="bookings" class="section">
+      <h2>Bookings</h2>
+
+      <div class="request-form">
+        <h3>Get My Bookings</h3>
+        <form id="getMyBookingsForm">
+          <button type="submit">Get My Bookings</button>
+        </form>
+      </div>
+
+      <div class="request-form">
+        <h3>Create Booking</h3>
+        <form id="createBookingForm">
+          <div class="form-group">
+            <label for="bookingEventId">Event ID</label>
+            <input type="text" id="bookingEventId" required />
+          </div>
+          <div class="form-group">
+            <label for="bookingTickets">Number of Tickets</label>
+            <input type="number" id="bookingTickets" required min="1" />
+          </div>
+          <button type="submit">Create Booking</button>
+        </form>
+      </div>
+
+      <div class="request-form">
+        <h3>Get Booking by ID</h3>
+        <form id="getBookingForm">
+          <div class="form-group">
+            <label for="bookingId">Booking ID</label>
+            <input type="text" id="bookingId" required />
+          </div>
+          <button type="submit">Get Booking</button>
+        </form>
+      </div>
+
+      <div class="request-form">
+        <h3>Cancel Booking</h3>
+        <form id="cancelBookingForm">
+          <div class="form-group">
+            <label for="cancelBookingId">Booking ID</label>
+            <input type="text" id="cancelBookingId" required />
+          </div>
+          <button type="submit">Cancel Booking</button>
+        </form>
+      </div>
+
+      <div class="response">
+        <h3>Response</h3>
+        <textarea
+          id="bookingsResponse"
+          class="response-area"
+          readonly
+        ></textarea>
+      </div>
+    </div>
+
+    <script>
+      // Global variables
+      let jwtToken = localStorage.getItem("jwtToken") || "";
+      const API_URL = "http://localhost:3000/api";
+
+      // Show JWT token if available
+      function updateTokenDisplay() {
+        if (jwtToken) {
+          document.getElementById("token-container").style.display = "block";
+          document.getElementById("token").textContent = jwtToken;
+        } else {
+          document.getElementById("token-container").style.display = "none";
+        }
+      }
+
+      // Section navigation
+      function showSection(sectionId) {
+        document.querySelectorAll(".section").forEach((section) => {
+          section.classList.remove("active");
+        });
+        document.getElementById(sectionId).classList.add("active");
+      }
+
+      // Helper function for API calls
+      async function callApi(endpoint, method, data = null) {
+        const headers = {
+          "Content-Type": "application/json",
+        };
+
+        if (jwtToken) {
+          headers["Authorization"] = `Bearer ${jwtToken}`;
+        }
+
+        const options = {
+          method,
+          headers,
+        };
+
+        if (
+          data &&
+          (method === "POST" || method === "PATCH" || method === "PUT")
+        ) {
+          options.body = JSON.stringify(data);
+        }
+
+        try {
+          const response = await fetch(`${API_URL}${endpoint}`, options);
+          const result = await response.json();
+          return { result, status: response.status };
+        } catch (error) {
+          return {
+            error: error.message,
+            status: 500,
+          };
+        }
+      }
+
+      // Register form submission
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const data = {
+            username: document.getElementById("registerUsername").value,
+            email: document.getElementById("registerEmail").value,
+            password: document.getElementById("registerPassword").value,
+            phone: document.getElementById("registerPhone").value,
+            location: document.getElementById("registerLocation").value,
+            bio: document.getElementById("registerBio").value,
+          };
+
+          const response = await callApi("/users/register", "POST", data);
+          document.getElementById("authResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Login form submission
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const data = {
+            email: document.getElementById("loginEmail").value,
+            password: document.getElementById("loginPassword").value,
+          };
+
+          const response = await callApi("/users/login", "POST", data);
+          document.getElementById("authResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+
+          if (response.result && response.result.token) {
+            jwtToken = response.result.token;
+            localStorage.setItem("jwtToken", jwtToken);
+            updateTokenDisplay();
+          }
+        });
+
+      // Get profile submission
+      document
+        .getElementById("profileForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const response = await callApi("/users/profile", "GET");
+          document.getElementById("authResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Get all events
+      document
+        .getElementById("getAllEventsForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const category = document.getElementById("eventCategory").value;
+          let endpoint = "/events";
+          if (category) {
+            endpoint += `?category=${encodeURIComponent(category)}`;
+          }
+
+          const response = await callApi(endpoint, "GET");
+          document.getElementById("eventsResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Get event by ID
+      document
+        .getElementById("getEventForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const eventId = document.getElementById("eventId").value;
+          const response = await callApi(`/events/${eventId}`, "GET");
+          document.getElementById("eventsResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Create event
+      document
+        .getElementById("createEventForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          let scheduleJson = {};
+          try {
+            const scheduleText = document.getElementById("eventSchedule").value;
+            if (scheduleText) {
+              scheduleJson = JSON.parse(scheduleText);
+            }
+          } catch (error) {
+            document.getElementById("eventsResponse").value =
+              "Error parsing schedule JSON: " + error.message;
+            return;
+          }
+
+          const data = {
+            title: document.getElementById("eventTitle").value,
+            date: new Date(
+              document.getElementById("eventDate").value
+            ).toISOString(),
+            location: document.getElementById("eventLocation").value,
+            description: document.getElementById("eventDescription").value,
+            price: parseInt(document.getElementById("eventPrice").value) || 0,
+            category: document.getElementById("eventCategory").value,
+            duration: document.getElementById("eventDuration").value,
+            organizer: document.getElementById("eventOrganizer").value,
+            available_tickets:
+              parseInt(document.getElementById("eventTickets").value) || 0,
+            schedule: scheduleJson,
+          };
+
+          const response = await callApi("/events", "POST", data);
+          document.getElementById("eventsResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Get my bookings
+      document
+        .getElementById("getMyBookingsForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const response = await callApi("/bookings/user", "GET");
+          document.getElementById("bookingsResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Create booking
+      document
+        .getElementById("createBookingForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const eventId = document.getElementById("bookingEventId").value;
+          const ticketsCount =
+            parseInt(document.getElementById("bookingTickets").value) || 1;
+
+          // First get the event to calculate total price
+          const eventResponse = await callApi(`/events/${eventId}`, "GET");
+
+          if (
+            eventResponse.error ||
+            !eventResponse.result ||
+            !eventResponse.result.data ||
+            !eventResponse.result.data.event
+          ) {
+            document.getElementById("bookingsResponse").value =
+              "Error: Could not get event details";
+            return;
+          }
+
+          const event = eventResponse.result.data.event;
+          const totalPrice = parseInt(event.price) * ticketsCount;
+
+          const data = {
+            event_id: eventId,
+            tickets_count: ticketsCount,
+            total_price: totalPrice,
+          };
+
+          const response = await callApi("/bookings", "POST", data);
+          document.getElementById("bookingsResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Get booking by ID
+      document
+        .getElementById("getBookingForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const bookingId = document.getElementById("bookingId").value;
+          const response = await callApi(`/bookings/${bookingId}`, "GET");
+          document.getElementById("bookingsResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Cancel booking
+      document
+        .getElementById("cancelBookingForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const bookingId = document.getElementById("cancelBookingId").value;
+          const response = await callApi(`/bookings/${bookingId}`, "DELETE");
+          document.getElementById("bookingsResponse").value = JSON.stringify(
+            response,
+            null,
+            2
+          );
+        });
+
+      // Initialize
+      updateTokenDisplay();
+    </script>
+  </body>
+</html>

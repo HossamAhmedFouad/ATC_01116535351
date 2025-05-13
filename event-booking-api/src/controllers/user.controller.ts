@@ -3,6 +3,7 @@ import {
   UserService,
   CreateUserInput,
   LoginInput,
+  UpdateUserInput,
 } from "../services/user.service";
 import { AppError } from "../middleware/error";
 
@@ -21,8 +22,8 @@ export class UserController {
       const userData: CreateUserInput = req.body;
 
       // Validate required fields
-      if (!userData.email || !userData.password || !userData.name) {
-        throw new AppError("Email, password, and name are required", 400);
+      if (!userData.email || !userData.password || !userData.username) {
+        throw new AppError("Username, email, and password are required", 400);
       }
 
       // Call service to register user
@@ -60,7 +61,6 @@ export class UserController {
       next(error);
     }
   };
-
   /**
    * Get the current user's profile
    */
@@ -77,6 +77,47 @@ export class UserController {
       res.status(200).json({
         status: "success",
         data: { user },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Update user profile
+   */
+  updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Check if user exists in request (from auth middleware)
+      if (!req.user || !req.user.userId) {
+        throw new AppError("Authentication required", 401);
+      }
+
+      const userData: UpdateUserInput = req.body;
+      const updatedUser = await this.userService.updateUser(
+        req.user.userId,
+        userData
+      );
+
+      res.status(200).json({
+        status: "success",
+        data: { user: updatedUser },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Get all users (admin only)
+   */
+  getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const users = await this.userService.getAllUsers();
+
+      res.status(200).json({
+        status: "success",
+        data: { users },
       });
     } catch (error) {
       next(error);

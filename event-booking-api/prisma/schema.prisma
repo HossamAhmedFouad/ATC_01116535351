@@ -1,30 +1,68 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  password      String
-  name          String
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model bookings {
+  user_id       BigInt
+  event_id      BigInt
+  booking_time  DateTime? @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @default(now()) @db.Timestamp(6)
+  tickets_count BigInt?   @map("tickets")
+  total_price   BigInt?
+  status        String?
+  id            BigInt    @id @unique @default(autoincrement())
+  events        events    @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users         users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  ticket_items  tickets[]
 }
 
-enum Role {
-  USER
-  ADMIN
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model events {
+  id                BigInt     @id @default(autoincrement())
+  title             String
+  date              DateTime   @db.Timestamp(6)
+  location          String?
+  description       String?
+  image_url         String?
+  price             BigInt?
+  category          String?
+  duration          String?
+  organizer         String?
+  available_tickets BigInt?
+  schedule          Json?      @db.Json
+  bookings          bookings[]
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model tickets {
+  id          BigInt    @id @default(autoincrement())
+  booking_id  BigInt
+  ticket_code String?
+  price       BigInt?
+  issued_date DateTime? @db.Timestamp(6)
+  status      String?
+  bookings    bookings  @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model users {
+  id          BigInt     @id @default(autoincrement())
+  username    String?
+  email       String?
+  password    String?
+  phone       String?
+  location    String?
+  bio         String?
+  role        String?
+  profile_url String?
+  bookings    bookings[]
 }

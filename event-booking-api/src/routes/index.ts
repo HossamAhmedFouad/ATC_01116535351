@@ -1,5 +1,7 @@
 import { Router } from "express";
 import userRoutes from "./user.routes";
+import eventRoutes from "./event.routes";
+import bookingRoutes from "./booking.routes";
 
 const router = Router();
 
@@ -8,10 +10,9 @@ router.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", message: "Server is running" });
 });
 
-// Mount user routes
+// Mount routes
 router.use("/users", userRoutes);
-
-// Add more routes here as the application grows
-// For example: router.use('/events', eventRoutes);
+router.use("/events", eventRoutes);
+router.use("/bookings", bookingRoutes);
 
 export default router;

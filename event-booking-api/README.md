@@ -23,6 +23,7 @@ src/
 - User registration and login
 - Protected routes with role-based authorization
 - Clean architecture pattern
+- Swagger UI for API documentation and testing
 
 ## Prerequisites
 
@@ -98,17 +99,70 @@ NODE_ENV=development
 
 ### Public Endpoints
 
+- `GET /api/health` - Health check endpoint
 - `POST /api/users/register` - Register a new user
 - `POST /api/users/login` - Login a user
-- `GET /api/health` - Health check
+- `GET /api/events` - Get all events
+- `GET /api/events/:id` - Get event by ID
+- `GET /api/events/search` - Search events
 
-### Protected Endpoints (Requires Authentication)
+### User Endpoints (Requires Authentication)
 
-- `GET /api/users/profile` - Get the current user's profile
+- `GET /api/users/profile` - Get current user's profile
+- `PATCH /api/users/profile` - Update current user's profile
+- `POST /api/bookings` - Create a new booking
+- `GET /api/bookings/my-bookings` - Get current user's bookings
+- `GET /api/bookings/:id` - Get booking details by ID
+- `PATCH /api/bookings/:id/cancel` - Cancel a booking
+- `GET /api/bookings/tickets/:id` - Get ticket details by ID
 
 ### Admin Only Endpoints
 
-- `GET /api/users/admin` - Example admin-only route
+- `GET /api/users` - Get all users
+- `POST /api/events` - Create a new event
+- `PATCH /api/events/:id` - Update an event
+- `DELETE /api/events/:id` - Delete an event
+- `GET /api/bookings` - Get all bookings
+
+## API Documentation
+
+The API comes with built-in Swagger documentation which can be accessed at:
+
+```
+http://localhost:3000/api-docs
+```
+
+This interactive UI allows you to:
+
+- Browse available endpoints
+- View request/response schemas
+- Test API endpoints directly in the browser
+- Authorize requests with JWT tokens
+
+### Using Swagger UI
+
+1. Start the server with `npm run dev`
+2. Navigate to `http://localhost:3000/api-docs` in your browser
+3. To test protected endpoints:
+   - First login via the `/api/users/login` endpoint to get a token
+   - Click the "Authorize" button at the top of the Swagger UI
+   - Enter your token in the format `Bearer YOUR_TOKEN` and click "Authorize"
+   - Now you can test protected endpoints
+
+## Testing UI
+
+In addition to Swagger, a simple browser-based UI is available for testing the API at:
+
+```
+http://localhost:3000/ui
+```
+
+This UI provides:
+
+- Forms for each API endpoint
+- Automatic JWT token handling
+- Request/response visualization
+- Persistent token storage between sessions
 
 ## License
 

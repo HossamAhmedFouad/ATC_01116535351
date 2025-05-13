@@ -1,5 +1,10 @@
 import { PrismaClient } from "../generated/prisma";
 
+// Add BigInt serialization for JSON responses
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 // Create a singleton instance of PrismaClient to ensure proper connection pooling
 const prisma = new PrismaClient();
 
