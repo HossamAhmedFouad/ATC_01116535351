@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { delay, tap, map, catchError } from 'rxjs/operators';
 import { Booking, BookingService } from './booking.service';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: number;
@@ -27,7 +28,7 @@ export interface AuthResponse {
 })
 
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private eventsUrl = 'assets/data/events.json'; // Path to your JSON file
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();

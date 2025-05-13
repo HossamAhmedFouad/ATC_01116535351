@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Event {
   id: number;
@@ -30,7 +31,7 @@ export interface Event {
 })
 
 export class EventService {
-  private apiUrl = 'api/events'; // Replace with your actual API endpoint
+  private apiUrl = `${environment.apiUrl}/events`; // Uses environment configuration
 
   constructor(private http: HttpClient, private router: Router) {}
 

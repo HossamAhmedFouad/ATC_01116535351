@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { User } from './auth.service';
 import { AuthService } from './auth.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3000/api/users'; // Adjust based on backend
+  private apiUrl = `${environment.apiUrl}/users`; // Uses environment configuration
 
   constructor(
     private http: HttpClient,
