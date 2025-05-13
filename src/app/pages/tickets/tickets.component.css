@@ -421,6 +421,32 @@
   color: var(--text-primary);
 }
 
+/* Dark mode form field input styles */
+:host-context(.dark-mode) ::ng-deep .mat-mdc-text-field-wrapper {
+  background-color: var(--surface-color);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-form-field-input-control {
+  color: white !important;
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-form-field-label {
+  color: var(--text-secondary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-form-field-prefix,
+:host-context(.dark-mode) ::ng-deep .mat-form-field-suffix {
+  color: var (--text-secondary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-input-element::placeholder {
+  color: var(--text-secondary);
+}
+
+:host-context(.dark-mode) ::ng-deep .mat-mdc-form-field-icon-prefix {
+  color: var(--text-secondary);
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .tickets-container {
