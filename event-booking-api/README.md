@@ -24,6 +24,7 @@ src/
 - Protected routes with role-based authorization
 - Clean architecture pattern
 - Swagger UI for API documentation and testing
+- Comprehensive logging system (console and file-based)
 
 ## Prerequisites
 
@@ -163,6 +164,50 @@ This UI provides:
 - Automatic JWT token handling
 - Request/response visualization
 - Persistent token storage between sessions
+
+## Logging System
+
+The application includes a comprehensive logging system that provides detailed insights into application behavior:
+
+### Features
+
+- Console logging for development
+- File-based logging for production and debugging
+- Automatic log rotation (size and time-based)
+- Request ID tracking across request lifecycle
+- Configurable log levels (ERROR, WARN, INFO, HTTP, DEBUG)
+- Sanitized request body logging (passwords are redacted)
+- Separate error log file for quick issue identification
+
+### Configuration
+
+Logging settings can be configured in the `.env` file:
+
+```
+# Set the logging level
+LOG_LEVEL=DEBUG  # Available: ERROR, WARN, INFO, HTTP, DEBUG
+
+# Set the directory for log files
+LOG_DIR=./logs
+```
+
+### Log Files
+
+- `combined.log` - Contains all log entries
+- `error.log` - Contains only error-level logs for easier debugging
+
+### Log Rotation
+
+Logs are automatically rotated based on:
+
+- Size: Files over 10MB are rotated
+- Time: Files are rotated daily
+- Retention: Combined logs are kept for 7 days, error logs for 14 days
+- Compression: Rotated logs are compressed with gzip
+
+### Morgan Integration
+
+HTTP requests are logged using Morgan middleware, which is integrated with the custom logger to maintain consistent log formatting.
 
 ## License
 

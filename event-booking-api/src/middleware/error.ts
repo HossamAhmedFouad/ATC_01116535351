@@ -1,4 +1,8 @@
 import { Request, Response, NextFunction } from "express";
+import { createLogger } from "../utils/logger";
+
+// Create a logger for errors
+const logger = createLogger("ErrorHandler");
 
 // Custom error class with status code
 export class AppError extends Error {
@@ -23,10 +27,20 @@ export const errorHandler = (
   const message = err.message || "Internal server error";
 
   // Log the error
-  console.error(`[Error] ${statusCode}: ${message}`);
-  if (process.env.NODE_ENV === "development") {
-    console.error(err.stack);
+  if (statusCode >= 500) {
+    logger.error(`${statusCode} Error: ${message}`, err);
+  } else {
+    logger.warn(`${statusCode} Error: ${message}`);
   }
+
+  if (process.env.NODE_ENV === "development") {
+    logger.debug(`Error stack: ${err.stack}`);
+  }
+
+  // Include request information in detailed logs
+  logger.debug(
+    `Error occurred on ${req.method} ${req.originalUrl} from ${req.ip}`
+  );
 
   res.status(statusCode).json({
     status: "error",

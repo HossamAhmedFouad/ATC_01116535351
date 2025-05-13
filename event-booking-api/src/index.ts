@@ -2,10 +2,14 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
+import morgan from "morgan";
 import { errorHandler } from "./middleware/error";
+import { requestLogger } from "./middleware/request-logger";
 import routes from "./routes";
 import { setupSwagger } from "./utils/swagger";
 import path from "path";
+import logger, { createLogger } from "./utils/logger";
+import prisma from "./prisma/client";
 
 // Load environment variables
 dotenv.config();
@@ -13,6 +17,22 @@ dotenv.config();
 // Create Express app
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Create custom morgan format with our logger
+morgan.token("timestamp", () => new Date().toISOString());
+
+// Create custom morgan stream that uses our logger
+const morganLogger = createLogger("HTTP");
+const morganStream = {
+  write: (message: string) => {
+    // Remove newline from the end of Morgan's message
+    morganLogger.http(message.trim());
+  },
+};
+
+// Define format for HTTP logging
+const morganFormat =
+  ":method :url :status - :response-time ms :res[content-length]";
 
 // Middleware
 app.use(
@@ -31,6 +51,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
+
+// Setup request loggers
+app.use(morgan(morganFormat, { stream: morganStream })); // HTTP request logging with custom format
+app.use(requestLogger); // Custom detailed request logging
 
 // Root route - API information and redirection to docs
 app.get("/api", (req, res) => {
@@ -62,12 +86,20 @@ setupSwagger(app);
 app.use(errorHandler);
 
 // Start server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-  console.log(
+app.listen(port, async () => {
+  logger.info(`Server is running on port ${port}`);
+  logger.info(
     `API Documentation available at http://localhost:${port}/api-docs`
   );
-  console.log(`API Testing UI available at http://localhost:${port}/ui`);
+  logger.info(`API Testing UI available at http://localhost:${port}/ui`);
+
+  // Test database connection
+  try {
+    await prisma.$connect();
+    logger.info("Successfully connected to the database");
+  } catch (error) {
+    logger.error("Failed to connect to the database:", error);
+  }
 });
 
 export default app;
