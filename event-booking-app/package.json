@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "vercel-build": "npm install --legacy-peer-deps && npm run build",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
