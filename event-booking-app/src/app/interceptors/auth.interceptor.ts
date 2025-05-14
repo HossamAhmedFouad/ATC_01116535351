@@ -3,7 +3,7 @@ import {
   HttpRequest,
   HttpHandlerFn,
   HttpInterceptorFn,
-  HttpErrorResponse
+  HttpErrorResponse,
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
-  
+
   // Get the auth token from localStorage
   const token = localStorage.getItem('token');
 
@@ -20,8 +20,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (token) {
     req = req.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
   }
 
@@ -32,11 +32,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        router.navigate(['/auth/signin'], { 
-          queryParams: { returnUrl: router.url } 
+        router.navigate(['/auth/signin'], {
+          queryParams: { returnUrl: router.url },
         });
       }
       return throwError(() => error);
     })
   );
-}
+};
