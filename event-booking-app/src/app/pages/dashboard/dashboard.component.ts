@@ -226,7 +226,25 @@ export class DashboardComponent implements OnInit {
 
         return forkJoin(observables).pipe(
           tap((bookedEvents: BookedEvent[]) => {
-            this.bookedEvents = bookedEvents;
+            // Process the bookings to normalize status
+            this.bookedEvents = bookedEvents.map((event) => {
+              // If it's a booking that has not been explicitly cancelled, mark it as upcoming
+              if (event.status === 'CONFIRMED' || event.status === 'booked') {
+                // Check if the event date is in the past
+                const eventDate = new Date(event.eventDetails.date);
+                const now = new Date();
+
+                if (eventDate < now) {
+                  event.status = 'completed';
+                } else {
+                  event.status = 'upcoming';
+                }
+              } else if (event.status === 'CANCELLED') {
+                event.status = 'cancelled';
+              }
+
+              return event;
+            });
           }),
           map(() => undefined)
         );
@@ -385,9 +403,10 @@ export class DashboardComponent implements OnInit {
     }
     this.currentPage = 1; // Reset to first page when sorting
   }
-
   getEventStatusClass(status: string): string {
-    switch (status) {
+    const normalizedStatus = this.getNormalizedStatus(status);
+
+    switch (normalizedStatus) {
       case 'upcoming':
         return 'status-upcoming';
       case 'completed':
@@ -395,12 +414,13 @@ export class DashboardComponent implements OnInit {
       case 'cancelled':
         return 'status-cancelled';
       default:
-        return '';
+        return 'status-unknown';
     }
   }
-
   getStatusIcon(status: string): string {
-    switch (status) {
+    const normalizedStatus = this.getNormalizedStatus(status);
+
+    switch (normalizedStatus) {
       case 'upcoming':
         return 'event_available';
       case 'completed':
@@ -552,14 +572,16 @@ export class DashboardComponent implements OnInit {
   }
   updateUpcomingEventsPreview() {
     const now = new Date();
-    // Filter events that are confirmed/booked and in the future
+    // Filter events that are confirmed/booked/upcoming and in the future
     this.upcomingEventsPreview = this.bookedEvents
       .filter(
         (event) =>
           event.status === 'booked' ||
-          (event.status === 'CONFIRMED' &&
-            new Date(event.eventDetails.date) > now)
+          event.status === 'upcoming' ||
+          event.status === 'CONFIRMED' ||
+          this.getNormalizedStatus(event.status) === 'upcoming'
       )
+      .filter((event) => new Date(event.eventDetails.date) > now) // Ensure event is in the future
       .sort(
         (a, b) =>
           new Date(a.eventDetails.date).getTime() -
@@ -720,5 +742,44 @@ export class DashboardComponent implements OnInit {
       (stat) => stat.spending > 0
     ).length;
     return monthsWithSpending > 0 ? totalSpending / monthsWithSpending : 0;
+  }
+  getFormattedStatus(status: string): string {
+    const normalizedStatus = this.getNormalizedStatus(status);
+
+    switch (normalizedStatus) {
+      case 'upcoming':
+        return 'Confirmed';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status
+          ? status.charAt(0).toUpperCase() + status.slice(1)
+          : 'Unknown';
+    }
+  }
+
+  /**
+   * Normalizes the event status from various backend formats
+   * @param status The status string from the backend
+   * @returns A normalized status string
+   */
+  getNormalizedStatus(status: string): string {
+    if (!status) return 'unknown';
+
+    // Convert to lowercase for case-insensitive comparison
+    const lowercaseStatus = status.toLowerCase();
+
+    if (lowercaseStatus === 'confirmed' || lowercaseStatus === 'booked') {
+      return 'upcoming';
+    } else if (
+      lowercaseStatus === 'cancelled' ||
+      lowercaseStatus === 'canceled'
+    ) {
+      return 'cancelled';
+    } else {
+      return lowercaseStatus;
+    }
   }
 }

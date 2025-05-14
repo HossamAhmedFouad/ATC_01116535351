@@ -20,6 +20,7 @@ export interface Event {
   organizer?: string;
   available_tickets?: number;
   schedule?: any;
+  isBooked?: boolean;
 }
 
 @Injectable({
@@ -228,5 +229,21 @@ export class EventService {
           return this.handleError(error);
         })
       );
+  }
+
+  /**
+   * Clear the cache for a specific event
+   * @param eventId The ID of the event to clear from cache
+   */
+  clearEventCache(eventId: string): void {
+    this.cacheService.remove(`event_${eventId}`);
+  }
+
+  /**
+   * Clear all event caches
+   */
+  clearAllEventCaches(): void {
+    this.cacheService.clearWithPrefix('event_');
+    this.cacheService.clearWithPrefix('events_');
   }
 }

@@ -11,12 +11,13 @@ import {
   Ticket,
 } from '../../services/booking.service';
 import { ToastService } from '../../services/toast.service';
+import { EventService } from '../../services/event.service';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatIconModule],
-  providers: [BookingService, ToastService],
+  providers: [BookingService, ToastService, EventService],
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css'],
 })
@@ -30,13 +31,13 @@ export class PaymentComponent implements OnInit {
   currentStep: 'payment' | 'complete' = 'payment';
   booking: Booking | null = null;
   tickets: Ticket[] = [];
-
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
     private route: ActivatedRoute,
     public router: Router,
     private bookingService: BookingService,
+    private eventService: EventService,
     private toastService: ToastService
   ) {
     this.paymentForm = this.fb.group({
@@ -83,6 +84,12 @@ export class PaymentComponent implements OnInit {
               next: (booking) => {
                 this.booking = booking;
                 this.tickets = booking.ticket_items || [];
+
+                // Clear event cache to ensure up-to-date data when returning to event details
+                if (this.eventId) {
+                  this.eventService.clearEventCache(this.eventId);
+                }
+
                 this.toastService.success('Booking confirmed successfully!');
                 // Update step to show success state
                 this.currentStep = 'complete';

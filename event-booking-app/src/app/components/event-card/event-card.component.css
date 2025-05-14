@@ -103,24 +103,38 @@
 }
 
 .book-button {
-  background: #4f46e5;
+  background-color: #4f46e5;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.3s ease;
   white-space: nowrap;
 }
 
 .book-button:hover:not(:disabled) {
-  background: #4338ca;
+  background-color: #4338ca;
 }
 
 .book-button:disabled {
-  background: #9ca3af;
+  background-color: #d1d5db;
   cursor: not-allowed;
+}
+
+/* Style for already booked button */
+.book-button:disabled {
+  background-color: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Custom style for 'Already Booked' state */
+.already-booked {
+  background-color: #10b981 !important;
+  color: white !important;
+  opacity: 0.8 !important;
 }
 
 /* Dark mode styles */
@@ -159,4 +173,4 @@
 
 :host-context(.dark-mode) .book-button:disabled {
   background: #6b7280;
-} 
+}

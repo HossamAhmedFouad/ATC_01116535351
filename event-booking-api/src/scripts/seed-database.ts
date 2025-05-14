@@ -46,8 +46,8 @@ async function main() {
   }
   // Create 5 events
   const events = [];
-  const categories = ["Conference", "Workshop", "Webinar", "Meetup", "Concert"];
-  const locations = ["New York", "San Francisco", "London", "Tokyo", "Sydney"];
+  const categories = ["Conference", "Workshop", "Webinar", "Meetup", "Concert", "Exhibition", "Seminar", "Retreat", "Hackathon", "Networking", "Festival", "Gala"];
+  const locations = ["New York", "San Francisco", "London", "Tokyo", "Sydney", "Berlin", "Paris", "Toronto", "Singapore", "Dubai", "Seoul", "Barcelona"];
 
   // Real working image URLs for events
   const eventImages = [
@@ -56,7 +56,15 @@ async function main() {
     "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1000",
     "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1000",
     "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1000",
+    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=1000",
+    "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=1000",
+    "https://images.unsplash.com/photo-1591115765373-5207764f72e4?q=80&w=1000",
+    "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=1000",
+    "https://images.unsplash.com/photo-1562329265-95a6d7a83440?q=80&w=1000",
+    "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000",
+    "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000",
   ];
+  
   // Real event titles and descriptions
   const eventTitles = [
     "Tech Innovation Summit 2025",
@@ -64,6 +72,13 @@ async function main() {
     "AI and Machine Learning Webinar",
     "Developers Meetup",
     "Summer Music Festival 2025",
+    "Sustainable Living Exhibition",
+    "Leadership & Management Seminar",
+    "Mindfulness Wellness Retreat",
+    "Global Fintech Hackathon",
+    "Creative Industries Networking Night",
+    "International Food Festival",
+    "Charity Fundraising Gala",
   ];
 
   const eventDescriptions = [
@@ -72,8 +87,16 @@ async function main() {
     "Explore the frontiers of AI and machine learning in this comprehensive webinar. Perfect for beginners and intermediate practitioners looking to enhance their skills.",
     "Connect with fellow developers in your city! Share knowledge, collaborate on projects, and discuss the latest programming languages and frameworks.",
     "Experience the magic of live music at our Summer Festival featuring top artists from around the world. Food, drinks, and unforgettable performances await!",
+    "Discover innovative solutions for sustainable living at our eco-friendly exhibition. Explore green technology, renewable energy, waste reduction methods, and much more.",
+    "Develop your leadership potential with our intensive seminar featuring renowned business experts. Learn effective management techniques, team building, and strategic thinking.",
+    "Escape the daily grind with our rejuvenating wellness retreat. Featuring meditation sessions, yoga classes, nature walks, and nutritional counseling for holistic wellbeing.",
+    "Join developers from around the world in this 48-hour hackathon to create innovative fintech solutions. Compete for prizes and connect with industry leaders.",
+    "Build valuable connections at our creative industries networking event. Meet professionals from design, media, art, fashion, and advertising in a relaxed atmosphere.",
+    "Savor cuisines from around the globe at our international food festival. Featuring cooking demonstrations, tastings, cultural performances, and a vibrant market area.",
+    "Support worthy causes at our elegant charity gala. Enjoy fine dining, entertainment, auctions, and make a difference in the lives of those in need.",
   ];
 
+  // Create standard events (the original 5)
   for (let i = 0; i < 5; i++) {
     // Set date to a future date (current date + random days between 10-60)
     const futureDate = new Date();
@@ -118,6 +141,93 @@ async function main() {
             ],
           },
         ],
+      },
+    });
+    console.log(`Created event with ID: ${event.id}`);
+    events.push(event);
+  }
+
+  // Create additional events (7 more events)
+  for (let i = 5; i < 12; i++) {
+    // Set date to a future date (current date + random days between 10-90)
+    const futureDate = new Date();
+    futureDate.setDate(
+      futureDate.getDate() + Math.floor(Math.random() * 80) + 10
+    );
+
+    // Create different schedule templates
+    let eventSchedule;
+    
+    if (i % 3 === 0) {
+      // One-day conference schedule
+      eventSchedule = [
+        {
+          day: "Conference Day",
+          events: [
+            { time: "09:00 AM", title: "Welcome & Check-in" },
+            { time: "10:00 AM", title: "Main Presentation" },
+            { time: "12:00 PM", title: "Lunch & Networking" },
+            { time: "01:30 PM", title: "Breakout Sessions" },
+            { time: "03:30 PM", title: "Panel Discussion" },
+            { time: "05:00 PM", title: "Closing Remarks & Reception" },
+          ],
+        },
+      ];
+    } else if (i % 3 === 1) {
+      // Multi-day festival schedule
+      eventSchedule = [
+        {
+          day: "Day 1",
+          events: [
+            { time: "12:00 PM", title: "Gates Open" },
+            { time: "01:00 PM", title: "Opening Act" },
+            { time: "03:00 PM", title: "Featured Artists" },
+            { time: "06:00 PM", title: "Headliner Performance" },
+            { time: "09:00 PM", title: "Closing Show" },
+          ],
+        },
+        {
+          day: "Day 2",
+          events: [
+            { time: "12:00 PM", title: "Gates Open" },
+            { time: "01:30 PM", title: "Special Guest Performance" },
+            { time: "04:00 PM", title: "International Artists" },
+            { time: "07:00 PM", title: "Main Event" },
+            { time: "10:00 PM", title: "Festival Closing" },
+          ],
+        },
+      ];
+    } else {
+      // Workshop schedule
+      eventSchedule = [
+        {
+          day: "Workshop Day",
+          events: [
+            { time: "08:30 AM", title: "Registration & Materials" },
+            { time: "09:00 AM", title: "Introduction & Overview" },
+            { time: "10:30 AM", title: "Hands-on Session I" },
+            { time: "12:00 PM", title: "Lunch Break" },
+            { time: "01:00 PM", title: "Hands-on Session II" },
+            { time: "03:00 PM", title: "Q&A and Discussion" },
+            { time: "04:30 PM", title: "Wrap-up & Certificates" },
+          ],
+        },
+      ];
+    }
+
+    const event = await prisma.events.create({
+      data: {
+        title: eventTitles[i],
+        date: futureDate,
+        location: locations[i],
+        description: eventDescriptions[i],
+        image_url: eventImages[i],
+        price: (Math.floor(Math.random() * 10) + 1) * 500, // Random price between 500-5000 cents
+        category: categories[i],
+        duration: `${Math.floor(Math.random() * 3) + 1} day${i !== 5 ? "s" : ""}`,
+        organizer: `Organizer ${String.fromCharCode(65 + i - 5)}`, // Organizers A through G
+        available_tickets: 50 + Math.floor(Math.random() * 200), // Random ticket count between 50-250
+        schedule: eventSchedule,
       },
     });
     console.log(`Created event with ID: ${event.id}`);

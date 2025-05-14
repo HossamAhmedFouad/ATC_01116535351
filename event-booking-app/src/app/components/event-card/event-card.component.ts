@@ -8,7 +8,7 @@ import { Event } from '../../services/event.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './event-card.component.html',
-  styleUrls: ['./event-card.component.css']
+  styleUrls: ['./event-card.component.css'],
 })
 export class EventCardComponent {
   @Input() event!: Event;
@@ -18,4 +18,4 @@ export class EventCardComponent {
   onBookClick() {
     this.router.navigate(['/events', this.event.id]);
   }
-} 
+}

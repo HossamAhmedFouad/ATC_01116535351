@@ -149,11 +149,27 @@
                   {{ formatDate(event.eventDetails.date) }}
                   <span
                     *ngIf="
-                      event.status === 'CONFIRMED' || event.status === 'booked'
+                      event.status === 'CONFIRMED' ||
+                      event.status === 'booked' ||
+                      event.status === 'upcoming' ||
+                      event.status === 'confirmed' ||
+                      getNormalizedStatus(event.status) === 'upcoming'
                     "
                     class="badge confirmed"
                   >
                     Confirmed
+                  </span>
+                  <span
+                    *ngIf="getNormalizedStatus(event.status) === 'completed'"
+                    class="badge completed"
+                  >
+                    Completed
+                  </span>
+                  <span
+                    *ngIf="getNormalizedStatus(event.status) === 'cancelled'"
+                    class="badge cancelled"
+                  >
+                    Cancelled
                   </span>
                   <span *ngIf="event.isCancelling" class="badge cancelling">
                     Cancelling...
@@ -268,7 +284,7 @@
                     >
                       <mat-icon>{{ getStatusIcon(event.status) }}</mat-icon>
                       <span class="status-text">{{
-                        event.status | titlecase
+                        getFormattedStatus(event.status)
                       }}</span>
                     </span>
                   </mat-card-subtitle>
@@ -316,7 +332,11 @@
                   <button
                     mat-raised-button
                     color="warn"
-                    *ngIf="event.status === 'CONFIRMED'"
+                    *ngIf="
+                      event.status === 'CONFIRMED' ||
+                      event.status === 'upcoming' ||
+                      getNormalizedStatus(event.status) === 'upcoming'
+                    "
                     (click)="cancelEvent(event)"
                     [disabled]="event.isCancelling"
                   >

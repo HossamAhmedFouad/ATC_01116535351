@@ -40,7 +40,7 @@
           <div class="info-content">
             <span class="info-label">Available Tickets</span>
             <span class="info-value"
-              >{{ event.availableTickets }} remaining</span
+              >{{ event.available_tickets }} remaining</span
             >
           </div>
         </div>
@@ -125,7 +125,7 @@
             <button
               class="quantity-btn"
               (click)="incrementTickets()"
-              [disabled]="ticketsToBook >= event.availableTickets"
+              [disabled]="ticketsToBook >= event.available_tickets"
             >
               +
             </button>
@@ -133,19 +133,24 @@
 
           <div class="total-price">Total: ${{ totalPrice }}</div>
         </div>
-
         <button
           class="pagination-button"
+          [class.already-booked]="isEventBooked"
           (click)="onBookNow()"
-          [disabled]="event.availableTickets === 0"
+          [disabled]="event.available_tickets === 0 || isEventBooked"
         >
-          {{ event.availableTickets === 0 ? "Sold Out" : "Book Now" }}
+          {{
+            event.available_tickets === 0
+              ? "Sold Out"
+              : isEventBooked
+              ? "Already Booked"
+              : "Book Now"
+          }}
         </button>
-
-        <div class="booking-note" *ngIf="event.availableTickets < 10">
+        <div class="booking-note" *ngIf="event.available_tickets < 10">
           <i class="fas fa-exclamation-circle"></i>
           <span
-            >Only {{ event.availableTickets }} tickets left! Book now to secure
+            >Only {{ event.available_tickets }} tickets left! Book now to secure
             your spot.</span
           >
         </div>

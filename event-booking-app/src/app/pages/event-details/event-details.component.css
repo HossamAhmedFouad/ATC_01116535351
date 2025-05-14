@@ -5,7 +5,7 @@
   margin: 0 auto;
   min-height: calc(100vh - 64px);
   transition: all 0.3s ease;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 :host-context(.dark-mode) .events-container {
@@ -34,7 +34,8 @@
   -webkit-text-fill-color: transparent;
 }
 
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 3rem;
   color: #6b7280;
@@ -268,7 +269,8 @@
   background: var(--card-background);
   border-radius: 1rem;
   padding: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   margin-top: 2rem;
   transition: all 0.3s ease;
 }
@@ -392,22 +394,26 @@
   padding: 1.5rem;
   background: linear-gradient(145deg, #ffffff, #f3f4f6);
   border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
 }
 
 :host-context(.dark-mode) .booking-section {
   background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 .booking-section:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 :host-context(.dark-mode) .booking-section:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2),
+    0 4px 6px -2px rgba(0, 0, 0, 0.1);
 }
 
 .booking-header {
@@ -579,11 +585,13 @@
 
 .pagination-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 :host-context(.dark-mode) .pagination-button:hover:not(:disabled) {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2),
+    0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 .pagination-button:disabled {
@@ -612,6 +620,25 @@
 :host-context(.dark-mode) .booking-note {
   background: linear-gradient(145deg, #7f1d1d, #991b1b);
   color: #fecaca;
+}
+
+/* Already booked button styles */
+.already-booked {
+  background-color: #10b981 !important;
+  color: white !important;
+  opacity: 0.8 !important;
+  cursor: not-allowed !important;
+}
+
+/* Style for already booked button */
+.pagination-button.already-booked {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  opacity: 0.9;
+}
+
+:host-context(.dark-mode) .pagination-button.already-booked {
+  background: linear-gradient(135deg, #059669, #065f46);
 }
 
 @media (max-width: 768px) {
@@ -663,4 +690,4 @@
   .total-price {
     text-align: center;
   }
-} 
+}

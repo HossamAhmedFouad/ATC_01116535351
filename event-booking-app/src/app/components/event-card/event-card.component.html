@@ -22,10 +22,16 @@
       </div>
       <button
         class="book-button"
-        [disabled]="event.available_tickets! === 0"
+        [class.already-booked]="event.isBooked"
         (click)="onBookClick()"
       >
-        {{ event.available_tickets! === 0 ? "Sold Out" : "Book Now" }}
+        {{
+          event.available_tickets! === 0
+            ? "Sold Out"
+            : event.isBooked
+            ? "Already Booked"
+            : "Book Now"
+        }}
       </button>
     </div>
   </div>

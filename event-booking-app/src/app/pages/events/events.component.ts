@@ -7,6 +7,8 @@ import { HttpClient } from '@angular/common/http';
 import { Event } from '../../services/event.service';
 import { EventService } from '../../services/event.service';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { AuthService } from '../../services/auth.service';
+import { BookingService } from '../../services/booking.service';
 
 @Component({
   selector: 'app-events',
@@ -38,12 +40,19 @@ export class EventsComponent implements OnInit {
 
   events: Event[] = [];
   loading = false;
+  userBookedEventIds: Set<string> = new Set<string>();
 
-  constructor(private http: HttpClient, private eventService: EventService) {}
+  constructor(
+    private http: HttpClient,
+    private eventService: EventService,
+    private authService: AuthService,
+    private bookingService: BookingService
+  ) {}
 
   ngOnInit() {
     this.loadEvents();
     this.loadMetadata();
+    this.loadUserBookings();
   }
 
   loadEvents() {
@@ -53,6 +62,10 @@ export class EventsComponent implements OnInit {
         this.events = events;
         this.totalPages = Math.ceil(this.events.length / this.itemsPerPage);
         this.loading = false;
+        // Update events with booked status if we already have user bookings
+        if (this.userBookedEventIds.size > 0) {
+          this.updateEventsWithBookedStatus();
+        }
       },
       error: (error) => {
         console.error('Error loading events:', error);
@@ -69,6 +82,36 @@ export class EventsComponent implements OnInit {
       },
       error: (error) => console.error('Error loading metadata:', error),
     });
+  }
+
+  loadUserBookings() {
+    // Only attempt to load bookings if the user is logged in
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.bookingService.getUserBookings().subscribe({
+          next: (bookings) => {
+            // Extract event IDs from bookings and store them in the Set
+            bookings.forEach((booking) => {
+              if (booking.status !== 'CANCELLED') {
+                this.userBookedEventIds.add(booking.event_id);
+              }
+            });
+            // After loading bookings, update events with booked status
+            this.updateEventsWithBookedStatus();
+          },
+          error: (error) =>
+            console.error('Error loading user bookings:', error),
+        });
+      }
+    });
+  }
+
+  updateEventsWithBookedStatus() {
+    // Mark events as booked based on the user's bookings
+    this.events = this.events.map((event) => ({
+      ...event,
+      isBooked: this.userBookedEventIds.has(event.id),
+    }));
   }
 
   get filteredEvents() {
