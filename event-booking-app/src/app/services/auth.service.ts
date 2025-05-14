@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { delay, tap, map, catchError } from 'rxjs/operators';
 import { Booking, BookingService } from './booking.service';
 import { environment } from '../../environments/environment';
+import { CacheService } from './cache.service';
 
 export interface User {
   id: string;
@@ -31,11 +32,11 @@ export class AuthService {
   private eventsUrl = 'assets/data/events.json'; // Path to your JSON file
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
-
   constructor(
     private http: HttpClient,
     private router: Router,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private cacheService: CacheService
   ) {
     // Check for stored user data on service initialization
     const storedUser = localStorage.getItem('currentUser');
@@ -140,6 +141,9 @@ export class AuthService {
 
       // Reset the user subject
       this.currentUserSubject.next(null);
+
+      // Clear all cached data
+      this.cacheService.clear();
 
       // Navigate to sign-in page
       this.router.navigate(['/auth/signin']);

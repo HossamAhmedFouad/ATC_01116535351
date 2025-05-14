@@ -1715,3 +1715,40 @@ mat-icon {
     margin-top: 0.5rem;
   }
 }
+
+.booking-info {
+  margin: 2rem 0;
+  background-color: var(--surface-hover);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.booking-info h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.booking-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.booking-details p {
+  margin: 0;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+}
+
+.booking-details p:last-child {
+  border-bottom: none;
+}
+
+.booking-details p strong {
+  color: var(--text-primary);
+}

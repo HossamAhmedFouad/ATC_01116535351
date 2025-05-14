@@ -6,9 +6,9 @@ const router = Router();
 const eventController = new EventController();
 
 // Public routes
-router.get("/", authenticate, eventController.getAllEvents);
-router.get("/search", authenticate, eventController.searchEvents);
-router.get("/:id", authenticate, eventController.getEventById);
+router.get("/", eventController.getAllEvents);
+router.get("/search", eventController.searchEvents);
+router.get("/:id", eventController.getEventById);
 
 // Admin only routes
 router.post(

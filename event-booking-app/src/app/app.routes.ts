@@ -50,6 +50,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'cache-tester',
+    loadComponent: () =>
+      import('./components/cache-tester/cache-tester.component').then(
+        (m) => m.CacheTesterComponent
+      ),
+    canActivate: [authGuard], // Protect this route for authorized users only
+  },
+  {
     path: 'bookings',
     loadComponent: () =>
       import('./pages/bookings/bookings.component').then(

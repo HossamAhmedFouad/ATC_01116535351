@@ -5,12 +5,18 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import {
+  BookingService,
+  Booking,
+  Ticket,
+} from '../../services/booking.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-payment',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, MatIconModule],
-  providers: [],
+  providers: [BookingService, ToastService],
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css'],
 })
@@ -22,13 +28,16 @@ export class PaymentComponent implements OnInit {
   totalAmount: number | undefined;
   event: any;
   currentStep: 'payment' | 'complete' = 'payment';
-  ticketIds: string[] = [];
+  booking: Booking | null = null;
+  tickets: Ticket[] = [];
 
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
     private route: ActivatedRoute,
-    public router: Router
+    public router: Router,
+    private bookingService: BookingService,
+    private toastService: ToastService
   ) {
     this.paymentForm = this.fb.group({
       name: ['', [Validators.required]],
@@ -57,37 +66,40 @@ export class PaymentComponent implements OnInit {
           expiryDate: this.paymentForm.get('expiryDate')?.value,
           cvv: this.paymentForm.get('cvv')?.value,
           amount: this.totalAmount,
-        }; // Mocking the payment API call
+        };
+
+        // Simulate payment processing
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve({ success: true });
           }, 1500); // Simulate a 1.5-second delay
         });
 
-        // Create booking and generate tickets
-        // In a real app, this would call the BookingService to create a booking with tickets
-        const eventId = this.eventId ? parseInt(this.eventId, 10) : 1;
-        const ticketCount = this.ticketCount || 1;
-        const ticketPrice = this.totalAmount
-          ? this.totalAmount / ticketCount
-          : 0;
-
-        // Generate random ticket IDs for each ticket purchased
-        this.ticketIds = [];
-        for (let i = 0; i < ticketCount; i++) {
-          const ticketId = `TKT-${Math.random()
-            .toString(36)
-            .substring(2, 11)
-            .toUpperCase()}`;
-          this.ticketIds.push(ticketId);
+        // Create booking and generate tickets using BookingService
+        if (this.eventId && this.ticketCount && this.totalAmount) {
+          this.bookingService
+            .bookEvent(this.eventId, this.ticketCount, this.totalAmount)
+            .subscribe({
+              next: (booking) => {
+                this.booking = booking;
+                this.tickets = booking.ticket_items || [];
+                this.toastService.success('Booking confirmed successfully!');
+                // Update step to show success state
+                this.currentStep = 'complete';
+                this.loading = false;
+              },
+              error: (error) => {
+                console.error('Booking failed:', error);
+                this.toastService.error('Booking failed. Please try again.');
+                this.loading = false;
+              },
+            });
+        } else {
+          throw new Error('Missing booking information');
         }
-
-        // Update step to show success state
-        this.currentStep = 'complete';
       } catch (error) {
-        console.error('Payment failed:', error);
-        alert('Payment failed. Please try again.');
-      } finally {
+        console.error('Payment processing failed:', error);
+        this.toastService.error('Payment failed. Please try again.');
         this.loading = false;
       }
     }
