@@ -166,15 +166,13 @@
           <td mat-cell *matCellDef="let booking">
             {{ getFormattedDate(booking.booking_time) }}
           </td>
-        </ng-container>
-
-        <!-- Tickets Column -->
+        </ng-container>        <!-- Tickets Column -->
         <ng-container matColumnDef="tickets">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Tickets</th>
           <td mat-cell *matCellDef="let booking">
             <div class="tickets-badge">
               <span
-                [matBadge]="booking.tickets"
+                [matBadge]="booking.tickets_count"
                 matBadgeOverlap="false"
                 matBadgeColor="accent"
               >

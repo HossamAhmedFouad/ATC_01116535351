@@ -51,16 +51,17 @@ export class BookingService {
           total_price: bookingData.total_price,
           status: "CONFIRMED",
         },
-      });
-
-      // Create individual tickets for the booking
+      });      // Create individual tickets for the booking
       const ticketPromises = [];
       const price = event.price
         ? Number(event.price) / Number(bookingData.tickets_count)
         : 0;
 
       for (let i = 0; i < bookingData.tickets_count; i++) {
-        const ticketCode = `TKT-${booking.id}-${i + 1}`;
+        const ticketCode = `TKT-${Math.random()
+          .toString(36)
+          .substring(2, 11)
+          .toUpperCase()}`;
         ticketPromises.push(
           tx.tickets.create({
             data: {

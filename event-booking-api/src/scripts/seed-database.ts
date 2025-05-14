@@ -152,10 +152,12 @@ async function main() {
     console.log(`Created booking with ID: ${booking.id}`);
     bookings.push(booking);
   }
-
   // Create 5 tickets (linked to the bookings)
   for (let i = 0; i < 5; i++) {
-    const ticketCode = `TICKET-${randomUUID().substring(0, 8).toUpperCase()}`;
+    const ticketCode = `TKT-${Math.random()
+      .toString(36)
+      .substring(2, 11)
+      .toUpperCase()}`;
     const booking = bookings[i];
     const event = events.find((e) => e.id === booking.event_id);
 
