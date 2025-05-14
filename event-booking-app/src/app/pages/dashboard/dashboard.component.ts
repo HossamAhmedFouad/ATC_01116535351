@@ -29,11 +29,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import moment from 'moment';
-import { Booking } from '../../services/booking.service';
+import { Booking, BookingService } from '../../services/booking.service';
 import { Event } from '../../services/event.service';
 import { EventService } from '../../services/event.service';
 import { forkJoin, Observable, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, switchMap } from 'rxjs/operators';
 
 interface BookedEvent extends Booking {
   eventDetails: Event;
@@ -162,10 +162,10 @@ export class DashboardComponent implements OnInit {
   upcomingEventsPreview: BookedEvent[] = [];
   recentActivity: { type: string; event: BookedEvent; date: Date }[] = [];
   monthlyStats: { month: string; count: number; spending: number }[] = [];
-
   constructor(
     private authService: AuthService,
     private eventService: EventService,
+    private bookingService: BookingService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -186,35 +186,45 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
-
   loadUserEvents(): Observable<void> {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser?.bookedEvents) {
-      this.bookedEvents = [];
-      return of(undefined);
-    }
+    return this.bookingService.getUserBookings().pipe(
+      switchMap((bookings: Booking[]) => {
+        if (!bookings || bookings.length === 0) {
+          this.bookedEvents = [];
+          return of(undefined);
+        }
 
-    const observables = currentUser.bookedEvents.map((booking) =>
-      this.eventService.getEvent(booking.event_id).pipe(
-        map((eventDetails) => ({
-          ...booking,
-          eventDetails,
-        })),
-        catchError((error) => {
-          console.error('Failed to load event details:', error);
-          return of({
-            ...booking,
-            eventDetails: {} as Event,
-          });
-        })
-      )
-    );
+        const observables = bookings.map((booking: Booking) =>
+          this.eventService.getEvent(booking.event_id).pipe(
+            map(
+              (eventDetails) =>
+                ({
+                  ...booking,
+                  eventDetails,
+                } as BookedEvent)
+            ),
+            catchError((error) => {
+              console.error('Failed to load event details:', error);
+              return of({
+                ...booking,
+                eventDetails: {} as Event,
+              } as BookedEvent);
+            })
+          )
+        );
 
-    return forkJoin(observables).pipe(
-      tap((bookedEvents) => {
-        this.bookedEvents = bookedEvents;
+        return forkJoin(observables).pipe(
+          tap((bookedEvents: BookedEvent[]) => {
+            this.bookedEvents = bookedEvents;
+          }),
+          map(() => undefined)
+        );
       }),
-      map(() => undefined)
+      catchError((error) => {
+        console.error('Failed to load user bookings:', error);
+        this.bookedEvents = [];
+        return of(undefined);
+      })
     );
   }
 
@@ -414,24 +424,48 @@ export class DashboardComponent implements OnInit {
       moment(event.eventDetails.date).isSame(date, 'day')
     );
   }
-
   hasEventsOnDate = (date: Date): string => {
     return this.getEventsForDate(date).length > 0 ? 'has-events' : '';
   };
 
   cancelEvent(event: BookedEvent) {
-    // TODO: Implement actual cancellation logic with API call
-    const index = this.bookedEvents.findIndex((e) => e.id === event.id);
-    if (index !== -1) {
-      this.bookedEvents[index].status = 'cancelled';
-      this.calculateStats();
-      this.calculateCategoryStats();
-      this.snackBar.open('Event booking cancelled successfully', 'Close', {
-        duration: 3000,
-        horizontalPosition: 'end',
-        verticalPosition: 'top',
-      });
-    }
+    this.bookingService.cancelBooking(event.id).subscribe({
+      next: (updatedBooking) => {
+        // Update the local booking with the latest data from server
+        const index = this.bookedEvents.findIndex((e) => e.id === event.id);
+        if (index !== -1) {
+          this.bookedEvents[index] = {
+            ...this.bookedEvents[index],
+            status: updatedBooking.status,
+          };
+
+          // Recalculate stats to reflect the changes
+          this.calculateStats();
+          this.calculateCategoryStats();
+          this.updateUpcomingEventsPreview();
+          this.generateRecentActivity();
+
+          this.snackBar.open('Event booking cancelled successfully', 'Close', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Failed to cancel booking:', error);
+        this.snackBar.open(
+          'Failed to cancel booking. Please try again.',
+          'Close',
+          {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['error-toast'],
+          }
+        );
+      },
+    });
   }
 
   getProgressColor(progress: number): string {

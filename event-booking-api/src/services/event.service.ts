@@ -145,6 +145,57 @@ export class EventService {
   }
 
   /**
+   * Cancel an event
+   * @param eventId Event ID
+   * @returns Updated event with cancelled status
+   */
+  async cancelEvent(eventId: string) {
+    try {
+      // First check if the event exists
+      const event = await prisma.events.findUnique({
+        where: { id: eventId },
+      });
+
+      if (!event) {
+        throw new AppError("Event not found", 404);
+      }
+
+      // Update the event to mark it as cancelled (using available_tickets = 0)
+      const updatedEvent = await prisma.events.update({
+        where: { id: eventId },
+        data: {
+          available_tickets: 0, // No more tickets available for cancelled events
+        },
+      });
+
+      // Cancel all pending bookings for this event
+      await prisma.bookings.updateMany({
+        where: {
+          event_id: eventId,
+          status: "CONFIRMED",
+        },
+        data: { status: "CANCELLED" },
+      });
+
+      // Cancel all related tickets
+      await prisma.tickets.updateMany({
+        where: {
+          bookings: {
+            event_id: eventId,
+          },
+          status: "VALID",
+        },
+        data: { status: "CANCELLED" },
+      });
+
+      return updatedEvent;
+    } catch (error) {
+      console.error("Failed to cancel event:", error);
+      throw new AppError("Failed to cancel event", 400);
+    }
+  }
+
+  /**
    * Delete an event
    * @param eventId Event ID
    */

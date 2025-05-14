@@ -120,6 +120,26 @@ export class EventController {
   };
 
   /**
+   * Cancel an event and all related bookings
+   */
+  cancelEvent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const event = await this.eventService.cancelEvent(id);
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          event,
+          message: "Event and all related bookings have been cancelled",
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
    * Search events
    */
   searchEvents = async (req: Request, res: Response, next: NextFunction) => {

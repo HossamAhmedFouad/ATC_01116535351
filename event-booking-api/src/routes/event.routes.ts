@@ -29,5 +29,12 @@ router.delete(
   authorize(["ADMIN"]),
   eventController.deleteEvent
 );
+// Cancel event route (admin only)
+router.patch(
+  "/:id/cancel",
+  authenticate,
+  authorize(["ADMIN"]),
+  eventController.cancelEvent
+);
 
 export default router;
