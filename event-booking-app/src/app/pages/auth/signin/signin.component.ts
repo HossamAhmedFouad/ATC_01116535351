@@ -1,15 +1,21 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-signin',
   templateUrl: './signin.component.html',
   styleUrls: ['./signin.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink]
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
 })
 export class SigninComponent {
   signinForm: FormGroup;
@@ -19,11 +25,12 @@ export class SigninComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {
     this.signinForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
@@ -35,12 +42,14 @@ export class SigninComponent {
       const { email, password } = this.signinForm.value;
       this.authService.signIn(email, password).subscribe({
         next: () => {
+          this.toastService.success('Sign in successful!');
           this.router.navigate(['/events']);
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = error.error.message || 'An error occurred during sign in';
-        }
+          this.errorMessage = error.message || 'Invalid email or password';
+          this.toastService.error(this.errorMessage, 'Sign In Failed');
+        },
       });
     }
   }
@@ -51,12 +60,15 @@ export class SigninComponent {
 
     this.authService.signInWithGoogle().subscribe({
       next: () => {
+        this.toastService.success('Google sign in successful!');
         this.router.navigate(['/events']);
       },
       error: (error) => {
         this.isLoading = false;
-        this.errorMessage = error.error.message || 'An error occurred during Google sign in';
-      }
+        this.errorMessage =
+          error.message || 'An error occurred during Google sign in';
+        this.toastService.error(this.errorMessage, 'Google Sign In Failed');
+      },
     });
   }
-} 
+}

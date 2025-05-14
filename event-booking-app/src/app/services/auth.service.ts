@@ -54,9 +54,12 @@ export class AuthService {
         tap((response) => this.handleAuthResponse(response)),
         catchError((error) => {
           console.error('Login error:', error);
-          return throwError(
-            () => new Error(error.error?.message || 'Login failed')
-          );
+          const errorMessage =
+            error.error?.message ||
+            (error.status === 401
+              ? 'Invalid email or password'
+              : 'Login failed');
+          return throwError(() => new Error(errorMessage));
         })
       );
   }
@@ -76,9 +79,17 @@ export class AuthService {
         tap((response) => this.handleAuthResponse(response)),
         catchError((error) => {
           console.error('Registration error:', error);
-          return throwError(
-            () => new Error(error.error?.message || 'Registration failed')
-          );
+          let errorMessage = 'Registration failed';
+
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.status === 409) {
+            errorMessage = 'Email or username already exists';
+          } else if (error.status === 400) {
+            errorMessage = 'Invalid registration data';
+          }
+
+          return throwError(() => new Error(errorMessage));
         })
       );
   }
@@ -96,6 +107,8 @@ export class AuthService {
       )
       .pipe(
         catchError((error) => {
+          console.error('Google auth error:', error);
+
           // Fallback to mock implementation
           return of({
             status: 'success',
@@ -111,7 +124,12 @@ export class AuthService {
           });
         }),
         map((response) => response.data),
-        tap((response) => this.handleAuthResponse(response))
+        tap((response) => this.handleAuthResponse(response)),
+        catchError((error) => {
+          return throwError(
+            () => new Error('Google authentication failed. Please try again.')
+          );
+        })
       );
   }
   signOut(): void {
