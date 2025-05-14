@@ -52,7 +52,7 @@ export class UserService {
     const hashedPassword = await hashPassword(userData.password);
 
     try {
-      // Create the user - let Prisma handle ID generation
+      // Create the user - let Prisma handle UUID generation
       const user = await prisma.users.create({
         data: {
           username: userData.username,
@@ -68,7 +68,7 @@ export class UserService {
 
       // Generate JWT token
       const token = generateToken({
-        userId: user.id.toString(),
+        userId: user.id,
         email: user.email || "",
         role: user.role || "USER",
       });
@@ -125,7 +125,7 @@ export class UserService {
 
     // Generate JWT token
     const token = generateToken({
-      userId: user.id.toString(),
+      userId: user.id,
       email: user.email || "",
       role: user.role || "USER",
     });
@@ -136,7 +136,6 @@ export class UserService {
     const { password, ...userWithoutPassword } = user;
     return { user: userWithoutPassword, token };
   }
-
   /**
    * Get user by ID
    * @param userId The ID of the user to retrieve
@@ -145,7 +144,7 @@ export class UserService {
   async getUserById(userId: string) {
     logger.debug(`Fetching user by ID: ${userId}`);
     const user = await prisma.users.findUnique({
-      where: { id: BigInt(userId) },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -168,7 +167,7 @@ export class UserService {
     logger.debug(`Updating user profile for ID: ${userId}`);
     try {
       const user = await prisma.users.update({
-        where: { id: BigInt(userId) },
+        where: { id: userId },
         data: userData,
       });
 

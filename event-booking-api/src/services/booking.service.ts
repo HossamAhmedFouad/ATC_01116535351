@@ -25,7 +25,7 @@ export class BookingService {
   async createBooking(bookingData: CreateBookingInput) {
     // Check if event exists and has available tickets
     const event = await prisma.events.findUnique({
-      where: { id: BigInt(bookingData.event_id) },
+      where: { id: bookingData.event_id },
     });
 
     if (!event) {
@@ -35,7 +35,7 @@ export class BookingService {
     // Check if there are enough tickets available
     if (
       event.available_tickets === null ||
-      event.available_tickets < BigInt(bookingData.tickets_count)
+      event.available_tickets < bookingData.tickets_count
     ) {
       throw new AppError("Not enough tickets available", 400);
     }
@@ -45,10 +45,10 @@ export class BookingService {
       // Create the booking
       const booking = await tx.bookings.create({
         data: {
-          user_id: BigInt(bookingData.user_id),
-          event_id: BigInt(bookingData.event_id),
-          tickets_count: BigInt(bookingData.tickets_count),
-          total_price: BigInt(bookingData.total_price),
+          user_id: bookingData.user_id,
+          event_id: bookingData.event_id,
+          tickets_count: bookingData.tickets_count,
+          total_price: bookingData.total_price,
           status: "CONFIRMED",
         },
       });
@@ -66,7 +66,7 @@ export class BookingService {
             data: {
               booking_id: booking.id,
               ticket_code: ticketCode,
-              price: BigInt(Math.round(price)),
+              price: Math.round(price),
               status: "VALID",
               issued_date: new Date(),
             },
@@ -79,15 +79,13 @@ export class BookingService {
         where: { id: event.id },
         data: {
           available_tickets:
-            (event.available_tickets ?? BigInt(0)) -
-            BigInt(bookingData.tickets_count),
+            (event.available_tickets ?? 0) - bookingData.tickets_count,
         },
       });
 
       return { booking, tickets };
     });
   }
-
   /**
    * Get all bookings for a user
    * @param userId User ID
@@ -95,7 +93,7 @@ export class BookingService {
    */
   async getUserBookings(userId: string) {
     return await prisma.bookings.findMany({
-      where: { user_id: BigInt(userId) },
+      where: { user_id: userId },
       include: {
         events: true,
         ticket_items: true,
@@ -110,7 +108,7 @@ export class BookingService {
    */
   async getBookingById(bookingId: string) {
     const booking = await prisma.bookings.findUnique({
-      where: { id: BigInt(bookingId) },
+      where: { id: bookingId },
       include: {
         events: true,
         ticket_items: true,
@@ -133,14 +131,14 @@ export class BookingService {
   async cancelBooking(bookingId: string, userId: string) {
     // Check if booking exists and belongs to the user
     const booking = await prisma.bookings.findUnique({
-      where: { id: BigInt(bookingId) },
+      where: { id: bookingId },
     });
 
     if (!booking) {
       throw new AppError("Booking not found", 404);
     }
 
-    if (booking.user_id !== BigInt(userId)) {
+    if (booking.user_id !== userId) {
       throw new AppError("Unauthorized", 403);
     }
 
@@ -148,14 +146,14 @@ export class BookingService {
     return await prisma.$transaction(async (tx) => {
       // Update the booking status
       const updatedBooking = await tx.bookings.update({
-        where: { id: BigInt(bookingId) },
+        where: { id: bookingId },
         data: { status: "CANCELLED" },
         include: { ticket_items: true },
       });
 
       // Update all tickets status to CANCELLED
       await tx.tickets.updateMany({
-        where: { booking_id: BigInt(bookingId) },
+        where: { booking_id: bookingId },
         data: { status: "CANCELLED" },
       });
 
@@ -182,7 +180,7 @@ export class BookingService {
    */
   async getTicketById(ticketId: string) {
     const ticket = await prisma.tickets.findUnique({
-      where: { id: BigInt(ticketId) },
+      where: { id: ticketId },
       include: {
         bookings: {
           include: {

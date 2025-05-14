@@ -37,7 +37,6 @@ export class EventService {
    * @returns The created event
    */ async createEvent(eventData: CreateEventInput) {
     try {
-      // Convert price and available_tickets to BigInt
       return await prisma.events.create({
         data: {
           title: eventData.title,
@@ -48,13 +47,11 @@ export class EventService {
           location: eventData.location || null,
           description: eventData.description || null,
           image_url: eventData.image_url || null,
-          price: eventData.price ? BigInt(eventData.price) : null,
+          price: eventData.price || null,
           category: eventData.category || null,
           duration: eventData.duration || null,
           organizer: eventData.organizer || null,
-          available_tickets: eventData.available_tickets
-            ? BigInt(eventData.available_tickets)
-            : null,
+          available_tickets: eventData.available_tickets || null,
           schedule: eventData.schedule
             ? (eventData.schedule as any)
             : undefined,
@@ -75,7 +72,6 @@ export class EventService {
     const where = category ? { category } : {};
     return await prisma.events.findMany({ where });
   }
-
   /**
    * Get event by ID
    * @param eventId Event ID
@@ -83,7 +79,7 @@ export class EventService {
    */
   async getEventById(eventId: string) {
     const event = await prisma.events.findUnique({
-      where: { id: BigInt(eventId) },
+      where: { id: eventId },
     });
 
     if (!event) {
@@ -92,7 +88,6 @@ export class EventService {
 
     return event;
   }
-
   /**
    * Update an event
    * @param eventId Event ID
@@ -118,12 +113,12 @@ export class EventService {
       if (eventData.organizer !== undefined)
         updateData.organizer = eventData.organizer;
 
-      // Convert numeric values to BigInt
+      // Handle numeric values
       if (eventData.price !== undefined) {
-        updateData.price = BigInt(eventData.price);
+        updateData.price = eventData.price;
       }
       if (eventData.available_tickets !== undefined) {
-        updateData.available_tickets = BigInt(eventData.available_tickets);
+        updateData.available_tickets = eventData.available_tickets;
       }
 
       // Handle date conversion
@@ -140,7 +135,7 @@ export class EventService {
       }
 
       return await prisma.events.update({
-        where: { id: BigInt(eventId) },
+        where: { id: eventId },
         data: updateData,
       });
     } catch (error) {
@@ -156,7 +151,7 @@ export class EventService {
   async deleteEvent(eventId: string) {
     try {
       await prisma.events.delete({
-        where: { id: BigInt(eventId) },
+        where: { id: eventId },
       });
     } catch (error) {
       throw new AppError("Failed to delete event", 400);

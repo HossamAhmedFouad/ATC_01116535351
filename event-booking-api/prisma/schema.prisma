@@ -11,14 +11,14 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model bookings {
-  user_id       BigInt
-  event_id      BigInt
+  user_id       String    @db.Uuid
+  event_id      String    @db.Uuid
   booking_time  DateTime? @default(now()) @db.Timestamp(6)
   updated_at    DateTime? @default(now()) @db.Timestamp(6)
-  tickets_count BigInt?   @map("tickets")
-  total_price   BigInt?
+  tickets_count Int?      @map("tickets")
+  total_price   Int?
   status        String?
-  id            BigInt    @id @unique @default(autoincrement())
+  id            String    @id @default(uuid()) @db.Uuid
   events        events    @relation(fields: [event_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users         users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   ticket_items  tickets[]
@@ -26,27 +26,27 @@ model bookings {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model events {
-  id                BigInt     @id @default(autoincrement())
+  id                String     @id @default(uuid()) @db.Uuid
   title             String
   date              DateTime   @db.Timestamp(6)
   location          String?
   description       String?
   image_url         String?
-  price             BigInt?
+  price             Int?
   category          String?
   duration          String?
   organizer         String?
-  available_tickets BigInt?
+  available_tickets Int?
   schedule          Json?      @db.Json
   bookings          bookings[]
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model tickets {
-  id          BigInt    @id @default(autoincrement())
-  booking_id  BigInt
+  id          String    @id @default(uuid()) @db.Uuid
+  booking_id  String    @db.Uuid
   ticket_code String?
-  price       BigInt?
+  price       Int?
   issued_date DateTime? @db.Timestamp(6)
   status      String?
   bookings    bookings  @relation(fields: [booking_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
@@ -55,7 +55,7 @@ model tickets {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model users {
-  id          BigInt     @id @default(autoincrement())
+  id          String     @id @default(uuid()) @db.Uuid
   username    String?
   email       String?
   password    String?
