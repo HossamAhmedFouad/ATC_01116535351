@@ -1,23 +1,34 @@
 import { PrismaClient } from "../generated/prisma";
 import { randomUUID } from "crypto";
+import { hashPassword } from "../utils/password";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Starting seeding...");
 
+  // First, delete all existing records (in reverse order of dependencies)
+  console.log("Deleting existing records...");
+  await prisma.tickets.deleteMany({});
+  await prisma.bookings.deleteMany({});
+  await prisma.events.deleteMany({});
+  await prisma.users.deleteMany({});
+  console.log("All existing records deleted.");
   // Create 5 users
   const users = [];
   for (let i = 0; i < 5; i++) {
+    // Hash the password just like in user.service.ts
+    const hashedPassword = await hashPassword(`password${i + 1}`);
+
     const user = await prisma.users.create({
       data: {
         username: `user${i + 1}`,
         email: `user${i + 1}@example.com`,
-        password: `password${i + 1}`, // In production, you would hash this
+        password: hashedPassword, // Using proper password hashing
         phone: `123-456-${7890 + i}`,
         location: `City ${i + 1}`,
         bio: `This is the bio for user ${i + 1}`,
-        role: i === 0 ? "admin" : "user",
+        role: i === 0 ? "ADMIN" : "USER", // Matching case with user.service.ts
         profile_url: `https://example.com/profiles/user${i + 1}.jpg`,
       },
     });
