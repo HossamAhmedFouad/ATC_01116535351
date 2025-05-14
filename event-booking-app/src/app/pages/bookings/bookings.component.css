@@ -3,6 +3,9 @@
   --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
   --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --info-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --pending-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  --refund-gradient: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
 
   --surface-color: #ffffff;
   --surface-hover: #f8fafc;
@@ -11,8 +14,11 @@
   --text-secondary: #64748b;
 
   --status-booked: #3b82f6;
+  --status-confirmed: #10b981;
   --status-completed: #10b981;
   --status-cancelled: #ef4444;
+  --status-pending: #f59e0b;
+  --status-refunded: #a855f7;
 
   --radius-lg: 16px;
   --radius-md: 12px;
@@ -29,6 +35,9 @@
   --success-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);
   --danger-gradient: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   --warning-gradient: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  --info-gradient: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  --pending-gradient: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  --refund-gradient: linear-gradient(135deg, #7e22ce 0%, #6b21a8 100%);
 
   --surface-color: #2d2d2d;
   --surface-hover: #3d3d3d;
@@ -37,8 +46,11 @@
   --text-secondary: #adb5bd;
 
   --status-booked: #60a5fa;
+  --status-confirmed: #34d399;
   --status-completed: #34d399;
   --status-cancelled: #f87171;
+  --status-pending: #fbbf24;
+  --status-refunded: #c084fc;
 
   background: #1a1a1a;
 }
@@ -444,42 +456,89 @@ tr.detail-row {
   font-weight: 600;
   text-transform: capitalize;
   vertical-align: middle;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.status-badge:hover {
+  transform: translateY(-1px);
 }
 
 .status-badge.booked {
   background-color: rgba(59, 130, 246, 0.1);
   color: var(--status-booked);
+  border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 :host-context(.dark-mode) .status-badge.booked {
-  background-color: rgba(59, 130, 246, 0.3);
+  background-color: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .status-badge.completed {
   background-color: rgba(16, 185, 129, 0.1);
   color: var(--status-completed);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 :host-context(.dark-mode) .status-badge.completed {
-  background-color: rgba(16, 185, 129, 0.3);
+  background-color: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .status-badge.cancelled {
   background-color: rgba(239, 68, 68, 0.1);
   color: var(--status-cancelled);
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
 :host-context(.dark-mode) .status-badge.cancelled {
-  background-color: rgba(239, 68, 68, 0.3);
+  background-color: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 .status-badge.confirmed {
   background-color: rgba(16, 185, 129, 0.1);
-  color: var(--status-completed);
+  color: var(--status-confirmed);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 :host-context(.dark-mode) .status-badge.confirmed {
-  background-color: rgba(16, 185, 129, 0.3);
+  background-color: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.pending {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--status-pending);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+:host-context(.dark-mode) .status-badge.pending {
+  background-color: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.refunded {
+  background-color: rgba(168, 85, 247, 0.1);
+  color: var(--status-refunded);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+:host-context(.dark-mode) .status-badge.refunded {
+  background-color: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.status-badge.valid {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--status-confirmed);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+:host-context(.dark-mode) .status-badge.valid {
+  background-color: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .status-badge mat-icon {

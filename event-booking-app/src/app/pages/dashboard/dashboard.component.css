@@ -31,6 +31,70 @@
   --status-cancelled-bg: rgba(220, 38, 38, 0.1);
 }
 
+/* Status badges for events */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: 8px;
+  text-transform: uppercase;
+}
+
+.badge.confirmed {
+  background-color: var(--status-completed-bg);
+  color: var(--status-completed);
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
+}
+
+.badge.cancelling {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning-color);
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.2);
+}
+
+.badge.cancelled {
+  background-color: var(--status-cancelled-bg);
+  color: var(--status-cancelled);
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
+}
+
+.badge.upcoming {
+  background-color: var(--status-upcoming-bg);
+  color: var(--status-upcoming);
+  box-shadow: 0 1px 3px rgba(26, 86, 219, 0.2);
+}
+
+/* Empty list message styling */
+.empty-list-message {
+  padding: 16px;
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  border-top: 1px solid var(--border-color);
+  margin-top: 8px;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+}
+
+/* Pulse animation for cancelling badge */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+
 /* Dark Mode Colors */
 :host-context(.dark-mode) {
   --primary-color: #6366f1;
@@ -138,14 +202,18 @@ mat-card-subtitle {
   border-color: var(--border-color);
 }
 
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-today {
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-today {
   background-color: #111827;
   color: white;
   border: 2px solid #111827;
   font-weight: 500;
 }
 
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-selected {
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-selected {
   background-color: #111827;
   color: white;
   border-color: #111827;
@@ -157,7 +225,7 @@ mat-card-subtitle {
 }
 
 ::ng-deep .custom-calendar .mat-calendar-body-cell-content.has-events::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 2px;
   left: 50%;
@@ -168,28 +236,40 @@ mat-card-subtitle {
   background-color: var(--primary-color);
 }
 
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.has-events.mat-calendar-body-today {
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.has-events.mat-calendar-body-today {
   background-color: #111827;
   color: white;
   border: 2px solid #111827;
 }
 
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.has-events.mat-calendar-body-today::after {
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.has-events.mat-calendar-body-today::after {
   background-color: white;
 }
 
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-disabled {
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-disabled {
   color: var(--text-secondary);
   opacity: 0.4;
 }
 
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-in-range {
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-in-range {
   background-color: var(--calendar-range-bg);
   color: var(--text-primary);
 }
 
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-in-range.mat-calendar-body-today,
-::ng-deep .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-in-range.mat-calendar-body-selected {
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-in-range.mat-calendar-body-today,
+::ng-deep
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-in-range.mat-calendar-body-selected {
   background-color: var(--calendar-selected-bg);
   color: white;
 }
@@ -267,35 +347,43 @@ mat-card-subtitle {
 }
 
 /* Icon-specific colors */
-.event-info p:nth-child(1) mat-icon { /* Date */
+.event-info p:nth-child(1) mat-icon {
+  /* Date */
   color: #4f46e5;
 }
 
-.event-info p:nth-child(2) mat-icon { /* Time */
+.event-info p:nth-child(2) mat-icon {
+  /* Time */
   color: #7c3aed;
 }
 
-.event-info p:nth-child(3) mat-icon { /* Location */
+.event-info p:nth-child(3) mat-icon {
+  /* Location */
   color: #db2777;
 }
 
-.event-info p:nth-child(4) mat-icon { /* Ticket */
+.event-info p:nth-child(4) mat-icon {
+  /* Ticket */
   color: #ea580c;
 }
 
-.event-info p:nth-child(5) mat-icon { /* Price */
+.event-info p:nth-child(5) mat-icon {
+  /* Price */
   color: #16a34a;
 }
 
-.event-info p:nth-child(6) mat-icon { /* Category */
+.event-info p:nth-child(6) mat-icon {
+  /* Category */
   color: #0891b2;
 }
 
-.event-info p:nth-child(7) mat-icon { /* Attendees */
+.event-info p:nth-child(7) mat-icon {
+  /* Attendees */
   color: #9333ea;
 }
 
-.event-info p:nth-child(8) mat-icon { /* Organizer */
+.event-info p:nth-child(8) mat-icon {
+  /* Organizer */
   color: #2563eb;
 }
 
@@ -469,7 +557,7 @@ mat-card-subtitle {
 
 /* Material Icons */
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: "Material Icons";
   font-weight: normal;
   font-style: normal;
   font-size: 24px;
@@ -480,7 +568,7 @@ mat-card-subtitle {
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
-  -webkit-font-feature-settings: 'liga';
+  -webkit-font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
 }
 
@@ -510,7 +598,11 @@ mat-card-subtitle {
 }
 
 :host-context(.dark-mode) .stat-item {
-  background: linear-gradient(135deg, var(--primary-color-dark), var(--primary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color-dark),
+    var(--primary-color)
+  );
 }
 
 :host-context(.dark-mode) .category-stats {
@@ -562,7 +654,11 @@ mat-card-subtitle {
 }
 
 :host-context(.dark-mode) .event-card mat-card-header {
-  background: linear-gradient(135deg, var(--primary-color-dark), var(--primary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color-dark),
+    var(--primary-color)
+  );
 }
 
 :host-context(.dark-mode) .category-filter button {
@@ -623,6 +719,7 @@ mat-card-subtitle {
   color: var(--status-upcoming);
   background-color: var(--status-upcoming-bg);
   border: 1px solid var(--status-upcoming);
+  box-shadow: 0 1px 3px rgba(26, 86, 219, 0.2);
 }
 
 .status-upcoming mat-icon {
@@ -633,6 +730,7 @@ mat-card-subtitle {
   color: var(--status-completed);
   background-color: var(--status-completed-bg);
   border: 1px solid var(--status-completed);
+  box-shadow: 0 1px 3px rgba(5, 150, 105, 0.2);
 }
 
 .status-completed mat-icon {
@@ -643,10 +741,21 @@ mat-card-subtitle {
   color: var(--status-cancelled);
   background-color: var(--status-cancelled-bg);
   border: 1px solid var(--status-cancelled);
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.2);
 }
 
 .status-cancelled mat-icon {
   color: var(--status-cancelled);
+}
+
+.status-unknown {
+  color: var(--text-secondary);
+  background-color: var(--hover-background);
+  border: 1px solid var(--border-color);
+}
+
+.status-unknown mat-icon {
+  color: var(--text-secondary);
 }
 
 /* Dark Mode Status Overrides */
@@ -882,32 +991,42 @@ mat-card-subtitle {
 }
 
 /* Dark Mode Calendar Overrides */
-:host-context(.dark-mode) .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-selected {
+:host-context(.dark-mode)
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-selected {
   background-color: #111827;
   color: white;
   border: 2px solid #374151;
 }
 
-:host-context(.dark-mode) .custom-calendar .mat-calendar-body-cell-content.has-events.mat-calendar-body-selected {
+:host-context(.dark-mode)
+  .custom-calendar
+  .mat-calendar-body-cell-content.has-events.mat-calendar-body-selected {
   background-color: #111827;
   color: white;
   border: 2px solid #374151;
 }
 
-:host-context(.dark-mode) .custom-calendar .mat-calendar-body-cell-content.mat-calendar-body-today {
+:host-context(.dark-mode)
+  .custom-calendar
+  .mat-calendar-body-cell-content.mat-calendar-body-today {
   background-color: white;
   color: #111827;
   border: 2px solid white;
   font-weight: 500;
 }
 
-:host-context(.dark-mode) .custom-calendar .mat-calendar-body-cell-content.has-events.mat-calendar-body-today {
+:host-context(.dark-mode)
+  .custom-calendar
+  .mat-calendar-body-cell-content.has-events.mat-calendar-body-today {
   background-color: white;
   color: #111827;
   border: 2px solid white;
 }
 
-:host-context(.dark-mode) .custom-calendar .mat-calendar-body-cell-content.has-events.mat-calendar-body-today::after {
+:host-context(.dark-mode)
+  .custom-calendar
+  .mat-calendar-body-cell-content.has-events.mat-calendar-body-today::after {
   background-color: #111827;
 }
 
@@ -1118,7 +1237,11 @@ mat-card-subtitle {
 
 /* Dark mode overrides */
 :host-context(.dark-mode) .chart-bar {
-  background: linear-gradient(to top, var(--primary-color-dark), var(--primary-color));
+  background: linear-gradient(
+    to top,
+    var(--primary-color-dark),
+    var(--primary-color)
+  );
 }
 
 :host-context(.dark-mode) .bar-value {
@@ -1220,7 +1343,10 @@ mat-card-subtitle {
   color: var(--text-primary) !important;
 }
 
-:host-context(.dark-mode) mat-card mat-list-item .mdc-list-item__secondary-text {
+:host-context(.dark-mode)
+  mat-card
+  mat-list-item
+  .mdc-list-item__secondary-text {
   color: var(--text-secondary) !important;
 }
 
@@ -1244,13 +1370,25 @@ mat-card-subtitle {
   color: var(--text-primary);
 }
 
-:host-context(.dark-mode) .recent-activity-card mat-list-item .mdc-list-item__primary-text,
-:host-context(.dark-mode) .upcoming-events-card mat-list-item .mdc-list-item__primary-text {
+:host-context(.dark-mode)
+  .recent-activity-card
+  mat-list-item
+  .mdc-list-item__primary-text,
+:host-context(.dark-mode)
+  .upcoming-events-card
+  mat-list-item
+  .mdc-list-item__primary-text {
   color: var(--text-primary) !important;
 }
 
-:host-context(.dark-mode) .recent-activity-card mat-list-item .mdc-list-item__secondary-text,
-:host-context(.dark-mode) .upcoming-events-card mat-list-item .mdc-list-item__secondary-text {
+:host-context(.dark-mode)
+  .recent-activity-card
+  mat-list-item
+  .mdc-list-item__secondary-text,
+:host-context(.dark-mode)
+  .upcoming-events-card
+  mat-list-item
+  .mdc-list-item__secondary-text {
   color: var(--text-secondary) !important;
 }
 
@@ -1348,4 +1486,4 @@ mat-card-subtitle {
 :host-context(.dark-mode) .clear-filter-btn:hover {
   background: var(--error-color) !important;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
-} 
+}

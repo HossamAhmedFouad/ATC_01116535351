@@ -217,6 +217,17 @@ export class BookingService {
         })
       );
   }
+  // Clear specific cache entry
+  clearCache(key: string): void {
+    this.cacheService.remove(key);
+  }
+
+  // Clear all booking-related cache
+  clearAllCache(): void {
+    this.cacheService.remove('user_bookings');
+    // Clear any booking details cache by pattern
+    this.cacheService.clearWithPrefix('booking_');
+  }
 
   // Error handling
   private handleError(error: any) {

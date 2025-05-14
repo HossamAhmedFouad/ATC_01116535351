@@ -33,10 +33,12 @@ import { Booking, BookingService } from '../../services/booking.service';
 import { Event } from '../../services/event.service';
 import { EventService } from '../../services/event.service';
 import { forkJoin, Observable, of } from 'rxjs';
-import { map, tap, catchError, switchMap } from 'rxjs/operators';
+import { map, tap, catchError, switchMap, finalize } from 'rxjs/operators';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 interface BookedEvent extends Booking {
   eventDetails: Event;
+  isCancelling?: boolean;
 }
 
 interface EventStats {
@@ -98,6 +100,7 @@ export const MY_FORMATS = {
     MatDividerModule,
     MatListModule,
     MatMenuModule,
+    LoaderComponent,
   ],
   providers: [
     {
@@ -158,10 +161,11 @@ export class DashboardComponent implements OnInit {
     { name: 'Food', count: 0, color: '#ea580c', icon: 'restaurant' },
     { name: 'Arts', count: 0, color: '#db2777', icon: 'palette' },
   ];
-
   upcomingEventsPreview: BookedEvent[] = [];
   recentActivity: { type: string; event: BookedEvent; date: Date }[] = [];
   monthlyStats: { month: string; count: number; spending: number }[] = [];
+  isLoading: boolean = false;
+
   constructor(
     private authService: AuthService,
     private eventService: EventService,
@@ -186,7 +190,14 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
-  loadUserEvents(): Observable<void> {
+  loadUserEvents(forceRefresh: boolean = false): Observable<void> {
+    this.isLoading = true;
+
+    // If force refresh is requested, clear the cached bookings first
+    if (forceRefresh) {
+      this.bookingService.clearCache('user_bookings');
+    }
+
     return this.bookingService.getUserBookings().pipe(
       switchMap((bookings: Booking[]) => {
         if (!bookings || bookings.length === 0) {
@@ -224,6 +235,9 @@ export class DashboardComponent implements OnInit {
         console.error('Failed to load user bookings:', error);
         this.bookedEvents = [];
         return of(undefined);
+      }),
+      finalize(() => {
+        this.isLoading = false;
       })
     );
   }
@@ -427,33 +441,44 @@ export class DashboardComponent implements OnInit {
   hasEventsOnDate = (date: Date): string => {
     return this.getEventsForDate(date).length > 0 ? 'has-events' : '';
   };
-
   cancelEvent(event: BookedEvent) {
+    // Set a cancelling flag on this specific event to disable the button
+    event.isCancelling = true;
+
     this.bookingService.cancelBooking(event.id).subscribe({
       next: (updatedBooking) => {
-        // Update the local booking with the latest data from server
-        const index = this.bookedEvents.findIndex((e) => e.id === event.id);
-        if (index !== -1) {
-          this.bookedEvents[index] = {
-            ...this.bookedEvents[index],
-            status: updatedBooking.status,
-          };
+        // Refresh all dashboard data from the server
+        this.loadUserEvents(true).subscribe({
+          next: () => {
+            // Recalculate all stats after refresh
+            this.calculateStats();
+            this.calculateCategoryStats();
+            this.updateUpcomingEventsPreview();
+            this.generateRecentActivity();
 
-          // Recalculate stats to reflect the changes
-          this.calculateStats();
-          this.calculateCategoryStats();
-          this.updateUpcomingEventsPreview();
-          this.generateRecentActivity();
-
-          this.snackBar.open('Event booking cancelled successfully', 'Close', {
-            duration: 3000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-          });
-        }
+            this.snackBar.open(
+              'Event booking cancelled successfully',
+              'Close',
+              {
+                duration: 3000,
+                horizontalPosition: 'end',
+                verticalPosition: 'top',
+              }
+            );
+          },
+          error: (err) => {
+            console.error('Failed to refresh data after cancellation:', err);
+            // Reset the cancelling flag on error
+            event.isCancelling = false;
+          },
+        });
       },
       error: (error) => {
         console.error('Failed to cancel booking:', error);
+
+        // Reset the cancelling flag on error
+        event.isCancelling = false;
+
         this.snackBar.open(
           'Failed to cancel booking. Please try again.',
           'Close',
@@ -525,35 +550,77 @@ export class DashboardComponent implements OnInit {
       });
     }
   }
-
   updateUpcomingEventsPreview() {
     const now = new Date();
+    // Filter events that are confirmed/booked and in the future
     this.upcomingEventsPreview = this.bookedEvents
       .filter(
-        (event) => event.status === 'booked' && event.eventDetails.date > now
+        (event) =>
+          event.status === 'booked' ||
+          (event.status === 'CONFIRMED' &&
+            new Date(event.eventDetails.date) > now)
       )
       .sort(
-        (a, b) => a.eventDetails.date.getTime() - b.eventDetails.date.getTime()
+        (a, b) =>
+          new Date(a.eventDetails.date).getTime() -
+          new Date(b.eventDetails.date).getTime()
       )
-      .slice(0, 3);
+      .slice(0, 5); // Show more upcoming events (increased from 3 to 5)
   }
-
   generateRecentActivity() {
     const now = new Date();
-    this.recentActivity = this.bookedEvents
-      .map((event) => {
-        const activities = [];
-        if (event.status === 'booked' || event.status === 'cancelled') {
-          activities.push({
-            type: event.status,
-            event,
-            date: event.eventDetails?.date || now,
-          });
-        }
-        return activities;
-      })
-      .flat()
-      .sort((a, b) => (b.date?.getTime() || 0) - (a.date?.getTime() || 0))
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14); // Show activities from last two weeks
+
+    // Create a list of activities from bookings
+    const activities = this.bookedEvents.flatMap((event) => {
+      const result = [];
+
+      // Add booking activity
+      if (event.booking_time) {
+        result.push({
+          type: 'booked',
+          event,
+          date: new Date(event.booking_time),
+          actionText: 'Booked on',
+        });
+      }
+
+      // Add cancellation activity if the event was cancelled
+      if (event.status === 'cancelled' || event.status === 'CANCELLED') {
+        result.push({
+          type: 'cancelled',
+          event,
+          date: new Date(event.updated_at), // Use updated_at for cancellation date
+          actionText: 'Cancelled on',
+        });
+      }
+
+      // Add upcoming event notification for events happening soon (within next 3 days)
+      const eventDate = new Date(event.eventDetails.date);
+      const threeDaysFromNow = new Date();
+      threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+
+      if (
+        (event.status === 'booked' || event.status === 'CONFIRMED') &&
+        eventDate > now &&
+        eventDate < threeDaysFromNow
+      ) {
+        result.push({
+          type: 'upcoming',
+          event,
+          date: eventDate,
+          actionText: 'Coming up on',
+        });
+      }
+
+      return result;
+    });
+
+    // Sort by date (most recent first) and limit to 5 activities
+    this.recentActivity = activities
+      .filter((activity) => activity.date >= twoWeeksAgo) // Only show recent activities
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, 5);
   }
 
@@ -587,13 +654,15 @@ export class DashboardComponent implements OnInit {
 
     this.monthlyStats = months;
   }
-
   getActivityIcon(type: string): string {
     switch (type) {
       case 'completed':
+      case 'booked':
         return 'check_circle';
       case 'cancelled':
         return 'cancel';
+      case 'upcoming':
+        return 'event_upcoming';
       default:
         return 'event';
     }
@@ -602,9 +671,12 @@ export class DashboardComponent implements OnInit {
   getActivityColor(type: string): string {
     switch (type) {
       case 'completed':
+      case 'booked':
         return 'var(--success-color)';
       case 'cancelled':
         return 'var(--error-color)';
+      case 'upcoming':
+        return '#2196F3'; // Blue for upcoming events
       default:
         return 'var(--primary-color)';
     }

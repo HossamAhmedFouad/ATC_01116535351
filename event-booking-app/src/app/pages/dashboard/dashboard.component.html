@@ -1,5 +1,10 @@
 <div class="dashboard-container">
-  <div class="dashboard-content">
+  <app-loader
+    *ngIf="isLoading"
+    message="Loading your dashboard data..."
+  ></app-loader>
+
+  <div class="dashboard-content" *ngIf="!isLoading">
     <section class="stats-section">
       <mat-card class="stats-card">
         <mat-card-content>
@@ -142,8 +147,28 @@
                 <div matListItemTitle>{{ event.eventDetails.title }}</div>
                 <div matListItemLine>
                   {{ formatDate(event.eventDetails.date) }}
+                  <span
+                    *ngIf="
+                      event.status === 'CONFIRMED' || event.status === 'booked'
+                    "
+                    class="badge confirmed"
+                  >
+                    Confirmed
+                  </span>
+                  <span *ngIf="event.isCancelling" class="badge cancelling">
+                    Cancelling...
+                  </span>
+                </div>
+                <div matListItemLine>
+                  {{ event.eventDetails.location }}
                 </div>
               </mat-list-item>
+              <div
+                *ngIf="upcomingEventsPreview.length === 0"
+                class="empty-list-message"
+              >
+                No upcoming events at this time
+              </div>
             </mat-list>
           </mat-card-content>
         </mat-card>
@@ -169,10 +194,28 @@
                   {{ activity.event.eventDetails.title }}
                 </div>
                 <div matListItemLine>
-                  {{ activity.type | titlecase }} on
+                  {{ activity.actionText }}
                   {{ formatDate(activity.date) }}
                 </div>
+                <button
+                  mat-icon-button
+                  *ngIf="
+                    activity.type === 'booked' &&
+                    (activity.event.status === 'CONFIRMED' ||
+                      activity.event.status === 'booked')
+                  "
+                  [routerLink]="['/events', activity.event.eventDetails.id]"
+                  matTooltip="View event details"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
               </mat-list-item>
+              <div
+                *ngIf="recentActivity.length === 0"
+                class="empty-list-message"
+              >
+                No recent activity
+              </div>
             </mat-list>
           </mat-card-content>
         </mat-card>
@@ -275,9 +318,14 @@
                     color="warn"
                     *ngIf="event.status === 'CONFIRMED'"
                     (click)="cancelEvent(event)"
+                    [disabled]="event.isCancelling"
                   >
-                    <mat-icon>cancel</mat-icon>
-                    Cancel Booking
+                    <mat-icon>{{
+                      event.isCancelling ? "hourglass_empty" : "cancel"
+                    }}</mat-icon>
+                    {{
+                      event.isCancelling ? "Cancelling..." : "Cancel Booking"
+                    }}
                   </button>
                 </mat-card-actions>
               </mat-card>

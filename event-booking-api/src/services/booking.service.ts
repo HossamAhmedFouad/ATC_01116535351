@@ -51,7 +51,7 @@ export class BookingService {
           total_price: bookingData.total_price,
           status: "CONFIRMED",
         },
-      });      // Create individual tickets for the booking
+      }); // Create individual tickets for the booking
       const ticketPromises = [];
       const price = event.price
         ? Number(event.price) / Number(bookingData.tickets_count)
@@ -68,7 +68,7 @@ export class BookingService {
               booking_id: booking.id,
               ticket_code: ticketCode,
               price: Math.round(price),
-              status: "VALID",
+              status: "CONFIRMED",
               issued_date: new Date(),
             },
           })

@@ -162,6 +162,51 @@ export class TicketsComponent implements OnInit {
   getStatusColor(status: string): string {
     return status === 'CONFIRMED' ? 'primary' : 'warn';
   }
+
+  getStatusClass(status: string): string {
+    switch (status?.toUpperCase()) {
+      case 'CONFIRMED':
+        return 'confirmed';
+      case 'BOOKED':
+        return 'booked';
+      case 'CANCELLED':
+        return 'cancelled';
+      case 'COMPLETED':
+        return 'completed';
+      case 'PENDING':
+        return 'pending';
+      case 'REFUNDED':
+        return 'refunded';
+      case 'VALID':
+        return 'valid';
+      default:
+        return '';
+    }
+  }
+
+  getStatusIcon(status: string): string {
+    switch (status?.toUpperCase()) {
+      case 'CONFIRMED':
+        return 'event_available';
+      case 'BOOKED':
+        return 'event_seat';
+      case 'CANCELLED':
+        return 'event_busy';
+      case 'COMPLETED':
+        return 'event_note';
+      case 'PENDING':
+        return 'pending';
+      case 'REFUNDED':
+        return 'currency_exchange';
+      case 'EXPIRED':
+        return 'schedule';
+      case 'VALID':
+        return 'verified';
+      default:
+        return 'help_outline';
+    }
+  }
+
   viewBookingDetails(bookingId: string): void {
     this.router.navigate(['/bookings', bookingId]);
   }

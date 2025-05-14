@@ -9,7 +9,7 @@
   <div class="bookings-stats">
     <div class="stat-card booked">
       <div class="stat-icon">
-        <mat-icon>event_available</mat-icon>
+        <mat-icon>{{ getStatusIcon("CONFIRMED") }}</mat-icon>
       </div>
       <div class="stat-content">
         <div class="stat-value">{{ bookedCount }}</div>
@@ -18,7 +18,7 @@
     </div>
     <div class="stat-card completed">
       <div class="stat-icon">
-        <mat-icon>event_seat</mat-icon>
+        <mat-icon>{{ getStatusIcon("COMPLETED") }}</mat-icon>
       </div>
       <div class="stat-content">
         <div class="stat-value">{{ completedCount }}</div>
@@ -27,7 +27,7 @@
     </div>
     <div class="stat-card cancelled">
       <div class="stat-icon">
-        <mat-icon>event_busy</mat-icon>
+        <mat-icon>{{ getStatusIcon("CANCELLED") }}</mat-icon>
       </div>
       <div class="stat-content">
         <div class="stat-value">{{ cancelledCount }}</div>
@@ -69,7 +69,7 @@
             color="primary"
           >
             <div style="display: flex; align-items: center; gap: 4px">
-              <mat-icon>event_available</mat-icon> Upcoming
+              <mat-icon>{{ getStatusIcon("CONFIRMED") }}</mat-icon> Upcoming
             </div>
           </mat-chip-option>
           <mat-chip-option
@@ -79,7 +79,7 @@
             color="accent"
           >
             <div style="display: flex; align-items: center; gap: 4px">
-              <mat-icon>event_seat</mat-icon> Completed
+              <mat-icon>{{ getStatusIcon("COMPLETED") }}</mat-icon> Completed
             </div>
           </mat-chip-option>
           <mat-chip-option
@@ -89,7 +89,7 @@
             color="warn"
           >
             <div style="display: flex; align-items: center; gap: 4px">
-              <mat-icon>event_busy</mat-icon> Cancelled
+              <mat-icon>{{ getStatusIcon("CANCELLED") }}</mat-icon> Cancelled
             </div>
           </mat-chip-option>
         </mat-chip-listbox>
@@ -166,7 +166,8 @@
           <td mat-cell *matCellDef="let booking">
             {{ getFormattedDate(booking.booking_time) }}
           </td>
-        </ng-container>        <!-- Tickets Column -->
+        </ng-container>
+        <!-- Tickets Column -->
         <ng-container matColumnDef="tickets">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Tickets</th>
           <td mat-cell *matCellDef="let booking">
@@ -199,15 +200,7 @@
               [ngClass]="getStatusClass(booking.status)"
             >
               <div style="display: flex; align-items: center; gap: 4px">
-                <mat-icon *ngIf="booking.status === 'CONFIRMED'"
-                  >event_available</mat-icon
-                >
-                <mat-icon *ngIf="booking.status === 'COMPLETED'"
-                  >event_seat</mat-icon
-                >
-                <mat-icon *ngIf="booking.status === 'CANCELLED'"
-                  >event_busy</mat-icon
-                >
+                <mat-icon>{{ getStatusIcon(booking.status) }}</mat-icon>
                 {{ booking.status }}
               </div>
             </span>
@@ -294,16 +287,16 @@
                       <td>${{ ticket.price.toFixed(2) }}</td>
                       <td>{{ ticket.issued_date | date : "medium" }}</td>
                       <td>
-                        <span class="status-badge" [ngClass]="ticket.status">
+                        <span
+                          class="status-badge"
+                          [ngClass]="getStatusClass(ticket.status)"
+                        >
                           <div
                             style="display: flex; align-items: center; gap: 4px"
                           >
-                            <mat-icon *ngIf="ticket.status === 'CONFIRMED'"
-                              >check_circle</mat-icon
-                            >
-                            <mat-icon *ngIf="ticket.status === 'CANCELLED'"
-                              >cancel</mat-icon
-                            >
+                            <mat-icon>{{
+                              getStatusIcon(ticket.status)
+                            }}</mat-icon>
                             {{ ticket.status }}
                           </div>
                         </span>
