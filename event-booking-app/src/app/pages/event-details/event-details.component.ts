@@ -36,7 +36,7 @@ export class EventDetailsComponent implements OnInit {
   loadEventDetails(eventId: string) {
     this.http.get<{ events: Event[] }>('./assets/data/events.json').subscribe({
       next: (data) => {
-        this.event = data.events.find((e) => e.id === +eventId) || null;
+        this.event = data.events.find((e) => e.id === eventId) || null;
         this.loading = false;
         if (!this.event) {
           this.error = true;
@@ -51,7 +51,7 @@ export class EventDetailsComponent implements OnInit {
   }
 
   incrementTickets() {
-    if (this.event && this.ticketsToBook < this.event.availableTickets) {
+    if (this.event && this.ticketsToBook < this.event.available_tickets!) {
       this.ticketsToBook++;
     }
   }
@@ -63,7 +63,7 @@ export class EventDetailsComponent implements OnInit {
   }
 
   get totalPrice(): number {
-    return this.event ? this.event.price * this.ticketsToBook : 0;
+    return this.event ? this.event.price! * this.ticketsToBook : 0;
   }
   onBookNow() {
     if (this.event) {

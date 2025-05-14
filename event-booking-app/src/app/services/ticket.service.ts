@@ -1,53 +1,45 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, of } from 'rxjs';
-
-export interface Ticket {
-  id: number;
-  booking_id: number;
-  ticket_code: string;
-  price: number;
-  issued_date: Date;
-  status: 'confirmed' | 'cancelled';
-}
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { ToastService } from './toast.service';
+import { Booking, Ticket } from './booking.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TicketService {
-  private mockTicketsUrl = 'assets/data/tickets.json'; // Path to mock ticket data
+  private apiUrl = `${environment.apiUrl}/bookings`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private toastService: ToastService) {}
 
-  // Get tickets for a specific booking
-  getTicketsForBooking(bookingId: number): Observable<Ticket[]> {
+  // Get ticket by ID - no separate endpoint needed as this is handled by the booking service
+  getTicket(ticketId: string): Observable<Ticket> {
     return this.http
-      .get<Ticket[]>(this.mockTicketsUrl)
+      .get<{ status: string; data: { ticket: any } }>(
+        `${this.apiUrl}/tickets/${ticketId}`
+      )
       .pipe(
-        map((tickets: Ticket[]) =>
-          tickets.filter((ticket) => ticket.booking_id === bookingId)
-        )
+        map((response) => ({
+          ...response.data.ticket,
+          issued_date: new Date(response.data.ticket.issued_date),
+        })),
+        catchError((error) => {
+          this.toastService.error('Failed to load ticket');
+          return this.handleError(error);
+        })
       );
   }
-  // Create a ticket (mocked)
-  createTicket(bookingId: number, ticketData: Ticket): Observable<Ticket> {
-    return of({
-      ...ticketData,
-      id: Math.floor(Math.random() * 1000), // Mock ticket ID
-      booking_id: bookingId,
-      status: 'confirmed', // Default status for new tickets
-    });
-  }
-  // Cancel a ticket (mocked)
-  cancelTicket(ticketId: number): Observable<any> {
-    return of({ success: true }); // Mock success response
+
+  // Helper method to get tickets from a booking object
+  getTicketsFromBooking(booking: Booking): Ticket[] {
+    return booking.ticket_items || [];
   }
 
-  // Update ticket status (mocked)
-  updateTicketStatus(
-    ticketId: number,
-    status: 'confirmed' | 'cancelled'
-  ): Observable<any> {
-    return of({ success: true, ticketId, status }); // Mock success response
+  // Error handling
+  private handleError(error: any) {
+    console.error('API error:', error);
+    return throwError(() => error);
   }
 }

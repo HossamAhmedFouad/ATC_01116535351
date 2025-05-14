@@ -33,8 +33,8 @@
             All
           </mat-chip-option>
           <mat-chip-option
-            [selected]="selectedStatusFilter === 'confirmed'"
-            (click)="filterByStatus('confirmed')"
+            [selected]="selectedStatusFilter === 'CONFIRMED'"
+            (click)="filterByStatus('CONFIRMED')"
             class="confirmed-chip"
             color="primary"
           >
@@ -43,8 +43,8 @@
             </div>
           </mat-chip-option>
           <mat-chip-option
-            [selected]="selectedStatusFilter === 'cancelled'"
-            (click)="filterByStatus('cancelled')"
+            [selected]="selectedStatusFilter === 'CANCELLED'"
+            (click)="filterByStatus('CANCELLED')"
             class="cancelled-chip"
             color="warn"
           >
@@ -140,10 +140,10 @@
           <td mat-cell *matCellDef="let ticket">
             <span class="status-badge" [ngClass]="ticket.status">
               <div style="display: flex; align-items: center; gap: 4px">
-                <mat-icon *ngIf="ticket.status === 'confirmed'"
+                <mat-icon *ngIf="ticket.status === 'CONFIRMED'"
                   >check_circle</mat-icon
                 >
-                <mat-icon *ngIf="ticket.status === 'cancelled'"
+                <mat-icon *ngIf="ticket.status === 'CANCELLED'"
                   >cancel</mat-icon
                 >
                 {{ ticket.status }}
@@ -160,7 +160,7 @@
               mat-mini-fab
               color="primary"
               class="action-button"
-              [disabled]="ticket.status === 'cancelled'"
+              [disabled]="ticket.status === 'CANCELLED'"
               matTooltip="Download Ticket"
               (click)="downloadTicket(ticket)"
             >
@@ -173,7 +173,7 @@
         <tr
           mat-row
           *matRowDef="let row; columns: displayedColumns"
-          [ngClass]="{ 'cancelled-row': row.status === 'cancelled' }"
+          [ngClass]="{ 'cancelled-row': row.status === 'CANCELLED' }"
         ></tr>
 
         <!-- Row shown when no matching data -->

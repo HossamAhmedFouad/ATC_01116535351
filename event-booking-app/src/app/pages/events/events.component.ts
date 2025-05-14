@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EventCardComponent} from '../../components/event-card/event-card.component';
+import { EventCardComponent } from '../../components/event-card/event-card.component';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
 import { HttpClient } from '@angular/common/http';
 import { Event } from '../../services/event.service';
@@ -12,7 +12,7 @@ import { EventService } from '../../services/event.service';
   standalone: true,
   imports: [CommonModule, FormsModule, EventCardComponent, SearchBarComponent],
   templateUrl: './events.component.html',
-  styleUrls: ['events.component.css']
+  styleUrls: ['events.component.css'],
 })
 export class EventsComponent implements OnInit {
   searchQuery = '';
@@ -28,7 +28,7 @@ export class EventsComponent implements OnInit {
 
   locations: string[] = [];
   categories: string[] = [];
-  
+
   events: Event[] = [];
 
   constructor(private http: HttpClient, private eventService: EventService) {}
@@ -44,7 +44,7 @@ export class EventsComponent implements OnInit {
         this.events = events;
         this.totalPages = Math.ceil(this.events.length / this.itemsPerPage);
       },
-      error: (error) => console.error('Error loading events:', error)
+      error: (error) => console.error('Error loading events:', error),
     });
   }
 
@@ -54,21 +54,38 @@ export class EventsComponent implements OnInit {
         this.locations = metadata.locations;
         this.categories = metadata.categories;
       },
-      error: (error) => console.error('Error loading metadata:', error)
+      error: (error) => console.error('Error loading metadata:', error),
     });
   }
 
   get filteredEvents() {
     console.log('Filtering events...');
-    const filtered = this.events.filter(event => {
-      const matchesSearch = event.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                          event.description.toLowerCase().includes(this.searchQuery.toLowerCase());
-      const matchesPrice = !this.priceFilter || this.matchPriceRange(event.price, this.priceFilter);
-      const matchesLocation = !this.locationFilter || event.location.toLowerCase().includes(this.locationFilter.toLowerCase());
-      const matchesDate = !this.dateFilter || this.matchDateFilter(event.date, this.dateFilter);
-      const matchesCategory = !this.categoryFilter || event.category === this.categoryFilter;
+    const filtered = this.events.filter((event) => {
+      const matchesSearch =
+        event.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        event.description
+          ?.toLowerCase()
+          .includes(this.searchQuery.toLowerCase());
+      const matchesPrice =
+        !this.priceFilter ||
+        this.matchPriceRange(event.price || 0, this.priceFilter);
+      const matchesLocation =
+        !this.locationFilter ||
+        event.location
+          ?.toLowerCase()
+          .includes(this.locationFilter.toLowerCase());
+      const matchesDate =
+        !this.dateFilter || this.matchDateFilter(event.date, this.dateFilter);
+      const matchesCategory =
+        !this.categoryFilter || event.category === this.categoryFilter;
 
-      return matchesSearch && matchesPrice && matchesLocation && matchesDate && matchesCategory;
+      return (
+        matchesSearch &&
+        matchesPrice &&
+        matchesLocation &&
+        matchesDate &&
+        matchesCategory
+      );
     });
     console.log('Filtered events count:', filtered.length);
     return filtered;
@@ -123,7 +140,7 @@ export class EventsComponent implements OnInit {
   private matchDateFilter(eventDate: string | Date, filter: string): boolean {
     const today = new Date();
     const eventDateTime = new Date(eventDate);
-    
+
     switch (filter) {
       case 'today':
         return eventDateTime.toDateString() === today.toDateString();
@@ -131,11 +148,21 @@ export class EventsComponent implements OnInit {
         const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
         return eventDateTime >= weekAgo && eventDateTime <= today;
       case 'thisMonth':
-        return eventDateTime.getMonth() === today.getMonth() && 
-               eventDateTime.getFullYear() === today.getFullYear();
+        return (
+          eventDateTime.getMonth() === today.getMonth() &&
+          eventDateTime.getFullYear() === today.getFullYear()
+        );
       case 'nextMonth':
-        const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-        const nextMonthEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+        const nextMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() + 1,
+          1
+        );
+        const nextMonthEnd = new Date(
+          today.getFullYear(),
+          today.getMonth() + 2,
+          0
+        );
         return eventDateTime >= nextMonth && eventDateTime <= nextMonthEnd;
       default:
         return true;
@@ -150,4 +177,4 @@ export class EventsComponent implements OnInit {
     this.categoryFilter = '';
     this.currentPage = 1;
   }
-} 
+}

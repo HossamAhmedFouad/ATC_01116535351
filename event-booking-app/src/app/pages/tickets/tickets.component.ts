@@ -15,10 +15,11 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TicketService, Ticket } from '../../services/ticket.service';
-import { BookingService } from '../../services/booking.service';
+import { TicketService } from '../../services/ticket.service';
+import { BookingService, Ticket } from '../../services/booking.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-tickets',
@@ -54,83 +55,63 @@ export class TicketsComponent implements OnInit {
   filteredTickets = new MatTableDataSource<Ticket>();
   isLoading = true;
   searchQuery = '';
-  selectedStatusFilter: 'all' | 'confirmed' | 'cancelled' = 'all';
+  selectedStatusFilter: 'all' | 'CONFIRMED' | 'CANCELLED' = 'all';
 
   // Properties for ticket counts
   get confirmedTicketsCount(): number {
-    return this.tickets.filter((ticket) => ticket.status === 'confirmed')
+    return this.tickets.filter((ticket) => ticket.status === 'CONFIRMED')
       .length;
   }
 
   get cancelledTicketsCount(): number {
-    return this.tickets.filter((ticket) => ticket.status === 'cancelled')
+    return this.tickets.filter((ticket) => ticket.status === 'CANCELLED')
       .length;
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<Ticket>;
-
   constructor(
     private ticketService: TicketService,
     private bookingService: BookingService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
     this.loadUserTickets();
   }
-
   loadUserTickets(): void {
-    // Get the current user ID (in a real app, this would come from authentication)
-    const userId = 1; // Mock user ID
-
     this.isLoading = true;
 
     // Get all bookings for the user
-    this.bookingService.getUserBookings(userId).subscribe(
+    this.bookingService.getUserBookings().subscribe(
       (bookings) => {
-        // Create an array to hold all promises for ticket fetching
-        const ticketRequests: Promise<Ticket[]>[] = [];
-
-        // For each booking, get the related tickets
+        // Extract all tickets from bookings
+        this.tickets = [];
         bookings.forEach((booking) => {
-          const promise = new Promise<Ticket[]>((resolve) => {
-            this.ticketService.getTicketsForBooking(booking.id).subscribe(
-              (tickets) => resolve(tickets),
-              (error) => {
-                console.error(
-                  `Error fetching tickets for booking ${booking.id}:`,
-                  error
-                );
-                resolve([]);
-              }
-            );
-          });
-          ticketRequests.push(promise);
+          if (booking.ticket_items && booking.ticket_items.length > 0) {
+            this.tickets.push(...booking.ticket_items);
+          }
         });
 
-        // Wait for all ticket requests to complete
-        Promise.all(ticketRequests).then((ticketArrays) => {
-          // Flatten the array of ticket arrays into a single array
-          this.tickets = ticketArrays.flat();
-          this.filteredTickets.data = [...this.tickets];
+        this.filteredTickets.data = [...this.tickets];
+        this.isLoading = false;
 
-          this.isLoading = false;
-          // Set up table after data is loaded
-          setTimeout(() => {
-            if (this.table) {
-              this.filteredTickets.paginator = this.paginator;
-              this.filteredTickets.sort = this.sort;
-              this.table.dataSource = this.filteredTickets;
-            }
-          });
+        // Set up table after data is loaded
+        setTimeout(() => {
+          if (this.table) {
+            this.filteredTickets.paginator = this.paginator;
+            this.filteredTickets.sort = this.sort;
+            this.table.dataSource = this.filteredTickets;
+          }
         });
       },
       (error) => {
         console.error('Error fetching user bookings:', error);
         this.isLoading = false;
+        this.toastService.error('Failed to load your tickets');
       }
     );
   }
@@ -142,7 +123,7 @@ export class TicketsComponent implements OnInit {
     this.filterTickets();
   }
 
-  filterByStatus(status: 'all' | 'confirmed' | 'cancelled'): void {
+  filterByStatus(status: 'all' | 'CONFIRMED' | 'CANCELLED'): void {
     this.selectedStatusFilter = status;
     this.filterTickets();
   }
@@ -177,10 +158,9 @@ export class TicketsComponent implements OnInit {
   }
 
   getStatusColor(status: string): string {
-    return status === 'confirmed' ? 'primary' : 'warn';
+    return status === 'CONFIRMED' ? 'primary' : 'warn';
   }
-
-  viewBookingDetails(bookingId: number): void {
+  viewBookingDetails(bookingId: string): void {
     this.router.navigate(['/bookings', bookingId]);
   }
 

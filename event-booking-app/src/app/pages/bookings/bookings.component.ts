@@ -28,10 +28,11 @@ import {
   trigger,
 } from '@angular/animations';
 
-import { Booking, BookingService } from '../../services/booking.service';
+import { Booking, Ticket } from '../../services/booking.service';
+import { BookingService } from '../../services/booking.service';
 import { EventService } from '../../services/event.service';
 import { AuthService } from '../../services/auth.service';
-import { TicketService, Ticket } from '../../services/ticket.service';
+import { ToastService } from '../../services/toast.service';
 
 // Rename Event import to avoid conflict with DOM Event
 import { Event as EventModel } from '../../services/event.service';
@@ -86,47 +87,41 @@ export class BookingsComponent implements OnInit {
   filteredBookings = new MatTableDataSource<Booking>();
   isLoading = true;
   searchQuery = '';
-  selectedStatusFilter: 'all' | 'booked' | 'cancelled' | 'completed' = 'all';
-  events: Map<number, EventModel> = new Map();
-
+  selectedStatusFilter: 'all' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' = 'all';
+  events: Map<string, EventModel> = new Map();
   // Properties for booking counts
   get bookedCount(): number {
-    return this.bookings.filter((booking) => booking.status === 'booked')
+    return this.bookings.filter((booking) => booking.status === 'CONFIRMED')
       .length;
   }
 
   get cancelledCount(): number {
-    return this.bookings.filter((booking) => booking.status === 'cancelled')
+    return this.bookings.filter((booking) => booking.status === 'CANCELLED')
       .length;
   }
 
   get completedCount(): number {
-    return this.bookings.filter((booking) => booking.status === 'completed')
+    return this.bookings.filter((booking) => booking.status === 'COMPLETED')
       .length;
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatTable) table!: MatTable<Booking>;
-
   constructor(
     private bookingService: BookingService,
     private eventService: EventService,
-    private ticketService: TicketService,
     private authService: AuthService,
     private router: Router,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
     this.loadUserBookings();
   }
-
   loadUserBookings(): void {
-    // Get the current user ID (in a real app, this would come from authentication)
-    const userId = 1; // Mock user ID
-
     this.isLoading = true;
 
     // Get all events first to be able to display event details
@@ -138,7 +133,7 @@ export class BookingsComponent implements OnInit {
         });
 
         // Now get bookings
-        this.bookingService.getUserBookings(userId).subscribe(
+        this.bookingService.getUserBookings().subscribe(
           (bookings) => {
             this.bookings = bookings;
             this.filteredBookings.data = [...this.bookings];
@@ -156,9 +151,8 @@ export class BookingsComponent implements OnInit {
           (error) => {
             console.error('Error fetching user bookings:', error);
             this.isLoading = false;
-            this.showNotification(
-              'Error loading bookings. Please try again later.',
-              'error'
+            this.toastService.error(
+              'Error loading bookings. Please try again later.'
             );
           }
         );
@@ -166,9 +160,8 @@ export class BookingsComponent implements OnInit {
       (error) => {
         console.error('Error fetching events:', error);
         this.isLoading = false;
-        this.showNotification(
-          'Error loading events. Please try again later.',
-          'error'
+        this.toastService.error(
+          'Error loading events. Please try again later.'
         );
       }
     );
@@ -178,8 +171,9 @@ export class BookingsComponent implements OnInit {
     this.searchQuery = inputElement.value.trim().toLowerCase();
     this.filterBookings();
   }
-
-  filterByStatus(status: 'all' | 'booked' | 'cancelled' | 'completed'): void {
+  filterByStatus(
+    status: 'all' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
+  ): void {
     this.selectedStatusFilter = status;
     this.filterBookings();
   }
@@ -191,12 +185,10 @@ export class BookingsComponent implements OnInit {
       return (
         booking.id.toString().includes(this.searchQuery) ||
         (event && event.title.toLowerCase().includes(this.searchQuery)) ||
-        (event && event.location.toLowerCase().includes(this.searchQuery)) ||
+        (event && event.location?.toLowerCase().includes(this.searchQuery)) ||
         booking.status.toLowerCase().includes(this.searchQuery)
       );
-    });
-
-    // Then filter by status if not 'all'
+    }); // Then filter by status if not 'all'
     if (this.selectedStatusFilter !== 'all') {
       filtered = filtered.filter(
         (booking) => booking.status === this.selectedStatusFilter
@@ -215,14 +207,14 @@ export class BookingsComponent implements OnInit {
       this.table.dataSource = this.filteredBookings;
     }
   }
-  getEventDetails(eventId: number): EventModel | undefined {
+
+  getEventDetails(eventId: string): EventModel | undefined {
     return this.events.get(eventId);
   }
 
-  viewEventDetails(eventId: number): void {
+  viewEventDetails(eventId: string): void {
     this.router.navigate(['/events', eventId]);
   }
-
   downloadTicket(ticket: Ticket): void {
     // In a real app, this would generate and download a PDF ticket
     alert(`Downloading ticket: ${ticket.ticket_code}`);
@@ -240,63 +232,52 @@ export class BookingsComponent implements OnInit {
 
     this.isLoading = true;
     this.bookingService.cancelBooking(booking.id).subscribe(
-      (response) => {
+      (updatedBooking) => {
         // Update the status locally
         const index = this.bookings.findIndex((b) => b.id === booking.id);
         if (index !== -1) {
-          this.bookings[index].status = 'cancelled';
-          // Also update all tickets
-          if (this.bookings[index].ticketList) {
-            this.bookings[index].ticketList.forEach((ticket) => {
-              ticket.status = 'cancelled';
-            });
-          }
+          this.bookings[index] = updatedBooking;
         }
 
         // Update the filtered list
         this.filterBookings();
         this.isLoading = false;
-        this.showNotification('Booking cancelled successfully', 'success');
+        this.toastService.success('Booking cancelled successfully');
       },
       (error) => {
         console.error('Error cancelling booking:', error);
         this.isLoading = false;
-        this.showNotification(
-          'Error cancelling booking. Please try again later.',
-          'error'
+        this.toastService.error(
+          'Error cancelling booking. Please try again later.'
         );
       }
     );
   }
-
   getStatusClass(status: string): string {
     switch (status) {
-      case 'booked':
+      case 'CONFIRMED':
         return 'booked';
-      case 'cancelled':
+      case 'CANCELLED':
         return 'cancelled';
-      case 'completed':
+      case 'COMPLETED':
         return 'completed';
       default:
         return '';
     }
   }
-
   getFormattedDate(date: Date | string): string {
     return new Date(date).toLocaleString();
   }
 
+  // This method is now redundant since we're using the ToastService directly
+  // We'll keep it for compatibility with existing code but update it to use ToastService
   showNotification(message: string, type: 'success' | 'error' | 'info'): void {
-    this.snackBar.open(message, 'Close', {
-      duration: 5000,
-      panelClass:
-        type === 'error'
-          ? ['error-snackbar']
-          : type === 'success'
-          ? ['success-snackbar']
-          : ['info-snackbar'],
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-    });
+    if (type === 'error') {
+      this.toastService.error(message);
+    } else if (type === 'success') {
+      this.toastService.success(message);
+    } else {
+      this.toastService.info(message);
+    }
   }
 }

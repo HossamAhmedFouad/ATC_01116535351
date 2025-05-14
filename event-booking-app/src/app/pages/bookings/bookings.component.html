@@ -63,8 +63,8 @@
             All
           </mat-chip-option>
           <mat-chip-option
-            [selected]="selectedStatusFilter === 'booked'"
-            (click)="filterByStatus('booked')"
+            [selected]="selectedStatusFilter === 'CONFIRMED'"
+            (click)="filterByStatus('CONFIRMED')"
             class="booked-chip"
             color="primary"
           >
@@ -73,8 +73,8 @@
             </div>
           </mat-chip-option>
           <mat-chip-option
-            [selected]="selectedStatusFilter === 'completed'"
-            (click)="filterByStatus('completed')"
+            [selected]="selectedStatusFilter === 'COMPLETED'"
+            (click)="filterByStatus('COMPLETED')"
             class="completed-chip"
             color="accent"
           >
@@ -83,8 +83,8 @@
             </div>
           </mat-chip-option>
           <mat-chip-option
-            [selected]="selectedStatusFilter === 'cancelled'"
-            (click)="filterByStatus('cancelled')"
+            [selected]="selectedStatusFilter === 'CANCELLED'"
+            (click)="filterByStatus('CANCELLED')"
             class="cancelled-chip"
             color="warn"
           >
@@ -204,13 +204,13 @@
               [ngClass]="getStatusClass(booking.status)"
             >
               <div style="display: flex; align-items: center; gap: 4px">
-                <mat-icon *ngIf="booking.status === 'booked'"
+                <mat-icon *ngIf="booking.status === 'CONFIRMED'"
                   >event_available</mat-icon
                 >
-                <mat-icon *ngIf="booking.status === 'completed'"
+                <mat-icon *ngIf="booking.status === 'COMPLETED'"
                   >event_seat</mat-icon
                 >
-                <mat-icon *ngIf="booking.status === 'cancelled'"
+                <mat-icon *ngIf="booking.status === 'CANCELLED'"
                   >event_busy</mat-icon
                 >
                 {{ booking.status }}
@@ -238,8 +238,8 @@
                 color="warn"
                 class="action-button"
                 [disabled]="
-                  booking.status === 'cancelled' ||
-                  booking.status === 'completed'
+                  booking.status === 'CANCELLED' ||
+                  booking.status === 'COMPLETED'
                 "
                 matTooltip="Cancel Booking"
                 (click)="cancelBooking(booking)"
@@ -265,12 +265,12 @@
             >
               <div class="detail-header">
                 <h3>Tickets for this booking</h3>
-                <p>{{ booking.ticketList?.length || 0 }} tickets</p>
+                <p>{{ booking.tickets_count || 0 }} tickets</p>
               </div>
 
               <div
                 class="detail-content"
-                *ngIf="booking.ticketList && booking.ticketList.length > 0"
+                *ngIf="booking.ticket_items && booking.ticket_items.length > 0"
               >
                 <table class="tickets-table">
                   <thead>
@@ -285,9 +285,9 @@
                   </thead>
                   <tbody>
                     <tr
-                      *ngFor="let ticket of booking.ticketList"
+                      *ngFor="let ticket of booking.ticket_items"
                       [ngClass]="{
-                        'cancelled-row': ticket.status === 'cancelled'
+                        'cancelled-row': ticket.status === 'CANCELLED'
                       }"
                     >
                       <td>#{{ ticket.id }}</td>
@@ -303,10 +303,10 @@
                           <div
                             style="display: flex; align-items: center; gap: 4px"
                           >
-                            <mat-icon *ngIf="ticket.status === 'confirmed'"
+                            <mat-icon *ngIf="ticket.status === 'CONFIRMED'"
                               >check_circle</mat-icon
                             >
-                            <mat-icon *ngIf="ticket.status === 'cancelled'"
+                            <mat-icon *ngIf="ticket.status === 'CANCELLED'"
                               >cancel</mat-icon
                             >
                             {{ ticket.status }}
@@ -318,7 +318,7 @@
                           mat-mini-fab
                           color="primary"
                           class="action-button"
-                          [disabled]="ticket.status === 'cancelled'"
+                          [disabled]="ticket.status === 'CANCELLED'"
                           matTooltip="Download Ticket"
                           (click)="downloadTicket(ticket)"
                         >
@@ -329,10 +329,11 @@
                   </tbody>
                 </table>
               </div>
-
               <div
                 class="detail-empty"
-                *ngIf="!booking.ticketList || booking.ticketList.length === 0"
+                *ngIf="
+                  !booking.ticket_items || booking.ticket_items.length === 0
+                "
               >
                 <p>No tickets found for this booking.</p>
               </div>
@@ -347,8 +348,8 @@
           class="booking-row"
           [class.expanded-row]="expandedElement === booking"
           [ngClass]="{
-            'cancelled-row': booking.status === 'cancelled',
-            'completed-row': booking.status === 'completed'
+            'cancelled-row': booking.status === 'CANCELLED',
+            'completed-row': booking.status === 'COMPLETED'
           }"
           (click)="
             expandedElement = expandedElement === booking ? null : booking

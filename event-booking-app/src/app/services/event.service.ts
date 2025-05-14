@@ -1,88 +1,140 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { ToastService } from './toast.service';
 
 export interface Event {
-  id: number;
+  id: string;
   title: string;
   date: Date;
-  location: string;
-  description: string;
-  imageUrl: string;
-  price: number;
-  category: string;
-  duration: string;
-  organizer: string;
-  availableTickets: number;
-  schedule?: {
-    day: string;
-    events: {
-      time: string;
-      title: string;
-    }[];
-  }[];
+  location?: string;
+  description?: string;
+  image_url?: string;
+  price?: number;
+  category?: string;
+  duration?: string;
+  organizer?: string;
+  available_tickets?: number;
+  schedule?: any;
 }
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class EventService {
   private apiUrl = `${environment.apiUrl}/events`; // Uses environment configuration
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private toastService: ToastService
+  ) {}
 
   // Get all events
-  getEvents(): Observable<Event[]> {
-    return this.http.get<{ events: Event[] }>('/assets/data/events.json')
+  getEvents(category?: string): Observable<Event[]> {
+    const url = category ? `${this.apiUrl}?category=${category}` : this.apiUrl;
+
+    return this.http
+      .get<{ status: string; results: number; data: { events: any[] } }>(url)
       .pipe(
-        map(response => response.events.map(event => ({
-          ...event,
-          date: new Date(event.date)
-        }))),
-        catchError(this.handleError)
+        map((response) =>
+          response.data.events.map((event) => ({
+            ...event,
+            date: new Date(event.date),
+          }))
+        ),
+        catchError((error) => {
+          this.toastService.error('Failed to load events');
+          return this.handleError(error);
+        })
       );
   }
 
   // Get a single event by ID
-  getEvent(id: number): Observable<Event> {
-    return this.http.get<{ events: Event[] }>('/assets/data/events.json')
+  getEvent(id: string): Observable<Event> {
+    return this.http
+      .get<{ status: string; data: { event: any } }>(`${this.apiUrl}/${id}`)
       .pipe(
-        map(response => {
-          const event = response.events.find(e => e.id === id);
-          if (event) {
-            return {
-              ...event,
-              date: new Date(event.date)
-            };
-          }
-          throw new Error(`Event with id ${id} not found`);
-        }),
-        catchError(this.handleError)
+        map((response) => ({
+          ...response.data.event,
+          date: new Date(response.data.event.date),
+        })),
+        catchError((error) => {
+          this.toastService.error(`Failed to load event with ID ${id}`);
+          return this.handleError(error);
+        })
       );
   }
 
-  // Create a new event
+  // Search events
+  searchEvents(query: string): Observable<Event[]> {
+    return this.http
+      .get<{ status: string; results: number; data: { events: any[] } }>(
+        `${this.apiUrl}/search?query=${query}`
+      )
+      .pipe(
+        map((response) =>
+          response.data.events.map((event) => ({
+            ...event,
+            date: new Date(event.date),
+          }))
+        ),
+        catchError((error) => {
+          this.toastService.error('Failed to search events');
+          return this.handleError(error);
+        })
+      );
+  }
+  // Create a new event (admin only)
   createEvent(event: Omit<Event, 'id'>): Observable<Event> {
-    // In a real implementation, this would make an HTTP POST request
-    return throwError(() => new Error('Creating events requires a backend API implementation'));
+    return this.http
+      .post<{ status: string; data: { event: any } }>(this.apiUrl, event)
+      .pipe(
+        map((response) => ({
+          ...response.data.event,
+          date: new Date(response.data.event.date),
+        })),
+        catchError((error) => {
+          this.toastService.error('Failed to create event');
+          return this.handleError(error);
+        })
+      );
   }
 
-  // Update an existing event
-  updateEvent(event: Event): Observable<Event> {
-    // In a real implementation, this would make an HTTP PUT request
-    return throwError(() => new Error('Updating events requires a backend API implementation'));
+  // Update an existing event (admin only)
+  updateEvent(id: string, event: Partial<Event>): Observable<Event> {
+    return this.http
+      .patch<{ status: string; data: { event: any } }>(
+        `${this.apiUrl}/${id}`,
+        event
+      )
+      .pipe(
+        map((response) => ({
+          ...response.data.event,
+          date: new Date(response.data.event.date),
+        })),
+        catchError((error) => {
+          this.toastService.error('Failed to update event');
+          return this.handleError(error);
+        })
+      );
   }
 
-  // Delete an event
-  deleteEvent(id: number): Observable<void> {
-    // In a real implementation, this would make an HTTP DELETE request
-    return throwError(() => new Error('Deleting events requires a backend API implementation'));
+  // Delete an event (admin only)
+  deleteEvent(id: string): Observable<void> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`).pipe(
+      map(() => undefined),
+      catchError((error) => {
+        this.toastService.error('Failed to delete event');
+        return this.handleError(error);
+      })
+    );
   }
 
+  // Navigate to event details page
   viewEvent(eventId: number): void {
     this.router.navigate(['/events', eventId]);
   }
@@ -93,7 +145,21 @@ export class EventService {
     return throwError(() => error);
   }
 
-  getEventMetadata(): Observable<{ locations: string[]; categories: string[] }> {
-    return this.http.get<{ locations: string[]; categories: string[] }>('/assets/data/events-metadata.json');
+  // Get metadata like locations and categories (we'll need to implement this in the backend)
+  getEventMetadata(): Observable<{
+    locations: string[];
+    categories: string[];
+  }> {
+    // Ideally this would be an API endpoint, but for now we'll use the local data
+    return this.http
+      .get<{ locations: string[]; categories: string[] }>(
+        '/assets/data/events-metadata.json'
+      )
+      .pipe(
+        catchError((error) => {
+          this.toastService.error('Failed to load event metadata');
+          return this.handleError(error);
+        })
+      );
   }
 }

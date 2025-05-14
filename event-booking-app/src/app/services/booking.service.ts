@@ -1,162 +1,168 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError, forkJoin } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
-import { TicketService, Ticket } from './ticket.service';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
+import { ToastService } from './toast.service';
+
+export interface Ticket {
+  id: string;
+  booking_id: string;
+  ticket_code: string;
+  price: number;
+  issued_date: Date;
+  status: string;
+}
 
 export interface Booking {
-  id: number;
-  user_id: number;
-  event_id: number;
-  booking_time: Date | string;
+  id: string;
+  user_id: string;
+  event_id: string;
+  booking_time: Date;
   updated_at: Date;
-  tickets: number;
+  tickets_count: number;
   total_price: number;
-  status: 'booked' | 'cancelled' | 'completed';
-  ticketList?: Ticket[]; // To store the tickets related to this booking
+  status: string;
+  ticket_items?: Ticket[];
+  events?: any; // Event details when included
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class BookingService {
-  private mockDataUrl = 'assets/data/bookings.json'; // Path to the mock JSON file
+  private apiUrl = `${environment.apiUrl}/bookings`;
 
-  constructor(private http: HttpClient, private ticketService: TicketService) {}
-  // Get bookings only if a user is logged in
-  getUserBookings(id: number): Observable<Booking[]> {
-    return this.http.get<Booking[]>(this.mockDataUrl).pipe(
-      map((bookings) => bookings.filter((booking) => booking.user_id === id)),
-      map((bookings) =>
-        bookings.map((booking) => ({
-          ...booking,
-          bookingDate: new Date(booking.booking_time), // Convert string to Date if needed
-        }))
-      ),
-      switchMap((bookings) => {
-        if (bookings.length === 0) {
-          return of([]);
-        }
-        // Create an array of observables for fetching tickets for each booking
-        const bookingWithTicketsObservables = bookings.map((booking) =>
-          this.ticketService.getTicketsForBooking(booking.id).pipe(
-            map((tickets) => ({
-              ...booking,
-              ticketList: tickets,
-            }))
-          )
-        );
-        // Combine all the observables into one that emits when all are complete
-        return forkJoin(bookingWithTicketsObservables);
-      })
-    );
+  constructor(private http: HttpClient, private toastService: ToastService) {}
+
+  // Get bookings for the current logged in user
+  getUserBookings(): Observable<Booking[]> {
+    return this.http
+      .get<{ status: string; results: number; data: { bookings: any[] } }>(
+        `${this.apiUrl}/my-bookings`
+      )
+      .pipe(
+        map((response) => {
+          return response.data.bookings.map((booking) => ({
+            ...booking,
+            booking_time: new Date(booking.booking_time),
+            updated_at: new Date(booking.updated_at),
+          }));
+        }),
+        catchError((error) => {
+          this.toastService.error('Failed to load your bookings');
+          return this.handleError(error);
+        })
+      );
   }
-  // Book an event (mocked)
+
+  // Get a single booking by ID
+  getBooking(id: string): Observable<Booking> {
+    return this.http
+      .get<{ status: string; data: { booking: any } }>(`${this.apiUrl}/${id}`)
+      .pipe(
+        map((response) => ({
+          ...response.data.booking,
+          booking_time: new Date(response.data.booking.booking_time),
+          updated_at: new Date(response.data.booking.updated_at),
+        })),
+        catchError((error) => {
+          this.toastService.error(`Failed to load booking details`);
+          return this.handleError(error);
+        })
+      );
+  }
+
+  // Book an event
   bookEvent(
-    eventId: number,
-    ticketCount: number = 1,
-    price: number = 100
+    eventId: string,
+    ticketsCount: number,
+    totalPrice: number
   ): Observable<Booking> {
-    const mockBooking = {
-      id: Math.floor(Math.random() * 1000), // Mock ID
-      user_id: 1, // Mock user ID (replace with actual logic if needed)
+    const bookingData = {
       event_id: eventId,
-      booking_time: new Date(),
-      updated_at: new Date(),
-      tickets: ticketCount, // Number of tickets
-      total_price: price * ticketCount, // Calculate total price
-      status: 'booked' as const,
-      ticketList: [],
+      tickets_count: ticketsCount,
+      total_price: totalPrice,
     };
 
-    return of(mockBooking).pipe(
-      switchMap((booking) => {
-        // Create tickets for the booking
-        const ticketCreationObservables = [];
-        for (let i = 0; i < ticketCount; i++) {
-          // Generate a random ticket code
-          const ticketCode = `TKT-${Math.random()
-            .toString(36)
-            .substring(2, 11)
-            .toUpperCase()}`;
-
-          // Create a ticket
-          const ticketData = {
-            id: 0, // Will be set by the service
-            booking_id: booking.id,
-            ticket_code: ticketCode,
-            price: price,
-            issued_date: new Date(),
-            status: 'confirmed' as const,
-          };
-
-          ticketCreationObservables.push(
-            this.ticketService.createTicket(booking.id, ticketData)
-          );
-        }
-
-        // Combine ticket creation observables
-        return forkJoin(ticketCreationObservables).pipe(
-          map((tickets) => {
-            return {
-              ...booking,
-              ticketList: tickets,
-            };
-          })
-        );
-      })
-    );
+    return this.http
+      .post<{ status: string; data: any }>(`${this.apiUrl}`, bookingData)
+      .pipe(
+        map((response) => ({
+          ...response.data.booking,
+          booking_time: new Date(response.data.booking.booking_time),
+          updated_at: new Date(response.data.booking.updated_at),
+          ticket_items: response.data.tickets,
+        })),
+        catchError((error) => {
+          this.toastService.error('Failed to book event');
+          return this.handleError(error);
+        })
+      );
   }
-  // Cancel a booking (mocked)
-  cancelBooking(bookingId: number): Observable<any> {
-    // First get tickets for this booking
-    return this.ticketService.getTicketsForBooking(bookingId).pipe(
-      switchMap((tickets) => {
-        // Create an array of observables to update all ticket statuses
-        const updateTicketStatusObservables = tickets.map((ticket) =>
-          this.ticketService.updateTicketStatus(ticket.id, 'cancelled')
-        );
 
-        // If there are tickets to update, update them first
-        if (updateTicketStatusObservables.length > 0) {
-          return forkJoin(updateTicketStatusObservables).pipe(
-            // After updating all tickets, return success
-            map(() => ({
-              success: true,
-              message: 'Booking and tickets cancelled',
-            }))
-          );
-        } else {
-          // If no tickets, just return success
-          return of({
-            success: true,
-            message: 'Booking cancelled, no tickets found',
-          });
-        }
-      })
-    );
+  // Cancel a booking
+  cancelBooking(bookingId: string): Observable<Booking> {
+    return this.http
+      .patch<{ status: string; data: { booking: any } }>(
+        `${this.apiUrl}/${bookingId}/cancel`,
+        {}
+      )
+      .pipe(
+        map((response) => ({
+          ...response.data.booking,
+          booking_time: new Date(response.data.booking.booking_time),
+          updated_at: new Date(response.data.booking.updated_at),
+        })),
+        catchError((error) => {
+          this.toastService.error('Failed to cancel booking');
+          return this.handleError(error);
+        })
+      );
   }
-  // Admin: Get all bookings (mocked)
+
+  // Get ticket by ID
+  getTicket(ticketId: string): Observable<Ticket> {
+    return this.http
+      .get<{ status: string; data: { ticket: any } }>(
+        `${this.apiUrl}/tickets/${ticketId}`
+      )
+      .pipe(
+        map((response) => ({
+          ...response.data.ticket,
+          issued_date: new Date(response.data.ticket.issued_date),
+        })),
+        catchError((error) => {
+          this.toastService.error('Failed to load ticket details');
+          return this.handleError(error);
+        })
+      );
+  }
+
+  // Admin: Get all bookings
   getAllBookings(): Observable<Booking[]> {
-    return this.http.get<Booking[]>(this.mockDataUrl).pipe(
-      switchMap((bookings) => {
-        if (bookings.length === 0) {
-          return of([]);
-        }
+    return this.http
+      .get<{ status: string; results: number; data: { bookings: any[] } }>(
+        `${this.apiUrl}`
+      )
+      .pipe(
+        map((response) => {
+          return response.data.bookings.map((booking) => ({
+            ...booking,
+            booking_time: new Date(booking.booking_time),
+            updated_at: new Date(booking.updated_at),
+          }));
+        }),
+        catchError((error) => {
+          this.toastService.error('Failed to load all bookings');
+          return this.handleError(error);
+        })
+      );
+  }
 
-        // Create an array of observables for fetching tickets for each booking
-        const bookingWithTicketsObservables = bookings.map((booking) =>
-          this.ticketService.getTicketsForBooking(booking.id).pipe(
-            map((tickets) => ({
-              ...booking,
-              ticketList: tickets,
-            }))
-          )
-        );
-
-        // Combine all the observables into one that emits when all are complete
-        return forkJoin(bookingWithTicketsObservables);
-      })
-    );
+  // Error handling
+  private handleError(error: any) {
+    console.error('API error:', error);
+    return throwError(() => error);
   }
 }
