@@ -251,7 +251,7 @@ export class ProfileComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = () => {
         if (typeof reader.result === 'string') {
-          this.userForm.profilePicUrl = reader.result;
+          this.userForm.profile_url = reader.result;
         }
       };
       reader.readAsDataURL(file);
@@ -270,7 +270,7 @@ export class ProfileComponent implements OnInit {
         phone: this.currentUser.phone || '',
         location: this.currentUser.location || '',
         bio: this.currentUser.bio || '',
-        profilePicUrl: this.currentUser.profilePicUrl || '',
+        profile_url: this.currentUser.profile_url || '',
         // Add any additional fields you want to include
       };
 
