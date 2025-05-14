@@ -3,20 +3,20 @@
     <h1>Event Details</h1>
   </div>
 
-  <div *ngIf="loading" class="loading">
-    <p>Loading event details...</p>
-  </div>
+  <app-loader *ngIf="loading" message="Loading event details..."></app-loader>
 
   <div *ngIf="error" class="error">
     <p>Error loading event details. Please try again.</p>
-    <button class="reset-button" (click)="navigateToEvents()">Back to Events</button>
+    <button class="reset-button" (click)="navigateToEvents()">
+      Back to Events
+    </button>
   </div>
 
   <div *ngIf="!loading && !error && event" class="event-details">
     <!-- Left Column: Event Image and Quick Info -->
     <div class="event-left-column">
       <div class="event-image">
-        <img [src]="event.imageUrl" [alt]="event.title">
+        <img [src]="event.image_url" [alt]="event.title" />
         <div class="event-category-badge">{{ event.category }}</div>
       </div>
 
@@ -39,7 +39,9 @@
           <i class="fas fa-ticket-alt"></i>
           <div class="info-content">
             <span class="info-label">Available Tickets</span>
-            <span class="info-value">{{ event.availableTickets }} remaining</span>
+            <span class="info-value"
+              >{{ event.availableTickets }} remaining</span
+            >
           </div>
         </div>
       </div>
@@ -52,7 +54,7 @@
         <div class="event-meta">
           <div class="meta-item">
             <i class="fas fa-calendar"></i>
-            <span>{{ event.date | date:'medium' }}</span>
+            <span>{{ event.date | date : "medium" }}</span>
           </div>
           <div class="meta-item">
             <i class="fas fa-map-marker-alt"></i>
@@ -69,10 +71,20 @@
       <div class="event-highlights">
         <h3>Event Highlights</h3>
         <ul class="highlights-list">
-          <li><i class="fas fa-check-circle"></i> Professional networking opportunities</li>
-          <li><i class="fas fa-check-circle"></i> Interactive sessions and workshops</li>
-          <li><i class="fas fa-check-circle"></i> Refreshments and snacks provided</li>
-          <li><i class="fas fa-check-circle"></i> Certificate of participation</li>
+          <li>
+            <i class="fas fa-check-circle"></i> Professional networking
+            opportunities
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i> Interactive sessions and
+            workshops
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i> Refreshments and snacks provided
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i> Certificate of participation
+          </li>
         </ul>
       </div>
 
@@ -102,25 +114,42 @@
 
         <div class="booking-controls">
           <div class="ticket-selector">
-            <button class="quantity-btn" (click)="decrementTickets()" [disabled]="ticketsToBook <= 1">-</button>
+            <button
+              class="quantity-btn"
+              (click)="decrementTickets()"
+              [disabled]="ticketsToBook <= 1"
+            >
+              -
+            </button>
             <span class="ticket-count">{{ ticketsToBook }}</span>
-            <button class="quantity-btn" (click)="incrementTickets()" [disabled]="ticketsToBook >= event.availableTickets">+</button>
+            <button
+              class="quantity-btn"
+              (click)="incrementTickets()"
+              [disabled]="ticketsToBook >= event.availableTickets"
+            >
+              +
+            </button>
           </div>
 
-          <div class="total-price">
-            Total: ${{ totalPrice }}
-          </div>
+          <div class="total-price">Total: ${{ totalPrice }}</div>
         </div>
 
-        <button class="pagination-button" (click)="onBookNow()" [disabled]="event.availableTickets === 0">
-          {{ event.availableTickets === 0 ? 'Sold Out' : 'Book Now' }}
+        <button
+          class="pagination-button"
+          (click)="onBookNow()"
+          [disabled]="event.availableTickets === 0"
+        >
+          {{ event.availableTickets === 0 ? "Sold Out" : "Book Now" }}
         </button>
 
         <div class="booking-note" *ngIf="event.availableTickets < 10">
           <i class="fas fa-exclamation-circle"></i>
-          <span>Only {{ event.availableTickets }} tickets left! Book now to secure your spot.</span>
+          <span
+            >Only {{ event.availableTickets }} tickets left! Book now to secure
+            your spot.</span
+          >
         </div>
       </div>
     </div>
   </div>
-</div> 
+</div>

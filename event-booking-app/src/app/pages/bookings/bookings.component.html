@@ -97,10 +97,7 @@
     </div>
   </div>
 
-  <div class="loading-overlay" *ngIf="isLoading">
-    <mat-spinner diameter="50"></mat-spinner>
-    <p>Loading your bookings...</p>
-  </div>
+  <app-loader *ngIf="isLoading" message="Loading your bookings..."></app-loader>
 
   <div
     class="no-bookings-message"

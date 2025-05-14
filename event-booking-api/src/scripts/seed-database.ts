@@ -13,9 +13,18 @@ async function main() {
   await prisma.bookings.deleteMany({});
   await prisma.events.deleteMany({});
   await prisma.users.deleteMany({});
-  console.log("All existing records deleted.");
-  // Create 5 users
+  console.log("All existing records deleted."); // Create 5 users
   const users = [];
+
+  // Real working profile image URLs
+  const profileUrls = [
+    "https://randomuser.me/api/portraits/men/1.jpg",
+    "https://randomuser.me/api/portraits/women/2.jpg",
+    "https://randomuser.me/api/portraits/men/3.jpg",
+    "https://randomuser.me/api/portraits/women/4.jpg",
+    "https://randomuser.me/api/portraits/men/5.jpg",
+  ];
+
   for (let i = 0; i < 5; i++) {
     // Hash the password just like in user.service.ts
     const hashedPassword = await hashPassword(`password${i + 1}`);
@@ -29,17 +38,41 @@ async function main() {
         location: `City ${i + 1}`,
         bio: `This is the bio for user ${i + 1}`,
         role: i === 0 ? "ADMIN" : "USER", // Matching case with user.service.ts
-        profile_url: `https://example.com/profiles/user${i + 1}.jpg`,
+        profile_url: profileUrls[i],
       },
     });
     console.log(`Created user with ID: ${user.id}`);
     users.push(user);
   }
-
   // Create 5 events
   const events = [];
   const categories = ["Conference", "Workshop", "Webinar", "Meetup", "Concert"];
   const locations = ["New York", "San Francisco", "London", "Tokyo", "Sydney"];
+
+  // Real working image URLs for events
+  const eventImages = [
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1000",
+    "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?q=80&w=1000",
+    "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1000",
+    "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1000",
+    "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1000",
+  ];
+  // Real event titles and descriptions
+  const eventTitles = [
+    "Tech Innovation Summit 2025",
+    "Digital Marketing Workshop",
+    "AI and Machine Learning Webinar",
+    "Developers Meetup",
+    "Summer Music Festival 2025",
+  ];
+
+  const eventDescriptions = [
+    "Join industry leaders for our annual Tech Innovation Summit. Network with experts, attend insightful sessions, and discover the latest technological trends shaping our future.",
+    "Master the latest digital marketing strategies in this hands-on workshop. Learn SEO, social media marketing, content creation, and analytics from top marketing professionals.",
+    "Explore the frontiers of AI and machine learning in this comprehensive webinar. Perfect for beginners and intermediate practitioners looking to enhance their skills.",
+    "Connect with fellow developers in your city! Share knowledge, collaborate on projects, and discuss the latest programming languages and frameworks.",
+    "Experience the magic of live music at our Summer Festival featuring top artists from around the world. Food, drinks, and unforgettable performances await!",
+  ];
 
   for (let i = 0; i < 5; i++) {
     // Set date to a future date (current date + random days between 10-60)
@@ -50,35 +83,55 @@ async function main() {
 
     const event = await prisma.events.create({
       data: {
-        title: `Event ${i + 1}`,
+        title: eventTitles[i],
         date: futureDate,
         location: locations[i],
-        description: `This is the description for event ${
-          i + 1
-        }. Join us for an amazing experience!`,
-        image_url: `https://example.com/events/event${i + 1}.jpg`,
+        description: eventDescriptions[i],
+        image_url: eventImages[i],
         price: (i + 1) * 1000, // Price in cents
         category: categories[i],
         duration: `${i + 1} hour${i !== 0 ? "s" : ""}`,
         organizer: `Organizer ${i + 1}`,
         available_tickets: 100,
-        schedule: {
-          sessions: [
-            { time: "09:00 AM", title: "Registration" },
-            { time: "10:00 AM", title: "Opening Keynote" },
-            { time: "11:30 AM", title: "Break" },
-            { time: "12:00 PM", title: "Main Session" },
-          ],
-        },
+        schedule: [
+          {
+            day: "Day 1",
+            events: [
+              { time: "08:00 AM", title: "Registration & Welcome Coffee" },
+              { time: "09:00 AM", title: "Opening Keynote" },
+              { time: "10:30 AM", title: "AI & Machine Learning Panel" },
+              { time: "12:00 PM", title: "Lunch Break" },
+              { time: "01:30 PM", title: "Cloud Computing Workshop" },
+              { time: "03:00 PM", title: "Cybersecurity Trends" },
+              { time: "04:30 PM", title: "Networking Session" },
+            ],
+          },
+          {
+            day: "Day 2",
+            events: [
+              { time: "09:00 AM", title: "Future of Web Development" },
+              { time: "10:30 AM", title: "Blockchain Innovations" },
+              { time: "12:00 PM", title: "Lunch Break" },
+              { time: "01:30 PM", title: "Data Science Workshop" },
+              { time: "03:00 PM", title: "Closing Keynote" },
+              { time: "04:30 PM", title: "Networking & Farewell" },
+            ],
+          },
+        ],
       },
     });
     console.log(`Created event with ID: ${event.id}`);
     events.push(event);
   }
-
   // Create 5 bookings (one for each user, each booking for a different event)
   const bookings = [];
-  const statuses = ["confirmed", "pending", "canceled", "paid", "refunded"];
+  const statuses = [
+    "CONFIRMED",
+    "PENDING",
+    "CANCELLED",
+    "COMPLETED",
+    "REFUNDED",
+  ];
 
   for (let i = 0; i < 5; i++) {
     const ticketsCount = Math.floor(Math.random() * 3) + 1; // 1-3 tickets

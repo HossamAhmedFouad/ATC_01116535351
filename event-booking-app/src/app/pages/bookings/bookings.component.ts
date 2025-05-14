@@ -33,6 +33,7 @@ import { BookingService } from '../../services/booking.service';
 import { EventService } from '../../services/event.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 // Rename Event import to avoid conflict with DOM Event
 import { Event as EventModel } from '../../services/event.service';
@@ -58,6 +59,7 @@ import { Event as EventModel } from '../../services/event.service';
     MatExpansionModule,
     MatSnackBarModule,
     MatDialogModule,
+    LoaderComponent,
   ],
   templateUrl: './bookings.component.html',
   styleUrl: './bookings.component.css',

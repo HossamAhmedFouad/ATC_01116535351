@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { User, AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 interface AccountSetting {
   name: string;

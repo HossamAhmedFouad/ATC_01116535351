@@ -57,10 +57,7 @@
     </div>
   </div>
 
-  <div class="loading-overlay" *ngIf="isLoading">
-    <mat-spinner diameter="50"></mat-spinner>
-    <p>Loading your tickets...</p>
-  </div>
+  <app-loader *ngIf="isLoading" message="Loading your tickets..."></app-loader>
 
   <div
     class="no-tickets-message"

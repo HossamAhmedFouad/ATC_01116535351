@@ -20,6 +20,7 @@ import { BookingService, Ticket } from '../../services/booking.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 @Component({
   selector: 'app-tickets',
@@ -37,6 +38,7 @@ import { ToastService } from '../../services/toast.service';
     MatCardModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
+    LoaderComponent,
   ],
   templateUrl: './tickets.component.html',
   styleUrl: './tickets.component.css',

@@ -20,7 +20,9 @@
 
       <select [(ngModel)]="locationFilter" class="filter-select">
         <option value="">All Locations</option>
-        <option *ngFor="let location of locations" [value]="location">{{location}}</option>
+        <option *ngFor="let location of locations" [value]="location">
+          {{ location }}
+        </option>
       </select>
 
       <select [(ngModel)]="dateFilter" class="filter-select">
@@ -33,14 +35,19 @@
 
       <select [(ngModel)]="categoryFilter" class="filter-select">
         <option value="">All Categories</option>
-        <option *ngFor="let category of categories" [value]="category">{{category}}</option>
+        <option *ngFor="let category of categories" [value]="category">
+          {{ category }}
+        </option>
       </select>
 
-      <button (click)="resetFilters()" class="reset-button">Reset Filters</button>
+      <button (click)="resetFilters()" class="reset-button">
+        Reset Filters
+      </button>
     </div>
   </div>
+  <app-loader *ngIf="loading" message="Loading events..."></app-loader>
 
-  <div class="events-grid">
+  <div class="events-grid" *ngIf="!loading">
     <app-event-card
       *ngFor="let event of paginatedEvents"
       [event]="event"
@@ -48,26 +55,26 @@
   </div>
 
   <div class="pagination" *ngIf="totalPages > 1">
-    <button 
-      class="pagination-button" 
+    <button
+      class="pagination-button"
       [disabled]="currentPage === 1"
       (click)="previousPage()"
     >
       Previous
     </button>
-    
+
     <div class="page-numbers">
-      <button 
+      <button
         *ngFor="let page of pageNumbers"
         class="page-number"
         [class.active]="page === currentPage"
         (click)="changePage(page)"
       >
-        {{page}}
+        {{ page }}
       </button>
     </div>
 
-    <button 
+    <button
       class="pagination-button"
       [disabled]="currentPage === totalPages"
       (click)="nextPage()"
@@ -76,8 +83,10 @@
     </button>
   </div>
 
-  <div class="no-events" *ngIf="filteredEvents.length === 0">
+  <div class="no-events" *ngIf="!loading && filteredEvents.length === 0">
     <p>No events found matching your criteria.</p>
-    <button class="reset-filters" (click)="resetFilters()">Reset Filters</button>
+    <button class="reset-filters" (click)="resetFilters()">
+      Reset Filters
+    </button>
   </div>
-</div> 
+</div>

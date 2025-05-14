@@ -6,11 +6,18 @@ import { SearchBarComponent } from '../../components/search-bar/search-bar.compo
 import { HttpClient } from '@angular/common/http';
 import { Event } from '../../services/event.service';
 import { EventService } from '../../services/event.service';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [CommonModule, FormsModule, EventCardComponent, SearchBarComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    EventCardComponent,
+    SearchBarComponent,
+    LoaderComponent,
+  ],
   templateUrl: './events.component.html',
   styleUrls: ['events.component.css'],
 })
@@ -30,6 +37,7 @@ export class EventsComponent implements OnInit {
   categories: string[] = [];
 
   events: Event[] = [];
+  loading = false;
 
   constructor(private http: HttpClient, private eventService: EventService) {}
 
@@ -39,12 +47,17 @@ export class EventsComponent implements OnInit {
   }
 
   loadEvents() {
+    this.loading = true;
     this.eventService.getEvents().subscribe({
       next: (events) => {
         this.events = events;
         this.totalPages = Math.ceil(this.events.length / this.itemsPerPage);
+        this.loading = false;
       },
-      error: (error) => console.error('Error loading events:', error),
+      error: (error) => {
+        console.error('Error loading events:', error);
+        this.loading = false;
+      },
     });
   }
 
