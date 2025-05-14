@@ -8,7 +8,6 @@
       <a routerLink="/" class="nav-link">Home</a>
       <a routerLink="/events" class="nav-link">Events</a>
       <a routerLink="/about" class="nav-link">About</a>
-      <a routerLink="/contact" class="nav-link">Contact</a>
     </div>
 
     <div class="navbar-end">
@@ -64,9 +63,17 @@
         </button>
 
         <div class="user-dropdown" *ngIf="isUserMenuOpen">
+          <a routerLink="/profile" class="dropdown-item">
+            <span class="material-icons">person</span>
+            Profile
+          </a>
           <a routerLink="/dashboard" class="dropdown-item">
             <span class="material-icons">dashboard</span>
             Dashboard
+          </a>
+          <a *ngIf="isAdmin()" routerLink="/admin/events" class="dropdown-item">
+            <span class="material-icons">admin_panel_settings</span>
+            Manage Events
           </a>
           <a routerLink="/bookings" class="dropdown-item">
             <span class="material-icons">calendar_today</span>
@@ -75,10 +82,6 @@
           <a routerLink="/tickets" class="dropdown-item">
             <span class="material-icons">confirmation_number</span>
             My Tickets
-          </a>
-          <a routerLink="/profile" class="dropdown-item">
-            <span class="material-icons">person</span>
-            Profile
           </a>
           <button class="dropdown-item" (click)="logout()">
             <span class="material-icons">logout</span>

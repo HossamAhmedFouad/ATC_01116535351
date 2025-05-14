@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css']
+  styleUrls: ['./navbar.component.css'],
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
@@ -21,7 +21,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // Subscribe to auth state changes
-    this.authSubscription = this.authService.currentUser$.subscribe(user => {
+    this.authSubscription = this.authService.currentUser$.subscribe((user) => {
       this.currentUser = user;
       // Close user menu when auth state changes
       this.isUserMenuOpen = false;
@@ -61,4 +61,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.authService.signOut();
     this.isUserMenuOpen = false;
   }
-} 
+
+  isAdmin(): boolean {
+    return this.currentUser?.role === 'ADMIN';
+  }
+}

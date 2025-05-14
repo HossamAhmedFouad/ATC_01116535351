@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { adminGuard } from './guards/admin.guard';
 import { homeGuard } from './guards/home.guard';
 
 export const routes: Routes = [
@@ -40,6 +41,7 @@ export const routes: Routes = [
       import('./pages/payment/payment.component').then(
         (m) => m.PaymentComponent
       ),
+    canActivate: [authGuard],
   },
   {
     path: 'tickets',
@@ -93,7 +95,7 @@ export const routes: Routes = [
       import('./pages/tickets/tickets.component').then(
         (m) => m.TicketsComponent
       ),
-    canActivate: [],
+    canActivate: [authGuard],
   },
   {
     path: 'admin/events',
@@ -101,7 +103,7 @@ export const routes: Routes = [
       import('./pages/admin/admin-events.component').then(
         (m) => m.AdminEventsComponent
       ),
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
   },
   {
     path: '**',
