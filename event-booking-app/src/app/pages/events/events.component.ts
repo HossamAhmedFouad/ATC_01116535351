@@ -41,7 +41,6 @@ export class EventsComponent implements OnInit {
   events: Event[] = [];
   loading = false;
   userBookedEventIds: Set<string> = new Set<string>();
-
   constructor(
     private http: HttpClient,
     private eventService: EventService,
@@ -113,9 +112,7 @@ export class EventsComponent implements OnInit {
       isBooked: this.userBookedEventIds.has(event.id),
     }));
   }
-
   get filteredEvents() {
-    console.log('Filtering events...');
     const filtered = this.events.filter((event) => {
       const matchesSearch =
         event.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
@@ -143,15 +140,27 @@ export class EventsComponent implements OnInit {
         matchesCategory
       );
     });
-    console.log('Filtered events count:', filtered.length);
+
+    // Ensure current page is valid for filtered results
+    const totalFilteredPages = Math.ceil(filtered.length / this.itemsPerPage);
+    if (this.currentPage > totalFilteredPages) {
+      this.currentPage = Math.max(1, totalFilteredPages);
+    }
+
     return filtered;
   }
-
   get paginatedEvents() {
     const filtered = this.filteredEvents;
-    this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    return filtered.slice(startIndex, startIndex + this.itemsPerPage);
+    // Only calculate pages if we have more items than fit on one page
+    if (filtered.length > this.itemsPerPage) {
+      this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      return filtered.slice(startIndex, startIndex + this.itemsPerPage);
+    }
+    // If we have fewer items than itemsPerPage, just return all items
+    this.totalPages = 1;
+    this.currentPage = 1;
+    return filtered;
   }
 
   get pageNumbers() {
@@ -232,5 +241,10 @@ export class EventsComponent implements OnInit {
     this.dateFilter = '';
     this.categoryFilter = '';
     this.currentPage = 1;
+  }
+  // Filter changes are now handled by onFilterChange() method called from the template
+
+  onFilterChange(): void {
+    this.currentPage = 1; // Reset to first page when any filter changes
   }
 }

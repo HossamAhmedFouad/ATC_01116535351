@@ -3,13 +3,18 @@
     <h1>Discover Events</h1>
     <app-search-bar
       [(searchText)]="searchQuery"
+      (searchTextChange)="onFilterChange()"
       placeholder="Search events by title or description..."
     ></app-search-bar>
   </div>
 
   <div class="filters-section">
     <div class="filters">
-      <select [(ngModel)]="priceFilter" class="filter-select">
+      <select
+        [(ngModel)]="priceFilter"
+        (ngModelChange)="onFilterChange()"
+        class="filter-select"
+      >
         <option value="">All Prices</option>
         <option value="free">Free</option>
         <option value="under50">Under $50</option>
@@ -18,14 +23,22 @@
         <option value="over200">Over $200</option>
       </select>
 
-      <select [(ngModel)]="locationFilter" class="filter-select">
+      <select
+        [(ngModel)]="locationFilter"
+        (ngModelChange)="onFilterChange()"
+        class="filter-select"
+      >
         <option value="">All Locations</option>
         <option *ngFor="let location of locations" [value]="location">
           {{ location }}
         </option>
       </select>
 
-      <select [(ngModel)]="dateFilter" class="filter-select">
+      <select
+        [(ngModel)]="dateFilter"
+        (ngModelChange)="onFilterChange()"
+        class="filter-select"
+      >
         <option value="">All Dates</option>
         <option value="today">Today</option>
         <option value="thisWeek">This Week</option>
@@ -33,7 +46,11 @@
         <option value="nextMonth">Next Month</option>
       </select>
 
-      <select [(ngModel)]="categoryFilter" class="filter-select">
+      <select
+        [(ngModel)]="categoryFilter"
+        (ngModelChange)="onFilterChange()"
+        class="filter-select"
+      >
         <option value="">All Categories</option>
         <option *ngFor="let category of categories" [value]="category">
           {{ category }}
@@ -53,8 +70,7 @@
       [event]="event"
     ></app-event-card>
   </div>
-
-  <div class="pagination" *ngIf="totalPages > 1">
+  <div class="pagination" *ngIf="filteredEvents.length > itemsPerPage">
     <button
       class="pagination-button"
       [disabled]="currentPage === 1"

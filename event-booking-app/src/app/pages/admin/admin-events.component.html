@@ -158,617 +158,637 @@
           [message]="'Loading events...'"
         ></app-loader>
 
-        <!-- Show empty state when no events match filters -->
-        <div
-          class="empty-state"
-          *ngIf="!isLoading && filteredEvents.length === 0"
-        >
-          <mat-icon>event_busy</mat-icon>
-          <h3>No events found</h3>
-          <p>Try adjusting your filters or create a new event.</p>
-        </div>
+        <ng-container *ngIf="!isLoading">
+          <!-- Show empty state when no events match filters -->
+          <div class="empty-state" *ngIf="filteredEvents.length === 0">
+            <mat-icon>event_busy</mat-icon>
+            <h3>No events found</h3>
+            <p>Try adjusting your filters or create a new event.</p>
+            <button class="action-button primary" (click)="openEventModal()">
+              <mat-icon>add</mat-icon> Create New Event
+            </button>
+          </div>
 
-        <table
-          class="events-table"
-          *ngIf="!isLoading && filteredEvents.length > 0"
-        >
-          <thead>
-            <tr>
-              <th class="select-column">
-                <input
-                  type="checkbox"
-                  [checked]="isAllSelected()"
-                  (change)="toggleAllSelection()"
-                />
-              </th>
-              <th (click)="sortBy('id')" class="sortable">
-                ID
-                <mat-icon>{{
-                  sortColumn === "id"
-                    ? sortDirection === "asc"
-                      ? "arrow_upward"
-                      : "arrow_downward"
-                    : "unfold_more"
-                }}</mat-icon>
-              </th>
-              <th (click)="sortBy('title')" class="sortable">
-                Event Title
-                <mat-icon>{{
-                  sortColumn === "title"
-                    ? sortDirection === "asc"
-                      ? "arrow_upward"
-                      : "arrow_downward"
-                    : "unfold_more"
-                }}</mat-icon>
-              </th>
-              <th (click)="sortBy('date')" class="sortable">
-                Date
-                <mat-icon>{{
-                  sortColumn === "date"
-                    ? sortDirection === "asc"
-                      ? "arrow_upward"
-                      : "arrow_downward"
-                    : "unfold_more"
-                }}</mat-icon>
-              </th>
-              <th (click)="sortBy('location')" class="sortable">
-                Location
-                <mat-icon>{{
-                  sortColumn === "location"
-                    ? sortDirection === "asc"
-                      ? "arrow_upward"
-                      : "arrow_downward"
-                    : "unfold_more"
-                }}</mat-icon>
-              </th>
-              <th (click)="sortBy('status')" class="sortable">
-                Status
-                <mat-icon>{{
-                  sortColumn === "status"
-                    ? sortDirection === "asc"
-                      ? "arrow_upward"
-                      : "arrow_downward"
-                    : "unfold_more"
-                }}</mat-icon>
-              </th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              *ngFor="let event of filteredEvents"
-              [class.selected-row]="isEventSelected(event)"
-            >
-              <td class="select-column">
-                <input
-                  type="checkbox"
-                  [checked]="isEventSelected(event)"
-                  (change)="toggleEventSelection(event)"
-                />
-              </td>
-              <td [title]="event.id">{{ event.id }}</td>
-              <td [title]="event.title">{{ event.title }}</td>
-              <td [title]="event.date | date : 'mediumDate'">
-                {{ event.date | date : "mediumDate" }}
-                <span *ngIf="event.time" class="time-display">{{
-                  event.time
-                }}</span>
-              </td>
-              <td [title]="event.location">{{ event.location }}</td>
-              <td>
-                <span
-                  class="status-badge"
-                  [class.active]="event.status === 'active'"
-                  [class.inactive]="event.status === 'inactive'"
-                >
-                  <mat-icon *ngIf="event.status === 'active'"
-                    >check_circle</mat-icon
+          <!-- Events table shown when has events -->
+          <table class="events-table" *ngIf="filteredEvents.length > 0">
+            <thead>
+              <tr>
+                <th class="select-column">
+                  <input
+                    type="checkbox"
+                    [checked]="isAllSelected()"
+                    (change)="toggleAllSelection()"
+                  />
+                </th>
+                <th (click)="sortBy('id')" class="sortable">
+                  ID
+                  <mat-icon>{{
+                    sortColumn === "id"
+                      ? sortDirection === "asc"
+                        ? "arrow_upward"
+                        : "arrow_downward"
+                      : "unfold_more"
+                  }}</mat-icon>
+                </th>
+                <th (click)="sortBy('title')" class="sortable">
+                  Event Title
+                  <mat-icon>{{
+                    sortColumn === "title"
+                      ? sortDirection === "asc"
+                        ? "arrow_upward"
+                        : "arrow_downward"
+                      : "unfold_more"
+                  }}</mat-icon>
+                </th>
+                <th (click)="sortBy('date')" class="sortable">
+                  Date
+                  <mat-icon>{{
+                    sortColumn === "date"
+                      ? sortDirection === "asc"
+                        ? "arrow_upward"
+                        : "arrow_downward"
+                      : "unfold_more"
+                  }}</mat-icon>
+                </th>
+                <th (click)="sortBy('location')" class="sortable">
+                  Location
+                  <mat-icon>{{
+                    sortColumn === "location"
+                      ? sortDirection === "asc"
+                        ? "arrow_upward"
+                        : "arrow_downward"
+                      : "unfold_more"
+                  }}</mat-icon>
+                </th>
+                <th (click)="sortBy('status')" class="sortable">
+                  Status
+                  <mat-icon>{{
+                    sortColumn === "status"
+                      ? sortDirection === "asc"
+                        ? "arrow_upward"
+                        : "arrow_downward"
+                      : "unfold_more"
+                  }}</mat-icon>
+                </th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let event of filteredEvents"
+                [class.selected-row]="isEventSelected(event)"
+              >
+                <td class="select-column">
+                  <input
+                    type="checkbox"
+                    [checked]="isEventSelected(event)"
+                    (change)="toggleEventSelection(event)"
+                  />
+                </td>
+                <td [title]="event.id">{{ event.id }}</td>
+                <td [title]="event.title">{{ event.title }}</td>
+                <td [title]="event.date | date : 'mediumDate'">
+                  {{ event.date | date : "mediumDate" }}
+                  <span *ngIf="event.time" class="time-display">{{
+                    event.time
+                  }}</span>
+                </td>
+                <td [title]="event.location">{{ event.location }}</td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.active]="event.status === 'active'"
+                    [class.inactive]="event.status === 'inactive'"
                   >
-                  <mat-icon *ngIf="event.status === 'inactive'"
-                    >cancel</mat-icon
+                    <mat-icon *ngIf="event.status === 'active'"
+                      >check_circle</mat-icon
+                    >
+                    <mat-icon *ngIf="event.status === 'inactive'"
+                      >cancel</mat-icon
+                    >
+                    {{ event.status }}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <button
+                    class="btn-icon view"
+                    (click)="viewEvent(event)"
+                    title="View Event"
                   >
-                  {{ event.status }}
-                </span>
-              </td>
-              <td class="actions-cell">
-                <button
-                  class="btn-icon view"
-                  (click)="viewEvent(event)"
-                  title="View Event"
-                >
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button
-                  class="btn-icon edit"
-                  (click)="editEvent(event)"
-                  title="Edit Event"
-                >
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button
-                  class="btn-icon delete"
-                  (click)="confirmDelete(event)"
-                  title="Delete Event"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="empty-state" *ngIf="filteredEvents.length === 0">
-          <mat-icon>event_busy</mat-icon>
-          <h3>No events found</h3>
-          <p>Try adjusting your filters or create a new event</p>
-          <button class="action-button primary" (click)="openEventModal()">
-            <mat-icon>add</mat-icon> Create New Event
-          </button>
-        </div>
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <button
+                    class="btn-icon edit"
+                    (click)="editEvent(event)"
+                    title="Edit Event"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    class="btn-icon delete"
+                    (click)="confirmDelete(event)"
+                    title="Delete Event"
+                  >
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </ng-container>
       </div>
-    </div>
 
-    <!-- Pagination -->
-    <div class="pagination-container" *ngIf="totalPages > 1">
-      <div class="pagination">
-        <button
-          [disabled]="currentPage === 1"
-          (click)="goToPage(currentPage - 1)"
-        >
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-
-        <div class="page-numbers">
+      <!-- Pagination -->
+      <div class="pagination-container" *ngIf="totalPages > 1">
+        <div class="pagination">
           <button
-            *ngFor="let page of getPageNumbers()"
-            [class.active]="page === currentPage"
-            (click)="goToPage(page)"
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1)"
           >
-            {{ page }}
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+
+          <div class="page-numbers">
+            <button
+              *ngFor="let page of getPageNumbers()"
+              [class.active]="page === currentPage"
+              (click)="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+          </div>
+
+          <button
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1)"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div class="modal-backdrop" *ngIf="showEventModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">
+            {{ isEditMode ? "Edit Event" : "Create New Event" }}
+          </h2>
+          <button class="modal-close" (click)="closeEventModal()">
+            <mat-icon>close</mat-icon>
           </button>
         </div>
 
-        <button
-          [disabled]="currentPage === totalPages"
-          (click)="goToPage(currentPage + 1)"
-        >
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Event Modal -->
-  <div class="modal-backdrop" *ngIf="showEventModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title">
-          {{ isEditMode ? "Edit Event" : "Create New Event" }}
-        </h2>
-        <button class="modal-close" (click)="closeEventModal()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <form [formGroup]="eventForm" (ngSubmit)="saveEvent()">
-          <div class="form-group">
-            <label class="form-label" for="title">Event Title</label>
-            <input
-              type="text"
-              id="title"
-              class="form-control"
-              formControlName="title"
-              placeholder="Enter event title"
-            />
-            <div
-              class="form-error"
-              *ngIf="
-                eventForm.get('title')?.invalid &&
-                eventForm.get('title')?.touched
-              "
-            >
-              Event title is required
-            </div>
-          </div>
-
-          <div class="form-row">
+        <div class="modal-body">
+          <form [formGroup]="eventForm" (ngSubmit)="saveEvent()">
             <div class="form-group">
-              <label class="form-label" for="date">Event Date</label>
+              <label class="form-label" for="title">Event Title</label>
               <input
-                type="date"
-                id="date"
+                type="text"
+                id="title"
                 class="form-control"
-                formControlName="date"
+                formControlName="title"
+                placeholder="Enter event title"
               />
               <div
                 class="form-error"
                 *ngIf="
-                  eventForm.get('date')?.invalid &&
-                  eventForm.get('date')?.touched
+                  eventForm.get('title')?.invalid &&
+                  eventForm.get('title')?.touched
                 "
               >
-                Valid date is required
+                Event title is required
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label" for="time">Event Time</label>
-              <input
-                type="time"
-                id="time"
-                class="form-control"
-                formControlName="time"
-              />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="location">Location</label>
-            <input
-              type="text"
-              id="location"
-              class="form-control"
-              formControlName="location"
-              placeholder="Enter event location"
-            />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="description">Description</label>
-            <textarea
-              id="description"
-              class="form-control"
-              formControlName="description"
-              rows="4"
-              placeholder="Enter event description"
-            ></textarea>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="status">Status</label>
-              <select id="status" class="form-control" formControlName="status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="available_tickets"
-                >Available Tickets</label
-              >
-              <input
-                type="number"
-                id="available_tickets"
-                class="form-control"
-                formControlName="available_tickets"
-                min="0"
-                placeholder="Number of available tickets"
-              />
-              <div
-                class="form-error"
-                *ngIf="
-                  eventForm.get('available_tickets')?.invalid &&
-                  eventForm.get('available_tickets')?.touched
-                "
-              >
-                Available tickets must be 0 or greater
-              </div>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="image_url">Image URL</label>
-            <input
-              type="text"
-              id="image_url"
-              class="form-control"
-              formControlName="image_url"
-              placeholder="Enter image URL"
-            />
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="price">Price</label>
-              <input
-                type="number"
-                id="price"
-                class="form-control"
-                formControlName="price"
-                min="0"
-                placeholder="Event price"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="category">Category</label>
-              <input
-                type="text"
-                id="category"
-                class="form-control"
-                formControlName="category"
-                placeholder="Event category"
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="duration">Duration</label>
-              <input
-                type="text"
-                id="duration"
-                class="form-control"
-                formControlName="duration"
-                placeholder="Event duration (e.g. 2 hours)"
-              />
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="organizer">Organizer</label>
-              <input
-                type="text"
-                id="organizer"
-                class="form-control"
-                formControlName="organizer"
-                placeholder="Event organizer"
-              />
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="schedule">Event Schedule</label>
-            <div class="schedule-templates">
-              <span class="template-label">Quick templates:</span>
-              <button
-                type="button"
-                class="template-btn"
-                (click)="addScheduleTemplate('conference')"
-              >
-                Conference
-              </button>
-              <button
-                type="button"
-                class="template-btn"
-                (click)="addScheduleTemplate('workshop')"
-              >
-                Workshop
-              </button>
-              <button
-                type="button"
-                class="template-btn"
-                (click)="addScheduleTemplate('festival')"
-              >
-                Festival
-              </button>
-            </div>
-            <div class="schedule-form">
-              <div formArrayName="schedule">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="date">Event Date</label>
+                <input
+                  type="date"
+                  id="date"
+                  class="form-control"
+                  formControlName="date"
+                />
                 <div
-                  *ngFor="
-                    let day of scheduleDays.controls;
-                    let dayIndex = index
+                  class="form-error"
+                  *ngIf="
+                    eventForm.get('date')?.invalid &&
+                    eventForm.get('date')?.touched
                   "
-                  class="schedule-day-container"
                 >
-                  <div [formGroupName]="dayIndex" class="schedule-day">
-                    <div class="day-header">
-                      <input
-                        type="text"
-                        class="form-control day-name"
-                        formControlName="day"
-                        placeholder="Day name"
-                      />
-                      <div class="day-actions">
-                        <button
-                          type="button"
-                          class="btn-icon add"
-                          (click)="addScheduleEvent(dayIndex)"
-                          title="Add event"
-                        >
-                          <mat-icon>add</mat-icon>
-                        </button>
-                        <button
-                          type="button"
-                          class="btn-icon remove"
-                          (click)="removeScheduleDay(dayIndex)"
-                          title="Remove day"
-                          [disabled]="scheduleDays.length <= 1"
-                        >
-                          <mat-icon>delete</mat-icon>
-                        </button>
-                      </div>
-                    </div>
+                  Valid date is required
+                </div>
+              </div>
 
-                    <div formArrayName="events" class="schedule-events">
-                      <div
-                        *ngFor="
-                          let event of getScheduleEvents(dayIndex).controls;
-                          let eventIndex = index
-                        "
-                        [formGroupName]="eventIndex"
-                        class="schedule-event-item"
-                      >
-                        <div class="event-time">
-                          <input
-                            type="text"
-                            class="form-control"
-                            formControlName="time"
-                            placeholder="Time (e.g. 09:00 AM)"
-                            list="time-options"
-                          />
-                          <datalist id="time-options">
-                            <option value="08:00 AM"></option>
-                            <option value="08:30 AM"></option>
-                            <option value="09:00 AM"></option>
-                            <option value="09:30 AM"></option>
-                            <option value="10:00 AM"></option>
-                            <option value="10:30 AM"></option>
-                            <option value="11:00 AM"></option>
-                            <option value="11:30 AM"></option>
-                            <option value="12:00 PM"></option>
-                            <option value="12:30 PM"></option>
-                            <option value="01:00 PM"></option>
-                            <option value="01:30 PM"></option>
-                            <option value="02:00 PM"></option>
-                            <option value="02:30 PM"></option>
-                            <option value="03:00 PM"></option>
-                            <option value="03:30 PM"></option>
-                            <option value="04:00 PM"></option>
-                            <option value="04:30 PM"></option>
-                            <option value="05:00 PM"></option>
-                            <option value="05:30 PM"></option>
-                            <option value="06:00 PM"></option>
-                            <option value="06:30 PM"></option>
-                            <option value="07:00 PM"></option>
-                            <option value="07:30 PM"></option>
-                            <option value="08:00 PM"></option>
-                          </datalist>
-                        </div>
-                        <div class="event-title">
-                          <input
-                            type="text"
-                            class="form-control"
-                            formControlName="title"
-                            placeholder="Event title"
-                            list="event-titles"
-                          />
-                          <datalist id="event-titles">
-                            <option value="Registration & Check-in"></option>
-                            <option value="Opening Keynote"></option>
-                            <option value="Coffee Break"></option>
-                            <option value="Lunch Break"></option>
-                            <option value="Panel Discussion"></option>
-                            <option value="Networking Session"></option>
-                            <option value="Workshop"></option>
-                            <option value="Q&A Session"></option>
-                            <option value="Closing Remarks"></option>
-                          </datalist>
-                        </div>
-                        <div class="event-actions">
+              <div class="form-group">
+                <label class="form-label" for="time">Event Time</label>
+                <input
+                  type="time"
+                  id="time"
+                  class="form-control"
+                  formControlName="time"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="location">Location</label>
+              <input
+                type="text"
+                id="location"
+                class="form-control"
+                formControlName="location"
+                placeholder="Enter event location"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="description">Description</label>
+              <textarea
+                id="description"
+                class="form-control"
+                formControlName="description"
+                rows="4"
+                placeholder="Enter event description"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="status">Status</label>
+                <select
+                  id="status"
+                  class="form-control"
+                  formControlName="status"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="available_tickets"
+                  >Available Tickets</label
+                >
+                <input
+                  type="number"
+                  id="available_tickets"
+                  class="form-control"
+                  formControlName="available_tickets"
+                  min="0"
+                  placeholder="Number of available tickets"
+                />
+                <div
+                  class="form-error"
+                  *ngIf="
+                    eventForm.get('available_tickets')?.invalid &&
+                    eventForm.get('available_tickets')?.touched
+                  "
+                >
+                  Available tickets must be 0 or greater
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Event Image</label>
+              <div class="image-upload-section">
+                <!-- Image Source Toggle -->
+                <div class="image-source-toggle">
+                  <button
+                    type="button"
+                    [class.active]="imageSourceType === 'url'"
+                    (click)="imageSourceType = 'url'"
+                  >
+                    URL
+                  </button>
+                  <button
+                    type="button"
+                    [class.active]="imageSourceType === 'file'"
+                    (click)="imageSourceType = 'file'"
+                  >
+                    Upload File
+                  </button>
+                </div>
+
+                <!-- URL Input -->
+                <div
+                  *ngIf="imageSourceType === 'url'"
+                  class="url-input-container"
+                >
+                  <input
+                    type="text"
+                    id="image_url"
+                    class="form-control"
+                    formControlName="image_url"
+                    placeholder="Enter image URL"
+                  />
+                </div>
+
+                <!-- File Upload -->
+                <div
+                  *ngIf="imageSourceType === 'file'"
+                  class="file-upload-container"
+                >
+                  <app-file-upload
+                    [accept]="'image/*'"
+                    [multiple]="false"
+                    title="Drag & Drop Event Image"
+                    description="Drop your event image here or click to upload"
+                    icon="image"
+                    (uploadComplete)="onFileUploaded($event)"
+                    (uploadError)="onFileUploadError($event)"
+                  ></app-file-upload>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="price">Price</label>
+                <input
+                  type="number"
+                  id="price"
+                  class="form-control"
+                  formControlName="price"
+                  min="0"
+                  placeholder="Event price"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="category">Category</label>
+                <input
+                  type="text"
+                  id="category"
+                  class="form-control"
+                  formControlName="category"
+                  placeholder="Event category"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="duration">Duration</label>
+                <input
+                  type="text"
+                  id="duration"
+                  class="form-control"
+                  formControlName="duration"
+                  placeholder="Event duration (e.g. 2 hours)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="organizer">Organizer</label>
+                <input
+                  type="text"
+                  id="organizer"
+                  class="form-control"
+                  formControlName="organizer"
+                  placeholder="Event organizer"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="schedule">Event Schedule</label>
+              <div class="schedule-templates">
+                <span class="template-label">Quick templates:</span>
+                <button
+                  type="button"
+                  class="template-btn"
+                  (click)="addScheduleTemplate('conference')"
+                >
+                  Conference
+                </button>
+                <button
+                  type="button"
+                  class="template-btn"
+                  (click)="addScheduleTemplate('workshop')"
+                >
+                  Workshop
+                </button>
+                <button
+                  type="button"
+                  class="template-btn"
+                  (click)="addScheduleTemplate('festival')"
+                >
+                  Festival
+                </button>
+              </div>
+              <div class="schedule-form">
+                <div formArrayName="schedule">
+                  <div
+                    *ngFor="
+                      let day of scheduleDays.controls;
+                      let dayIndex = index
+                    "
+                    class="schedule-day-container"
+                  >
+                    <div [formGroupName]="dayIndex" class="schedule-day">
+                      <div class="day-header">
+                        <input
+                          type="text"
+                          class="form-control day-name"
+                          formControlName="day"
+                          placeholder="Day name"
+                        />
+                        <div class="day-actions">
                           <button
                             type="button"
-                            class="btn-icon move"
-                            (click)="moveEventUp(dayIndex, eventIndex)"
-                            title="Move up"
-                            [disabled]="eventIndex === 0"
+                            class="btn-icon add"
+                            (click)="addScheduleEvent(dayIndex)"
+                            title="Add event"
                           >
-                            <mat-icon>arrow_upward</mat-icon>
-                          </button>
-                          <button
-                            type="button"
-                            class="btn-icon move"
-                            (click)="moveEventDown(dayIndex, eventIndex)"
-                            title="Move down"
-                            [disabled]="
-                              eventIndex ===
-                              getScheduleEvents(dayIndex).length - 1
-                            "
-                          >
-                            <mat-icon>arrow_downward</mat-icon>
+                            <mat-icon>add</mat-icon>
                           </button>
                           <button
                             type="button"
                             class="btn-icon remove"
-                            (click)="removeScheduleEvent(dayIndex, eventIndex)"
-                            title="Remove event"
-                            [disabled]="getScheduleEvents(dayIndex).length <= 1"
+                            (click)="removeScheduleDay(dayIndex)"
+                            title="Remove day"
+                            [disabled]="scheduleDays.length <= 1"
                           >
-                            <mat-icon>remove</mat-icon>
+                            <mat-icon>delete</mat-icon>
                           </button>
+                        </div>
+                      </div>
+
+                      <div formArrayName="events" class="schedule-events">
+                        <div
+                          *ngFor="
+                            let event of getScheduleEvents(dayIndex).controls;
+                            let eventIndex = index
+                          "
+                          [formGroupName]="eventIndex"
+                          class="schedule-event-item"
+                        >
+                          <div class="event-time">
+                            <input
+                              type="text"
+                              class="form-control"
+                              formControlName="time"
+                              placeholder="Time (e.g. 09:00 AM)"
+                              list="time-options"
+                            />
+                            <datalist id="time-options">
+                              <option value="08:00 AM"></option>
+                              <option value="08:30 AM"></option>
+                              <option value="09:00 AM"></option>
+                              <option value="09:30 AM"></option>
+                              <option value="10:00 AM"></option>
+                              <option value="10:30 AM"></option>
+                              <option value="11:00 AM"></option>
+                              <option value="11:30 AM"></option>
+                              <option value="12:00 PM"></option>
+                              <option value="12:30 PM"></option>
+                              <option value="01:00 PM"></option>
+                              <option value="01:30 PM"></option>
+                              <option value="02:00 PM"></option>
+                              <option value="02:30 PM"></option>
+                              <option value="03:00 PM"></option>
+                              <option value="03:30 PM"></option>
+                              <option value="04:00 PM"></option>
+                              <option value="04:30 PM"></option>
+                              <option value="05:00 PM"></option>
+                              <option value="05:30 PM"></option>
+                              <option value="06:00 PM"></option>
+                              <option value="06:30 PM"></option>
+                              <option value="07:00 PM"></option>
+                              <option value="07:30 PM"></option>
+                              <option value="08:00 PM"></option>
+                            </datalist>
+                          </div>
+                          <div class="event-title">
+                            <input
+                              type="text"
+                              class="form-control"
+                              formControlName="title"
+                              placeholder="Event title"
+                              list="event-titles"
+                            />
+                            <datalist id="event-titles">
+                              <option value="Registration & Check-in"></option>
+                              <option value="Opening Keynote"></option>
+                              <option value="Coffee Break"></option>
+                              <option value="Lunch Break"></option>
+                              <option value="Panel Discussion"></option>
+                              <option value="Networking Session"></option>
+                              <option value="Workshop"></option>
+                              <option value="Q&A Session"></option>
+                              <option value="Closing Remarks"></option>
+                            </datalist>
+                          </div>
+                          <div class="event-actions">
+                            <button
+                              type="button"
+                              class="btn-icon move"
+                              (click)="moveEventUp(dayIndex, eventIndex)"
+                              title="Move up"
+                              [disabled]="eventIndex === 0"
+                            >
+                              <mat-icon>arrow_upward</mat-icon>
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon move"
+                              (click)="moveEventDown(dayIndex, eventIndex)"
+                              title="Move down"
+                              [disabled]="
+                                eventIndex ===
+                                getScheduleEvents(dayIndex).length - 1
+                              "
+                            >
+                              <mat-icon>arrow_downward</mat-icon>
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon remove"
+                              (click)="
+                                removeScheduleEvent(dayIndex, eventIndex)
+                              "
+                              title="Remove event"
+                              [disabled]="
+                                getScheduleEvents(dayIndex).length <= 1
+                              "
+                            >
+                              <mat-icon>remove</mat-icon>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="schedule-actions">
-                  <button
-                    type="button"
-                    class="btn btn-outline-primary"
-                    (click)="addScheduleDay()"
-                  >
-                    <mat-icon>add</mat-icon> Add Schedule Day
-                  </button>
-                  <small class="schedule-help-text"
-                    >Use the form above to define your event schedule. Add days
-                    and time slots as needed.</small
-                  >
+                  <div class="schedule-actions">
+                    <button
+                      type="button"
+                      class="btn btn-outline-primary"
+                      (click)="addScheduleDay()"
+                    >
+                      <mat-icon>add</mat-icon> Add Schedule Day
+                    </button>
+                    <small class="schedule-help-text"
+                      >Use the form above to define your event schedule. Add
+                      days and time slots as needed.</small
+                    >
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
 
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          (click)="closeEventModal()"
-        >
-          <mat-icon>close</mat-icon> Cancel
-        </button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          [disabled]="eventForm.invalid"
-          (click)="saveEvent()"
-        >
-          <mat-icon>save</mat-icon>
-          {{ isEditMode ? "Update Event" : "Create Event" }}
-        </button>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeEventModal()"
+          >
+            <mat-icon>close</mat-icon> Cancel
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="eventForm.invalid"
+            (click)="saveEvent()"
+          >
+            <mat-icon>save</mat-icon>
+            {{ isEditMode ? "Update Event" : "Create Event" }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Delete Confirmation Modal -->
-  <div class="modal-backdrop" *ngIf="showDeleteModal">
-    <div class="modal-content delete-modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Confirm Delete</h2>
-        <button class="modal-close" (click)="cancelDelete()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-backdrop" *ngIf="showDeleteModal">
+      <div class="modal-content delete-modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Confirm Delete</h2>
+          <button class="modal-close" (click)="cancelDelete()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
 
-      <div class="modal-body">
-        <mat-icon class="delete-icon">warning</mat-icon>
-        <h3>Are you sure you want to delete this event?</h3>
-        <p>{{ eventToDelete?.title }}</p>
-        <p class="warning-text">This action cannot be undone.</p>
-      </div>
+        <div class="modal-body">
+          <mat-icon class="delete-icon">warning</mat-icon>
+          <h3>Are you sure you want to delete this event?</h3>
+          <p>{{ eventToDelete?.title }}</p>
+          <p class="warning-text">This action cannot be undone.</p>
+        </div>
 
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          (click)="cancelDelete()"
-        >
-          <mat-icon>cancel</mat-icon> Cancel
-        </button>
-        <button type="button" class="btn btn-danger" (click)="deleteEvent()">
-          <mat-icon>delete</mat-icon> Delete Event
-        </button>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelDelete()"
+          >
+            <mat-icon>cancel</mat-icon> Cancel
+          </button>
+          <button type="button" class="btn btn-danger" (click)="deleteEvent()">
+            <mat-icon>delete</mat-icon> Delete Event
+          </button>
+        </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Toast Notifications -->
-  <div class="toast-container">
-    <div
-      class="toast"
-      *ngFor="let toast of toasts"
-      [class.success]="toast.type === 'success'"
-      [class.error]="toast.type === 'error'"
-      [class.info]="toast.type === 'info'"
-      [class.warning]="toast.type === 'warning'"
-    >
-      <div class="toast-content">
-        <mat-icon [class]="toast.type">
-          {{ getToastIcon(toast.type) }}
-        </mat-icon>
-        <div>{{ toast.message }}</div>
-      </div>
-      <button class="toast-close" (click)="removeToast(toast)">
-        <mat-icon>close</mat-icon>
-      </button>
     </div>
   </div>
 </div>

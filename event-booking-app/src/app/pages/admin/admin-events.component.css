@@ -842,88 +842,6 @@ textarea.form-control {
   color: var(--danger-color);
 }
 
-/* Toast Notifications */
-.toast-container {
-  position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 350px;
-}
-
-.toast {
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  animation: slideIn 0.3s ease;
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  width: 100%;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.toast-icon {
-  margin-right: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.toast-content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.toast-close {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0.25rem;
-  transition: color 0.2s ease;
-}
-
-.toast-close:hover {
-  color: var(--text-primary);
-}
-
-.toast.success .toast-content mat-icon {
-  color: var(--success-color);
-}
-
-.toast.error .toast-content mat-icon {
-  color: var(--danger-color);
-}
-
-.toast.warning .toast-content mat-icon {
-  color: var(--warning-color);
-}
-
-.toast.info .toast-content mat-icon {
-  color: var(--info-color);
-}
-
 /* Bulk Actions */
 .bulk-actions {
   display: flex;
@@ -1297,4 +1215,43 @@ textarea.form-control {
 
 :host-context(.dark-mode) .template-btn:nth-child(4):hover {
   background-color: rgba(245, 158, 11, 0.2);
+}
+
+/* Image Upload Styles */
+.image-upload-section {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--surface-hover);
+}
+
+.image-source-toggle {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.image-source-toggle button {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--surface-color);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.image-source-toggle button.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.url-input-container {
+  margin-top: 1rem;
+}
+
+.file-upload-container {
+  margin-top: 1rem;
 }

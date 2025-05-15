@@ -163,7 +163,6 @@ export class DashboardComponent implements OnInit {
   ];
   upcomingEventsPreview: BookedEvent[] = [];
   recentActivity: { type: string; event: BookedEvent; date: Date }[] = [];
-  monthlyStats: { month: string; count: number; spending: number }[] = [];
   isLoading: boolean = false;
 
   constructor(
@@ -183,7 +182,6 @@ export class DashboardComponent implements OnInit {
             this.calculateCategoryStats();
             this.updateUpcomingEventsPreview();
             this.generateRecentActivity();
-            this.calculateMonthlyStats();
           },
           error: (err) => console.error('Failed to load events:', err),
         });
@@ -259,29 +257,34 @@ export class DashboardComponent implements OnInit {
       })
     );
   }
-
   calculateStats() {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const yearStart = new Date(now.getFullYear(), 0, 1);
 
+    // Filter only non-cancelled bookings for active stats
+    const activeBookings = this.bookedEvents.filter(
+      (e) => e.status !== 'cancelled' && e.status !== 'CANCELLED'
+    );
+
     this.eventStats = {
-      totalEvents: this.bookedEvents.length,
-      upcomingEvents: this.bookedEvents.filter(
-        (e) => new Date(e.booking_time) > now && e.status === 'booked'
+      totalEvents: activeBookings.length,
+      upcomingEvents: activeBookings.filter(
+        (e) => new Date(e.eventDetails.date) > now
       ).length,
-      completedEvents: this.bookedEvents.filter(
-        (e) => new Date(e.booking_time) <= now && e.status === 'booked'
+      completedEvents: activeBookings.filter(
+        (e) => new Date(e.eventDetails.date) <= now
       ).length,
-      cancelledEvents: this.bookedEvents.filter((e) => e.status === 'cancelled')
-        .length,
-      totalSpent: this.bookedEvents.reduce(
+      cancelledEvents: this.bookedEvents.filter(
+        (e) => e.status === 'cancelled' || e.status === 'CANCELLED'
+      ).length,
+      totalSpent: activeBookings.reduce(
         (sum, event) => sum + event.total_price,
         0
       ),
       favoriteCategory: this.getFavoriteCategory(),
-      monthlySpending: this.bookedEvents
-        .filter((e) => new Date(e.booking_time) >= monthStart)
+      monthlySpending: activeBookings
+        .filter((e) => new Date(e.eventDetails.date) >= monthStart)
         .reduce((sum, event) => sum + event.total_price, 0),
       yearlySpending: this.bookedEvents
         .filter((e) => new Date(e.booking_time) >= yearStart)
@@ -441,9 +444,22 @@ export class DashboardComponent implements OnInit {
   }
 
   formatCurrency(amount: number): string {
+    // Use compact notation for large numbers
+    if (amount >= 1000) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        notation: 'compact',
+        maximumFractionDigits: 1,
+      }).format(amount);
+    }
+
+    // Use standard notation for smaller numbers
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
     }).format(amount);
   }
 
@@ -645,37 +661,6 @@ export class DashboardComponent implements OnInit {
       .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, 5);
   }
-
-  calculateMonthlyStats() {
-    const now = new Date();
-    const months = Array.from({ length: 6 }, (_, i) => {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      return {
-        month: date.toLocaleString('default', { month: 'short' }),
-        count: 0,
-        spending: 0,
-      };
-    }).reverse();
-
-    this.bookedEvents.forEach((event) => {
-      const eventMonth = event.eventDetails.date.getMonth();
-      const eventYear = event.eventDetails.date.getFullYear();
-      const monthIndex = months.findIndex((m) => {
-        const monthDate = new Date(eventYear, eventMonth, 1);
-        return (
-          monthDate.getMonth() === eventMonth &&
-          monthDate.getFullYear() === eventYear
-        );
-      });
-
-      if (monthIndex !== -1) {
-        months[monthIndex].count++;
-        months[monthIndex].spending += event.total_price;
-      }
-    });
-
-    this.monthlyStats = months;
-  }
   getActivityIcon(type: string): string {
     switch (type) {
       case 'completed':
@@ -718,31 +703,6 @@ export class DashboardComponent implements OnInit {
     return categoryInfo?.icon || 'event';
   }
 
-  getBarHeight(spending: number): number {
-    const maxSpending = Math.max(
-      ...this.monthlyStats.map((stat) => stat.spending)
-    );
-    if (maxSpending === 0) return 0;
-    // Calculate height as a percentage of the maximum spending
-    // Using 80% of the chart height as maximum to leave space for labels
-    return Math.max((spending / maxSpending) * 80, 4); // Minimum 4% height
-  }
-
-  getTotalEvents(): number {
-    return this.monthlyStats.reduce((sum, stat) => sum + stat.count, 0);
-  }
-
-  getTotalSpending(): number {
-    return this.monthlyStats.reduce((sum, stat) => sum + stat.spending, 0);
-  }
-
-  getAverageSpending(): number {
-    const totalSpending = this.getTotalSpending();
-    const monthsWithSpending = this.monthlyStats.filter(
-      (stat) => stat.spending > 0
-    ).length;
-    return monthsWithSpending > 0 ? totalSpending / monthsWithSpending : 0;
-  }
   getFormattedStatus(status: string): string {
     const normalizedStatus = this.getNormalizedStatus(status);
 

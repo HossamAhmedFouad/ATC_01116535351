@@ -15,6 +15,10 @@ import { EventService } from '../../services/event.service';
 import { AdminService } from '../../services/admin.service';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { FileUploadComponent } from '../../components/file-upload/file-upload.component';
+import { ToastService } from '../../services/toast.service';
+import { UploadResponse } from '../../services/assets.service';
+import { environment } from '../../../environments/environment';
 
 interface Event {
   id: string; // UUID format from backend
@@ -33,12 +37,6 @@ interface Event {
   // UI-specific fields
   status?: 'active' | 'inactive';
   bookingsCount?: number;
-}
-
-interface Toast {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
 }
 
 interface ScheduleDay {
@@ -64,6 +62,7 @@ interface ScheduleEvent {
     MatIconModule,
     SearchBarComponent,
     LoaderComponent,
+    FileUploadComponent,
   ],
 })
 export class AdminEventsComponent implements OnInit {
@@ -75,6 +74,18 @@ export class AdminEventsComponent implements OnInit {
   itemsPerPage: number = 10;
   currentPage: number = 1;
   totalPages: number = 1;
+
+  // Added method for pagination
+  getPageNumbers(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.filterEvents();
+    }
+  }
 
   // Filters
   searchTerm: string = '';
@@ -97,10 +108,7 @@ export class AdminEventsComponent implements OnInit {
 
   // Form
   eventForm!: FormGroup;
-
-  // Toasts
-  toasts: Toast[] = [];
-  nextToastId: number = 1;
+  // Loading state
   // Bulk actions
   selectedEvents: Event[] = [];
   bulkAction: string = '';
@@ -108,10 +116,16 @@ export class AdminEventsComponent implements OnInit {
   // Loading state
   isLoading: boolean = false;
 
+  // Image upload properties
+  imageSourceType: 'url' | 'file' = 'url';
+  uploadedFile?: File;
+
   constructor(
     private fb: FormBuilder,
+    private router: Router,
     private eventService: EventService,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private toastService: ToastService
   ) {}
   ngOnInit(): void {
     this.initEventForm();
@@ -120,6 +134,8 @@ export class AdminEventsComponent implements OnInit {
   }
   // Initialize event form
   initEventForm(): void {
+    this.imageSourceType = 'url';
+    this.uploadedFile = undefined;
     this.eventForm = this.fb.group({
       id: [null],
       title: ['', Validators.required],
@@ -922,23 +938,147 @@ export class AdminEventsComponent implements OnInit {
     // Add the day to the schedule
     scheduleFormArray.push(dayGroup);
   }
-
   // Toast notifications
   showToast(
     message: string,
     type: 'success' | 'error' | 'info' | 'warning'
   ): void {
-    const id = this.nextToastId++;
-    const toast: Toast = { id, message, type };
-    this.toasts.push(toast);
-
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      this.removeToast(toast);
-    }, 5000);
+    switch (type) {
+      case 'success':
+        this.toastService.success(message);
+        break;
+      case 'error':
+        this.toastService.error(message);
+        break;
+      case 'info':
+        this.toastService.info(message);
+        break;
+      case 'warning':
+        this.toastService.warning(message);
+        break;
+    }
   }
 
-  removeToast(toast: Toast): void {
-    this.toasts = this.toasts.filter((t) => t.id !== toast.id);
+  private getEventImageUrl(path: string): string {
+    // If the path is already a full URL, use it
+    if (path.startsWith('http')) {
+      return path;
+    }
+
+    // Otherwise construct the Supabase storage URL
+    return `${environment.supabase.url}/storage/v1/object/public/images/${path}`;
+  }
+  // Handle file upload handlers
+  onFileUploaded(response: UploadResponse) {
+    // If file upload was successful, set the image_url in the form
+    // Store the path - it will be converted to full URL during event creation
+    this.eventForm.patchValue({
+      image_url: response.path,
+    });
+    this.showToast('Image uploaded successfully', 'success');
+  }
+
+  onFileUploadError(error: Error) {
+    this.showToast(error.message || 'Failed to upload image', 'error');
+  }
+
+  // View event details
+  viewEvent(event: Event): void {
+    this.router.navigate(['/events', event.id]);
+  }
+
+  // Edit event
+  editEvent(event: Event): void {
+    this.isEditMode = true;
+    this.eventToDelete = undefined;
+    this.eventForm.patchValue({
+      id: event.id,
+      title: event.title,
+      date: event.date,
+      time: event.time,
+      location: event.location,
+      description: event.description,
+      status: event.status,
+      available_tickets: event.available_tickets,
+      image_url: event.image_url,
+      price: event.price,
+      category: event.category,
+      organizer: event.organizer,
+    });
+    this.showEventModal = true;
+  }
+
+  // Show delete confirmation modal
+  confirmDelete(event: Event): void {
+    this.eventToDelete = event;
+    this.showDeleteModal = true;
+  }
+
+  // Cancel deletion
+  cancelDelete(): void {
+    this.eventToDelete = undefined;
+    this.showDeleteModal = false;
+  }
+
+  // Delete the event
+  deleteEvent(): void {
+    if (!this.eventToDelete) return;
+
+    this.isLoading = true;
+
+    this.adminService.deleteEvent(this.eventToDelete.id).subscribe({
+      next: () => {
+        this.showToast('Event deleted successfully', 'success');
+        this.cancelDelete();
+        this.loadEvents();
+      },
+      error: (err) => {
+        this.showToast(
+          'Error deleting event: ' + (err.message || 'Unknown error'),
+          'error'
+        );
+        this.isLoading = false;
+      },
+    });
+  }
+
+  // Save event changes
+  saveEvent(): void {
+    if (this.eventForm.invalid) {
+      this.showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    this.isLoading = true;
+    // Get the form data
+    const eventData = { ...this.eventForm.value };
+
+    // Convert the image path to a full URL if it exists
+    if (eventData.image_url) {
+      eventData.image_url = this.getEventImageUrl(eventData.image_url);
+    }
+
+    const operation = this.isEditMode
+      ? this.adminService.updateEvent(eventData.id, eventData)
+      : this.adminService.createEvent(eventData);
+
+    operation.subscribe({
+      next: () => {
+        this.showToast(
+          `Event ${this.isEditMode ? 'updated' : 'created'} successfully`,
+          'success'
+        );
+        this.closeEventModal();
+        this.loadEvents();
+      },
+      error: (err) => {
+        this.showToast(
+          `Error ${this.isEditMode ? 'updating' : 'creating'} event: ` +
+            (err.message || 'Unknown error'),
+          'error'
+        );
+        this.isLoading = false;
+      },
+    });
   }
 }
