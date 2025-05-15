@@ -1,29 +1,30 @@
 {
   "locations": [
-    "San Francisco, CA",
-    "Los Angeles, CA",
-    "New York, NY",
-    "Chicago, IL",
-    "Miami, FL",
-    "Seattle, WA",
-    "Austin, TX",
-    "New Orleans, LA",
-    "Portland, OR",
-    "San Jose, CA",
-    "Las Vegas, NV",
-    "Napa Valley, CA",
-    "Denver, CO",
-    "Boston, MA",
-    "Bali, Indonesia"
+    "New York",
+    "San Francisco",
+    "London",
+    "Tokyo",
+    "Sydney",
+    "Berlin",
+    "Paris",
+    "Toronto",
+    "Singapore",
+    "Dubai",
+    "Seoul",
+    "Barcelona"
   ],
   "categories": [
-    "Technology",
-    "Music",
-    "Food & Drink",
-    "Business",
-    "Arts & Culture",
-    "Sports",
+    "Conference",
+    "Workshop",
+    "Webinar",
+    "Meetup",
+    "Concert",
+    "Exhibition",
+    "Seminar",
+    "Retreat",
+    "Hackathon",
     "Networking",
-    "Health & Wellness"
+    "Festival",
+    "Gala"
   ]
 }
