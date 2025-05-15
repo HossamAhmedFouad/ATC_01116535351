@@ -40,6 +40,8 @@ export class UserService {
         tap((user) => {
           // Cache the result
           this.cacheService.set(cacheKey, user, this.defaultTtl);
+          // Update auth service with fresh data
+          this.updateAuthServiceUser(user);
         }),
         catchError((error) => {
           this.toastService.error('Failed to load profile');
@@ -67,6 +69,8 @@ export class UserService {
             updatedUser,
             this.defaultTtl
           );
+          // Update auth service with fresh data
+          this.updateAuthServiceUser(updatedUser);
         }),
         catchError((error) => {
           this.toastService.error('Failed to update profile');
@@ -100,5 +104,18 @@ export class UserService {
    */
   getCurrentUser(): User | null {
     return this.authService.getCurrentUser();
+  }
+
+  /**
+   * Helper method to update the AuthService user data
+   */
+  private updateAuthServiceUser(userData: Partial<User>): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      const updatedUser = { ...currentUser, ...userData };
+      // Update auth service and localStorage
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      this.authService['currentUserSubject'].next(updatedUser);
+    }
   }
 }

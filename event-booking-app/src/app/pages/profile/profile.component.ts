@@ -4,7 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { User, AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
-import { LoaderComponent } from '../../components/loader/loader.component';
+import { FileUploadComponent } from '../../components/file-upload/file-upload.component';
+import { UploadResponse } from '../../services/assets.service';
+import { environment } from '../../../environments/environment';
 
 interface AccountSetting {
   name: string;
@@ -28,17 +30,19 @@ interface ActivityItem {
   icon: string;
 }
 
+interface UserForm extends Partial<User> {}
+
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, FileUploadComponent],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent implements OnInit {
   currentUser: User | null = null;
   isEditing = false;
-  userForm: Partial<User> = {};
+  userForm: UserForm = {};
   isLoading = false;
   successMessage = '';
   errorMessage = '';
@@ -258,6 +262,28 @@ export class ProfileComponent implements OnInit {
       reader.readAsDataURL(file);
     }
   }
+  onProfilePicUploaded(response: UploadResponse) {
+    // Store the file path and let getProfilePicUrl handle the URL construction
+    this.userForm.profile_url = response.path;
+
+    // Save the profile immediately when picture is uploaded
+    this.userService
+      .updateUserProfile({ profile_url: response.path })
+      .subscribe({
+        next: (updatedUser) => {
+          this.currentUser = updatedUser;
+          this.successMessage = 'Profile picture uploaded successfully';
+        },
+        error: (error) => {
+          this.errorMessage =
+            error.message || 'Failed to update profile picture';
+        },
+      });
+  }
+
+  onProfilePicError(error: Error) {
+    this.errorMessage = error.message || 'Failed to upload profile picture';
+  }
 
   resetMessages(): void {
     this.successMessage = '';
@@ -300,28 +326,34 @@ export class ProfileComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    // In a real app, this would send data to the backend
-    // For this demo, we'll simulate an API call
-    setTimeout(() => {
-      if (this.currentUser) {
-        // Update the current user with form values
-        const updatedUser: User = {
-          ...this.currentUser,
-          ...this.userForm,
-        };
-
-        // Update in local storage (simulating backend update)
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-
-        // Update the auth service
-        this.authService['currentUserSubject'].next(updatedUser);
+    this.userService.updateUserProfile(this.userForm).subscribe({
+      next: (updatedUser) => {
         this.currentUser = updatedUser;
-
         this.isLoading = false;
         this.isEditing = false;
         this.successMessage = 'Profile updated successfully!';
-      }
-    }, 1000);
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'Failed to update profile';
+      },
+    });
+  }
+  getProfilePicUrl(): string | null {
+    if (!this.currentUser?.profile_url) {
+      return null;
+    }
+
+    // If the profile_url is already a full URL, use it
+    if (this.currentUser.profile_url.startsWith('http')) {
+      return this.currentUser.profile_url;
+    }
+
+    // Otherwise construct the storage URL
+    console.log(
+      `${environment.supabase.url}/storage/v1/object/public/avatars/${this.currentUser.profile_url}`
+    );
+    return `${environment.supabase.url}/storage/v1/object/public/avatars/${this.currentUser.profile_url}`;
   }
 
   // Helper to generate initials for avatar
@@ -389,5 +421,18 @@ export class ProfileComponent implements OnInit {
   getLanguageName(code: string): string {
     const language = this.availableLanguages.find((l) => l.code === code);
     return language ? language.name : 'English';
+  }
+
+  // Handle profile image loading errors
+  onProfileImageError(event: ErrorEvent): void {
+    const imgElement = event.target as HTMLImageElement;
+    if (imgElement) {
+      imgElement.style.display = 'none'; // Hide the broken image
+    }
+    this.errorMessage = 'Failed to load profile picture';
+    // Clear the profile URL so the initials avatar shows instead
+    if (this.currentUser) {
+      this.currentUser.profile_url = '';
+    }
   }
 }

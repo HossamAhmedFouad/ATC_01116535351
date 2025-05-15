@@ -57,7 +57,15 @@
       <div class="user-menu" *ngIf="currentUser">
         <button class="user-button" (click)="toggleUserMenu()">
           <div class="user-avatar">
-            {{ currentUser.username.charAt(0).toUpperCase() }}
+            <img
+              *ngIf="getProfilePicUrl()"
+              [src]="getProfilePicUrl()"
+              [alt]="currentUser.username"
+              (error)="onProfileImageError($event)"
+            />
+            <div *ngIf="!getProfilePicUrl()" class="initials-avatar">
+              {{ getInitials() }}
+            </div>
           </div>
           <span class="user-name">{{ currentUser.username }}</span>
         </button>

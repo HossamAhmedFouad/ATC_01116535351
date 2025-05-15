@@ -331,353 +331,16 @@ export class AdminEventsComponent implements OnInit {
 
   // Get sort icon class
   getSortIcon(column: string): string {
-    if (this.sortColumn !== column) {
-      return 'fas fa-sort';
-    }
+    if (this.sortColumn !== column) return 'fas fa-sort';
     return this.sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
   }
 
-  // Apply sorting to events array
-  private sortEvents(events: Event[]): void {
-    events.sort((a: any, b: any) => {
-      const aValue = a[this.sortColumn];
-      const bValue = b[this.sortColumn];
-
-      if (aValue < bValue) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-
-  // Pagination methods
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.filterEvents();
-    }
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const totalVisible = 5;
-
-    if (this.totalPages <= totalVisible) {
-      // Show all pages if there are fewer than totalVisible
-      for (let i = 1; i <= this.totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Show a window of pages around current page
-      let startPage = Math.max(
-        1,
-        this.currentPage - Math.floor(totalVisible / 2)
-      );
-      let endPage = startPage + totalVisible - 1;
-
-      if (endPage > this.totalPages) {
-        endPage = this.totalPages;
-        startPage = Math.max(1, endPage - totalVisible + 1);
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-    }
-
-    return pages;
-  }
-  // Modal methods
-  openEventModal(): void {
-    this.isEditMode = false;
-    this.initEventForm();
-    this.eventForm.patchValue({
-      status: 'active',
-      date: new Date().toISOString().split('T')[0],
-    });
-
-    // Create a default schedule with common event time slots
-    this.createDefaultSchedule();
-
-    this.showEventModal = true;
-  }
-
-  // Create a default schedule with common event timeslots
-  createDefaultSchedule(): void {
-    const scheduleFormArray = this.eventForm.get('schedule') as FormArray;
-
-    // Clear existing schedule
-    while (scheduleFormArray.length) {
-      scheduleFormArray.removeAt(0);
-    }
-
-    // Create a default day
-    const dayGroup = this.fb.group({
-      day: ['Day 1'],
-      events: this.fb.array([]),
-    });
-
-    // Get events form array for this day
-    const eventsArray = dayGroup.get('events') as FormArray;
-
-    // Add common event time slots
-    const commonTimeSlots = [
-      { time: '08:00 AM', title: 'Registration & Check-in' },
-      { time: '09:00 AM', title: 'Opening Session' },
-      { time: '10:30 AM', title: 'Morning Break' },
-      { time: '11:00 AM', title: 'Main Presentation' },
-      { time: '12:30 PM', title: 'Lunch Break' },
-      { time: '02:00 PM', title: 'Afternoon Session' },
-      { time: '03:30 PM', title: 'Networking Break' },
-      { time: '04:00 PM', title: 'Closing Remarks' },
-    ];
-
-    commonTimeSlots.forEach((slot) => {
-      eventsArray.push(
-        this.fb.group({
-          time: [slot.time],
-          title: [slot.title],
-        })
-      );
-    });
-
-    // Add the day to the schedule
-    scheduleFormArray.push(dayGroup);
-  }
-
-  closeEventModal(): void {
-    this.showEventModal = false;
-  }
-
-  viewEvent(event: Event): void {
-    this.eventService.viewEvent(event.id);
-  }
-  editEvent(event: Event): void {
-    this.isEditMode = true;
-
-    // Extract time from date if available
-    const eventDate = new Date(event.date);
-    const formattedDate = eventDate.toISOString().split('T')[0];
-
-    // Format the event time (if any)
-    let eventTime = '';
-    if (eventDate) {
-      const hours = eventDate.getHours().toString().padStart(2, '0');
-      const minutes = eventDate.getMinutes().toString().padStart(2, '0');
-      eventTime = `${hours}:${minutes}`;
-    }
-
-    // Map status to UI representation
-    const status = event.available_tickets === 0 ? 'inactive' : 'active';
-
-    // Reset the form with new FormArrays for schedule
-    this.eventForm = this.fb.group({
-      id: [event.id],
-      title: [event.title, Validators.required],
-      date: [formattedDate, Validators.required],
-      time: [eventTime],
-      location: [event.location || ''],
-      description: [event.description || ''],
-      status: [status],
-      available_tickets: [
-        event.available_tickets || 0,
-        [Validators.required, Validators.min(0)],
-      ],
-      image_url: [event.image_url || ''],
-      price: [event.price || 0, [Validators.min(0)]],
-      category: [event.category || 'General'],
-      duration: [event.duration || '2 hours'],
-      organizer: [event.organizer || 'Event System'],
-      schedule: this.fb.array([]),
-    }); // Populate schedule FormArray if it exists
-    if (event.schedule && Array.isArray(event.schedule)) {
-      const scheduleFormArray = this.eventForm.get('schedule') as FormArray;
-
-      // Clear existing form array items
-      while (scheduleFormArray.length) {
-        scheduleFormArray.removeAt(0);
-      } // Add each schedule day from the event data
-      event.schedule.forEach((day: ScheduleDay) => {
-        const dayGroup = this.fb.group({
-          day: [day.day || ''],
-          events: this.fb.array([]),
-        });
-
-        // Get events form array for this day
-        const eventsArray = dayGroup.get('events') as FormArray;
-
-        // Add each event in this day
-        if (day.events && Array.isArray(day.events)) {
-          day.events.forEach((scheduleEvent: ScheduleEvent) => {
-            eventsArray.push(
-              this.fb.group({
-                time: [scheduleEvent.time || ''],
-                title: [scheduleEvent.title || ''],
-              })
-            );
-          });
-        }
-
-        // Add the day with its events to the schedule
-        scheduleFormArray.push(dayGroup);
-      });
-    } else {
-      // If no schedule, create a default one
-      const scheduleFormArray = this.eventForm.get('schedule') as FormArray;
-      scheduleFormArray.push(this.createScheduleDay());
-    }
-
-    this.showEventModal = true;
-  }
-  saveEvent(): void {
-    if (this.eventForm.invalid) {
-      // Mark all fields as touched to trigger validation messages
-      Object.keys(this.eventForm.controls).forEach((key) => {
-        const control = this.eventForm.get(key);
-        control?.markAsTouched();
-      });
-      return;
-    }
-
-    const formData = { ...this.eventForm.value };
-
-    // Convert FormArray schedule to array of objects
-    if (formData.schedule && Array.isArray(formData.schedule)) {
-      // Already structured correctly from FormArray
-      // No need for JSON parsing
-    }
-
-    // Combine date and time if time is provided
-    if (formData.time) {
-      const dateStr = formData.date;
-      formData.date = `${dateStr}T${formData.time}:00`;
-    }
-
-    // Remove the time field since it's not in the database schema
-    delete formData.time;
-
-    // Map status field to available_tickets if inactive
-    if (formData.status === 'inactive') {
-      formData.available_tickets = 0;
-    }
-
-    // Remove the status field since it's not in the database schema
-    delete formData.status;
-
-    this.isLoading = true;
-
-    if (this.isEditMode) {
-      // Update existing event
-      this.adminService.updateEvent(formData.id, formData).subscribe({
-        next: (response) => {
-          this.showToast('Event updated successfully', 'success');
-          this.closeEventModal();
-          this.loadEvents();
-        },
-        error: (err) => {
-          this.showToast(
-            'Error updating event: ' + (err.message || 'Unknown error'),
-            'error'
-          );
-          this.isLoading = false;
-        },
-      });
-    } else {
-      // Create new event
-      this.adminService.createEvent(formData).subscribe({
-        next: (response) => {
-          this.showToast('Event created successfully', 'success');
-          this.closeEventModal();
-
-          // Force a complete refresh of events from the API
-          setTimeout(() => {
-            this.loadEvents();
-          }, 500); // Small delay to ensure backend has processed the creation
-        },
-        error: (err) => {
-          this.showToast(
-            'Error creating event: ' + (err.message || 'Unknown error'),
-            'error'
-          );
-          this.isLoading = false;
-        },
-      });
-    }
-  }
-
-  confirmDelete(event: Event): void {
-    this.eventToDelete = event;
-    this.showDeleteModal = true;
-  }
-
-  cancelDelete(): void {
-    this.eventToDelete = undefined;
-    this.showDeleteModal = false;
-  }
-  deleteEvent(): void {
-    if (this.eventToDelete) {
-      this.isLoading = true;
-      this.adminService.deleteEvent(this.eventToDelete.id).subscribe({
-        next: () => {
-          this.showToast(
-            `Event "${this.eventToDelete!.title}" has been deleted`,
-            'info'
-          );
-          this.cancelDelete();
-          this.loadEvents();
-        },
-        error: (err) => {
-          this.showToast(
-            'Error deleting event: ' + (err.message || 'Unknown error'),
-            'error'
-          );
-          this.isLoading = false;
-        },
-      });
-    }
-  }
-
-  // Toast notifications
-  showToast(
-    message: string,
-    type: 'success' | 'error' | 'info' | 'warning'
-  ): void {
-    const id = this.nextToastId++;
-    const toast: Toast = { id, message, type };
-    this.toasts.push(toast);
-
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      this.removeToast(toast);
-    }, 5000);
-  }
-
-  removeToast(toast: Toast): void {
-    this.toasts = this.toasts.filter((t) => t.id !== toast.id);
-  }
-  getToastIcon(type: string): string {
-    switch (type) {
-      case 'success':
-        return 'check_circle';
-      case 'error':
-        return 'error';
-      case 'warning':
-        return 'warning';
-      case 'info':
-        return 'info';
-      default:
-        return 'fas fa-info-circle';
-    }
-  }
-
   // Update searchTerm when search changes
-  onSearchChange(newValue: string) {
+  onSearchChange(newValue: string): void {
     this.searchTerm = newValue;
     this.filterEvents();
   }
+
   // Count events by status
   getEventCountByStatus(status: 'active' | 'inactive'): number {
     return this.events.filter((event) => event.status === status).length;
@@ -741,6 +404,26 @@ export class AdminEventsComponent implements OnInit {
         this.clientSideExport();
       },
     });
+  }
+
+  // Modal methods
+  openEventModal(): void {
+    this.isEditMode = false;
+    this.initEventForm();
+    this.eventForm.patchValue({
+      status: 'active',
+      date: new Date().toISOString().split('T')[0],
+    });
+
+    // Create a default schedule with common event time slots
+    this.createDefaultSchedule();
+
+    this.showEventModal = true;
+  }
+
+  closeEventModal(): void {
+    this.showEventModal = false;
+    this.eventForm.reset();
   }
 
   // Fallback client-side CSV export
@@ -1177,5 +860,85 @@ export class AdminEventsComponent implements OnInit {
 
     scheduleFormArray.push(day1);
     scheduleFormArray.push(day2);
+  }
+
+  // Sort methods
+  private sortEvents(events: Event[]): void {
+    events.sort((a: Event, b: Event) => {
+      if (this.sortColumn === 'date') {
+        return this.sortDirection === 'asc'
+          ? new Date(a.date).getTime() - new Date(b.date).getTime()
+          : new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+
+      const aValue = (a[this.sortColumn as keyof Event] || '').toString();
+      const bValue = (b[this.sortColumn as keyof Event] || '').toString();
+
+      return this.sortDirection === 'asc'
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    });
+  }
+
+  // Create a default schedule with common event timeslots
+  private createDefaultSchedule(): void {
+    const scheduleFormArray = this.eventForm.get('schedule') as FormArray;
+
+    // Clear existing schedule
+    while (scheduleFormArray.length) {
+      scheduleFormArray.removeAt(0);
+    }
+
+    // Create a default day
+    const dayGroup = this.fb.group({
+      day: ['Day 1'],
+      events: this.fb.array([]),
+    });
+
+    // Get events form array for this day
+    const eventsArray = dayGroup.get('events') as FormArray;
+
+    // Add common event time slots
+    const commonTimeSlots = [
+      { time: '08:00 AM', title: 'Registration & Check-in' },
+      { time: '09:00 AM', title: 'Opening Session' },
+      { time: '10:30 AM', title: 'Morning Break' },
+      { time: '11:00 AM', title: 'Main Presentation' },
+      { time: '12:30 PM', title: 'Lunch Break' },
+      { time: '02:00 PM', title: 'Afternoon Session' },
+      { time: '03:30 PM', title: 'Networking Break' },
+      { time: '04:00 PM', title: 'Closing Remarks' },
+    ];
+
+    commonTimeSlots.forEach((slot) => {
+      eventsArray.push(
+        this.fb.group({
+          time: [slot.time],
+          title: [slot.title],
+        })
+      );
+    });
+
+    // Add the day to the schedule
+    scheduleFormArray.push(dayGroup);
+  }
+
+  // Toast notifications
+  showToast(
+    message: string,
+    type: 'success' | 'error' | 'info' | 'warning'
+  ): void {
+    const id = this.nextToastId++;
+    const toast: Toast = { id, message, type };
+    this.toasts.push(toast);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      this.removeToast(toast);
+    }, 5000);
+  }
+
+  removeToast(toast: Toast): void {
+    this.toasts = this.toasts.filter((t) => t.id !== toast.id);
   }
 }

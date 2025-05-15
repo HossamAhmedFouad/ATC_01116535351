@@ -55,17 +55,18 @@
             <!-- User avatar - either profile pic or initials -->
             <div class="avatar-container">
               <div
-                *ngIf="!currentUser.profilePicUrl"
+                *ngIf="!currentUser.profile_url"
                 class="avatar-initials"
                 [style.background-color]="getAvatarColor()"
               >
                 {{ getInitials() }}
               </div>
               <img
-                *ngIf="currentUser.profilePicUrl"
-                [src]="currentUser.profilePicUrl"
+                *ngIf="getProfilePicUrl()"
+                [src]="getProfilePicUrl()"
                 alt="Profile picture"
                 class="avatar-image"
+                (error)="onProfileImageError($event)"
               />
             </div>
 
@@ -195,28 +196,19 @@
 
           <div class="form-group">
             <label for="profilePic">Profile Picture</label>
-            <div class="file-input-container">
-              <input
-                type="file"
-                id="profilePic"
-                name="profilePic"
-                accept="image/*"
-                (change)="handleFileInput($event)"
-                class="file-input"
-              />
-              <label for="profilePic" class="file-input-label">
-                <span class="material-icons">cloud_upload</span>
-                Choose Photo
-              </label>
-              <span class="file-name">{{
-                userForm.profilePicUrl ? "Image selected" : "No file chosen"
-              }}</span>
-            </div>
-
-            <!-- Preview image if available -->
-            <div class="image-preview" *ngIf="userForm.profilePicUrl">
-              <img [src]="userForm.profilePicUrl" alt="Profile preview" />
-            </div>
+            <app-file-upload
+              [(ngModel)]="userForm.profile_url"
+              name="profilePic"
+              [bucket]="'avatars'"
+              [folder]="'profiles'"
+              [accept]="'image/*'"
+              [multiple]="false"
+              title="Upload Profile Picture"
+              description="Drop your profile picture here or click to browse"
+              icon="account_circle"
+              (uploadComplete)="onProfilePicUploaded($event)"
+              (uploadError)="onProfilePicError($event)"
+            ></app-file-upload>
           </div>
 
           <div class="form-group full-width">
