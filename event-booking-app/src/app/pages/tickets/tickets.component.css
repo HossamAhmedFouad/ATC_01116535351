@@ -578,3 +578,21 @@
     display: none;
   }
 }
+
+.event-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.event-link:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}

@@ -34,6 +34,7 @@ import { EventService } from '../../services/event.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { CancelBookingDialogComponent } from '../../components/cancel-booking-dialog/cancel-booking-dialog.component';
 
 // Rename Event import to avoid conflict with DOM Event
 import { Event as EventModel } from '../../services/event.service';
@@ -76,7 +77,6 @@ import { Event as EventModel } from '../../services/event.service';
 })
 export class BookingsComponent implements OnInit {
   displayedColumns: string[] = [
-    'id',
     'event',
     'booking_time',
     'tickets',
@@ -213,7 +213,6 @@ export class BookingsComponent implements OnInit {
   getEventDetails(eventId: string): EventModel | undefined {
     return this.events.get(eventId);
   }
-
   viewEventDetails(eventId: string): void {
     this.router.navigate(['/events', eventId]);
   }
@@ -223,37 +222,43 @@ export class BookingsComponent implements OnInit {
   }
 
   cancelBooking(booking: Booking): void {
-    // Ask for confirmation before cancelling
-    if (
-      !confirm(
-        'Are you sure you want to cancel this booking? All tickets will be cancelled.'
-      )
-    ) {
-      return;
-    }
-
-    this.isLoading = true;
-    this.bookingService.cancelBooking(booking.id).subscribe(
-      (updatedBooking) => {
-        // Update the status locally
-        const index = this.bookings.findIndex((b) => b.id === booking.id);
-        if (index !== -1) {
-          this.bookings[index] = updatedBooking;
-        }
-
-        // Update the filtered list
-        this.filterBookings();
-        this.isLoading = false;
-        this.toastService.success('Booking cancelled successfully');
+    const eventDetails = this.getEventDetails(booking.event_id);
+    const dialogRef = this.dialog.open(CancelBookingDialogComponent, {
+      width: '500px',
+      panelClass: 'cancel-booking-dialog',
+      data: {
+        bookingId: booking.id,
+        eventTitle: eventDetails?.title || 'Unknown Event',
+        ticketsCount: booking.tickets_count || 0,
       },
-      (error) => {
-        console.error('Error cancelling booking:', error);
-        this.isLoading = false;
-        this.toastService.error(
-          'Error cancelling booking. Please try again later.'
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.isLoading = true;
+        this.bookingService.cancelBooking(booking.id).subscribe(
+          (updatedBooking) => {
+            // Update the status locally
+            const index = this.bookings.findIndex((b) => b.id === booking.id);
+            if (index !== -1) {
+              this.bookings[index] = updatedBooking;
+            }
+
+            // Update the filtered list
+            this.filterBookings();
+            this.isLoading = false;
+            this.toastService.success('Booking cancelled successfully');
+          },
+          (error) => {
+            console.error('Error cancelling booking:', error);
+            this.isLoading = false;
+            this.toastService.error(
+              'Error cancelling booking. Please try again later.'
+            );
+          }
         );
       }
-    );
+    });
   }
   getStatusClass(status: string): string {
     switch (status?.toUpperCase()) {

@@ -105,3 +105,28 @@ body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
+
+/* Dialog styles with dark mode support */
+.cancel-booking-dialog .mat-mdc-dialog-container {
+  border-radius: 8px;
+  overflow: hidden !important;
+  padding: 0;
+}
+
+/* Dark mode styles for the dialog */
+.dark-mode .cancel-booking-dialog .mat-mdc-dialog-container {
+  background-color: var(--card-background);
+  color: var(--text-color);
+}
+
+.dark-mode .mat-mdc-dialog-container .mdc-dialog__title {
+  color: var(--text-color);
+}
+
+.dark-mode .mat-mdc-dialog-container .mdc-dialog__content {
+  color: var(--text-color);
+}
+
+.dark-mode .cancel-booking-dialog .mat-mdc-dialog-surface {
+  background-color: var(--card-background);
+}

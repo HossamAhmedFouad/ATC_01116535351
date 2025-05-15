@@ -16,11 +16,16 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TicketService } from '../../services/ticket.service';
-import { BookingService, Ticket } from '../../services/booking.service';
+import {
+  BookingService,
+  Ticket,
+  Booking,
+} from '../../services/booking.service';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../services/toast.service';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { EventService } from '../../services/event.service';
 
 @Component({
   selector: 'app-tickets',
@@ -45,8 +50,7 @@ import { LoaderComponent } from '../../components/loader/loader.component';
 })
 export class TicketsComponent implements OnInit {
   displayedColumns: string[] = [
-    'id',
-    'booking_id',
+    'event',
     'ticket_code',
     'price',
     'issued_date',
@@ -58,6 +62,8 @@ export class TicketsComponent implements OnInit {
   isLoading = true;
   searchQuery = '';
   selectedStatusFilter: 'all' | 'CONFIRMED' | 'CANCELLED' = 'all';
+  bookingsMap: Map<string, Booking> = new Map();
+  eventsMap: Map<string, any> = new Map();
 
   // Properties for ticket counts
   get confirmedTicketsCount(): number {
@@ -78,7 +84,8 @@ export class TicketsComponent implements OnInit {
     private bookingService: BookingService,
     private authService: AuthService,
     private router: Router,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private eventService: EventService
   ) {}
 
   ngOnInit(): void {
@@ -93,6 +100,19 @@ export class TicketsComponent implements OnInit {
         // Extract all tickets from bookings
         this.tickets = [];
         bookings.forEach((booking) => {
+          // Store the booking in our map
+          this.bookingsMap.set(booking.id, booking);
+
+          // Load the event details for this booking
+          this.eventService.getEvent(booking.event_id).subscribe(
+            (event) => {
+              this.eventsMap.set(booking.event_id, event);
+            },
+            (error) => {
+              console.error('Error loading event details:', error);
+            }
+          );
+
           if (booking.ticket_items && booking.ticket_items.length > 0) {
             this.tickets.push(...booking.ticket_items);
           }
@@ -129,15 +149,20 @@ export class TicketsComponent implements OnInit {
     this.selectedStatusFilter = status;
     this.filterTickets();
   }
-
   filterTickets(): void {
     // First filter by search query
-    let filtered = this.tickets.filter(
-      (ticket) =>
+    let filtered = this.tickets.filter((ticket) => {
+      // Get the event for this ticket
+      const event = this.getEventForBooking(ticket.booking_id);
+      const eventTitle = event?.title?.toLowerCase() || '';
+
+      return (
         ticket.ticket_code.toLowerCase().includes(this.searchQuery) ||
         ticket.booking_id.toString().includes(this.searchQuery) ||
-        ticket.id.toString().includes(this.searchQuery)
-    );
+        ticket.id.toString().includes(this.searchQuery) ||
+        eventTitle.includes(this.searchQuery)
+      );
+    });
 
     // Then filter by status if not 'all'
     if (this.selectedStatusFilter !== 'all') {
@@ -214,5 +239,13 @@ export class TicketsComponent implements OnInit {
   downloadTicket(ticket: Ticket): void {
     // In a real app, this would generate and download a PDF ticket
     alert(`Downloading ticket: ${ticket.ticket_code}`);
+  }
+
+  // Method to get the event name for a booking ID
+  getEventForBooking(bookingId: string): any {
+    const booking = this.bookingsMap.get(bookingId);
+    if (!booking) return null;
+
+    return this.eventsMap.get(booking.event_id) || { title: 'Loading...' };
   }
 }
