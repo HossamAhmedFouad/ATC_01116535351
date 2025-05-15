@@ -521,6 +521,14 @@
   color: var(--danger-color);
 }
 
+.btn-icon.move {
+  color: var(--info-color);
+}
+
+.btn-icon.move:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
 /* Empty State */
 .empty-state {
   padding: 4rem 1rem;
@@ -1024,4 +1032,269 @@ textarea.form-control {
   .filter-options {
     flex-direction: column;
   }
+}
+
+/* Event Schedule Form Styles */
+.schedule-form {
+  margin-top: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-hover);
+  overflow: hidden;
+}
+
+:host-context(.dark-mode) .schedule-form {
+  background-color: var(--surface-color);
+}
+
+:host-context(.dark-mode) .schedule-form input[type="text"] {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:host-context(.dark-mode) .schedule-form input[type="text"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Fix datalist dropdown appearance in dark mode */
+:host-context(.dark-mode) .schedule-form input[list] {
+  color: var(--text-primary);
+  background-color: var(--surface-color);
+}
+
+:host-context(.dark-mode) .schedule-form option {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+}
+
+.schedule-day-container {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.schedule-day-container:last-child {
+  border-bottom: 0;
+}
+
+.schedule-day {
+  padding: 1rem;
+}
+
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--border-color);
+}
+
+:host-context(.dark-mode) .day-header {
+  border-bottom-color: var(--border-color);
+}
+
+.day-name {
+  font-weight: 600;
+  width: 60%;
+  color: var(--text-primary);
+}
+
+.day-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.schedule-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.schedule-event-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--surface-color);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+:host-context(.dark-mode) .schedule-event-item {
+  border-color: var(--border-color);
+}
+
+.schedule-event-item:hover {
+  background: var(--surface-hover);
+}
+
+.event-time {
+  width: 30%;
+}
+
+.event-title {
+  flex-grow: 1;
+}
+
+.event-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.event-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Button styles for adding and removing schedule items */
+.btn-icon.add {
+  color: var(--success-color);
+}
+
+.btn-icon.remove {
+  color: var(--danger-color);
+}
+
+.btn-icon.add:hover,
+.btn-icon.remove:hover {
+  background-color: var(--surface-hover);
+}
+
+:host-context(.dark-mode) .btn-icon.move:hover,
+:host-context(.dark-mode) .btn-icon.add:hover,
+:host-context(.dark-mode) .btn-icon.remove:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.btn-icon.add:disabled,
+.btn-icon.remove:disabled {
+  color: var(--text-tertiary);
+  cursor: not-allowed;
+}
+
+.schedule-help-text {
+  display: block;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.schedule-actions button {
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  transition: all 0.2s;
+}
+
+.schedule-actions button:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Make the schedule form more responsive */
+@media (max-width: 768px) {
+  .schedule-event-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .event-time,
+  .event-title {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .event-actions {
+    justify-content: flex-start;
+  }
+
+  .day-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .day-name {
+    width: 100%;
+  }
+}
+
+/* Template Buttons */
+.schedule-templates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.template-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-right: 0.5rem;
+}
+
+.template-btn {
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-hover);
+  border: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.template-btn:hover {
+  background-color: var(--surface-color);
+  border-color: var(--text-secondary);
+}
+
+/* Different colors for different template types */
+.template-btn:nth-child(2) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.template-btn:nth-child(3) {
+  border-color: var(--success-color);
+  color: var(--success-color);
+}
+
+.template-btn:nth-child(4) {
+  border-color: var(--warning-color);
+  color: var(--warning-color);
+}
+
+.template-btn:nth-child(2):hover {
+  background-color: rgba(99, 102, 241, 0.1);
+}
+
+:host-context(.dark-mode) .template-btn:nth-child(2):hover {
+  background-color: rgba(99, 102, 241, 0.2);
+}
+
+.template-btn:nth-child(3):hover {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+:host-context(.dark-mode) .template-btn:nth-child(3):hover {
+  background-color: rgba(16, 185, 129, 0.2);
+}
+
+.template-btn:nth-child(4):hover {
+  background-color: rgba(245, 158, 11, 0.1);
+}
+
+:host-context(.dark-mode) .template-btn:nth-child(4):hover {
+  background-color: rgba(245, 158, 11, 0.2);
 }

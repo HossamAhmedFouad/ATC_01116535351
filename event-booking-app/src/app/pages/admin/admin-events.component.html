@@ -513,16 +513,186 @@
               />
             </div>
           </div>
-
           <div class="form-group">
-            <label class="form-label" for="schedule">Schedule (JSON)</label>
-            <textarea
-              id="schedule"
-              class="form-control"
-              formControlName="schedule"
-              rows="3"
-              placeholder="Event schedule in JSON format"
-            ></textarea>
+            <label class="form-label" for="schedule">Event Schedule</label>
+            <div class="schedule-templates">
+              <span class="template-label">Quick templates:</span>
+              <button
+                type="button"
+                class="template-btn"
+                (click)="addScheduleTemplate('conference')"
+              >
+                Conference
+              </button>
+              <button
+                type="button"
+                class="template-btn"
+                (click)="addScheduleTemplate('workshop')"
+              >
+                Workshop
+              </button>
+              <button
+                type="button"
+                class="template-btn"
+                (click)="addScheduleTemplate('festival')"
+              >
+                Festival
+              </button>
+            </div>
+            <div class="schedule-form">
+              <div formArrayName="schedule">
+                <div
+                  *ngFor="
+                    let day of scheduleDays.controls;
+                    let dayIndex = index
+                  "
+                  class="schedule-day-container"
+                >
+                  <div [formGroupName]="dayIndex" class="schedule-day">
+                    <div class="day-header">
+                      <input
+                        type="text"
+                        class="form-control day-name"
+                        formControlName="day"
+                        placeholder="Day name"
+                      />
+                      <div class="day-actions">
+                        <button
+                          type="button"
+                          class="btn-icon add"
+                          (click)="addScheduleEvent(dayIndex)"
+                          title="Add event"
+                        >
+                          <mat-icon>add</mat-icon>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-icon remove"
+                          (click)="removeScheduleDay(dayIndex)"
+                          title="Remove day"
+                          [disabled]="scheduleDays.length <= 1"
+                        >
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div formArrayName="events" class="schedule-events">
+                      <div
+                        *ngFor="
+                          let event of getScheduleEvents(dayIndex).controls;
+                          let eventIndex = index
+                        "
+                        [formGroupName]="eventIndex"
+                        class="schedule-event-item"
+                      >
+                        <div class="event-time">
+                          <input
+                            type="text"
+                            class="form-control"
+                            formControlName="time"
+                            placeholder="Time (e.g. 09:00 AM)"
+                            list="time-options"
+                          />
+                          <datalist id="time-options">
+                            <option value="08:00 AM"></option>
+                            <option value="08:30 AM"></option>
+                            <option value="09:00 AM"></option>
+                            <option value="09:30 AM"></option>
+                            <option value="10:00 AM"></option>
+                            <option value="10:30 AM"></option>
+                            <option value="11:00 AM"></option>
+                            <option value="11:30 AM"></option>
+                            <option value="12:00 PM"></option>
+                            <option value="12:30 PM"></option>
+                            <option value="01:00 PM"></option>
+                            <option value="01:30 PM"></option>
+                            <option value="02:00 PM"></option>
+                            <option value="02:30 PM"></option>
+                            <option value="03:00 PM"></option>
+                            <option value="03:30 PM"></option>
+                            <option value="04:00 PM"></option>
+                            <option value="04:30 PM"></option>
+                            <option value="05:00 PM"></option>
+                            <option value="05:30 PM"></option>
+                            <option value="06:00 PM"></option>
+                            <option value="06:30 PM"></option>
+                            <option value="07:00 PM"></option>
+                            <option value="07:30 PM"></option>
+                            <option value="08:00 PM"></option>
+                          </datalist>
+                        </div>
+                        <div class="event-title">
+                          <input
+                            type="text"
+                            class="form-control"
+                            formControlName="title"
+                            placeholder="Event title"
+                            list="event-titles"
+                          />
+                          <datalist id="event-titles">
+                            <option value="Registration & Check-in"></option>
+                            <option value="Opening Keynote"></option>
+                            <option value="Coffee Break"></option>
+                            <option value="Lunch Break"></option>
+                            <option value="Panel Discussion"></option>
+                            <option value="Networking Session"></option>
+                            <option value="Workshop"></option>
+                            <option value="Q&A Session"></option>
+                            <option value="Closing Remarks"></option>
+                          </datalist>
+                        </div>
+                        <div class="event-actions">
+                          <button
+                            type="button"
+                            class="btn-icon move"
+                            (click)="moveEventUp(dayIndex, eventIndex)"
+                            title="Move up"
+                            [disabled]="eventIndex === 0"
+                          >
+                            <mat-icon>arrow_upward</mat-icon>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-icon move"
+                            (click)="moveEventDown(dayIndex, eventIndex)"
+                            title="Move down"
+                            [disabled]="
+                              eventIndex ===
+                              getScheduleEvents(dayIndex).length - 1
+                            "
+                          >
+                            <mat-icon>arrow_downward</mat-icon>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-icon remove"
+                            (click)="removeScheduleEvent(dayIndex, eventIndex)"
+                            title="Remove event"
+                            [disabled]="getScheduleEvents(dayIndex).length <= 1"
+                          >
+                            <mat-icon>remove</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="schedule-actions">
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    (click)="addScheduleDay()"
+                  >
+                    <mat-icon>add</mat-icon> Add Schedule Day
+                  </button>
+                  <small class="schedule-help-text"
+                    >Use the form above to define your event schedule. Add days
+                    and time slots as needed.</small
+                  >
+                </div>
+              </div>
+            </div>
           </div>
         </form>
       </div>
