@@ -122,6 +122,43 @@ async function main() {
     "Support worthy causes at our elegant charity gala. Enjoy fine dining, entertainment, auctions, and make a difference in the lives of those in need.",
   ];
 
+  // Create special internship acceptance event first
+  const internshipEvent = await prisma.events.create({
+    data: {
+      title: "Internship Acceptance Celebration! 🎉",
+      date: new Date("2025-05-16"),
+      location: "Dubai",
+      description:
+        "Celebrating the successful acceptance into Areeb's internship program! Join us for this momentous occasion as we begin this exciting journey in software development.",
+      image_url:
+        "https://twxkscrkqztvzqucypof.supabase.co/storage/v1/object/public/images//acceptance.webp",
+      price: 0, // Free event
+      category: "Conference",
+      duration: "1 day",
+      organizer: "Areeb Tech",
+      available_tickets: 50,
+      schedule: [
+        {
+          day: "Celebration Day",
+          events: [
+            { time: "09:00 AM", title: "Welcome & Introduction" },
+            { time: "09:30 AM", title: "Meet the Team" },
+            { time: "10:00 AM", title: "Project Overview & Goals" },
+            { time: "11:00 AM", title: "Development Environment Setup" },
+            { time: "12:00 PM", title: "Team Lunch & Networking" },
+            { time: "01:30 PM", title: "First Project Briefing" },
+            { time: "03:00 PM", title: "Tech Stack Deep Dive" },
+            { time: "04:00 PM", title: "Future Growth Opportunities" },
+            { time: "04:30 PM", title: "Celebration & Photos" },
+            { time: "05:00 PM", title: "Closing Remarks & Next Steps" },
+          ],
+        },
+      ],
+    },
+  });
+  console.log(`Created internship event with ID: ${internshipEvent.id}`);
+  events.push(internshipEvent);
+
   // Create standard events (the original 5)
   for (let i = 0; i < 5; i++) {
     // Set date to a future date (current date + random days between 10-60)
