@@ -65,22 +65,4 @@ export class SignupComponent {
       });
     }
   }
-
-  signUpWithGoogle(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    this.authService.signInWithGoogle().subscribe({
-      next: () => {
-        this.toastService.success('Google sign up successful! Welcome aboard!');
-        this.router.navigate(['/events']);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage =
-          error.message || 'An error occurred during Google sign up';
-        this.toastService.error(this.errorMessage, 'Google Sign Up Failed');
-      },
-    });
-  }
 }

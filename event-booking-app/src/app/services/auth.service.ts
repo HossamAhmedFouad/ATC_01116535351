@@ -94,45 +94,6 @@ export class AuthService {
         })
       );
   }
-  signInWithGoogle(): Observable<AuthResponse> {
-    // TODO: Replace with actual Google OAuth implementation once backend endpoint is ready
-    // For now, keeping the mock implementation
-    console.warn(
-      'Google authentication not yet implemented on the backend API'
-    );
-
-    // Simulate successful Google authentication for development
-    return this.http
-      .get<{ status: string; data: AuthResponse }>(
-        `${this.apiUrl}/users/google-auth`
-      )
-      .pipe(
-        catchError((error) => {
-          console.error('Google auth error:', error);
-
-          // Fallback to mock implementation
-          return of({
-            status: 'success',
-            data: {
-              user: {
-                id: '1', // Updated to string to match User interface
-                username: 'googleuser',
-                email: 'google@example.com',
-                location: 'San Francisco, CA',
-              },
-              token: 'mock-jwt-token',
-            },
-          });
-        }),
-        map((response) => response.data),
-        tap((response) => this.handleAuthResponse(response)),
-        catchError((error) => {
-          return throwError(
-            () => new Error('Google authentication failed. Please try again.')
-          );
-        })
-      );
-  }
   signOut(): void {
     try {
       // Clear stored authentication data

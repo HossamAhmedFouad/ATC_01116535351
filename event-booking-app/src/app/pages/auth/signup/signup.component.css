@@ -114,65 +114,6 @@
   cursor: not-allowed;
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  margin: 1.5rem 0;
-}
-
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.divider span {
-  padding: 0 1rem;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-}
-
-.google-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.75rem 1rem;
-  background-color: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.google-button:hover:not(:disabled) {
-  background-color: var(--hover-background);
-  border-color: var(--border-color-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.google-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.google-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.google-button img {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
 .auth-link {
   text-align: center;
   margin-top: 1.5rem;

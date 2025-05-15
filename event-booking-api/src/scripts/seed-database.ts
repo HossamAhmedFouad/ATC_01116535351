@@ -46,8 +46,34 @@ async function main() {
   }
   // Create 5 events
   const events = [];
-  const categories = ["Conference", "Workshop", "Webinar", "Meetup", "Concert", "Exhibition", "Seminar", "Retreat", "Hackathon", "Networking", "Festival", "Gala"];
-  const locations = ["New York", "San Francisco", "London", "Tokyo", "Sydney", "Berlin", "Paris", "Toronto", "Singapore", "Dubai", "Seoul", "Barcelona"];
+  const categories = [
+    "Conference",
+    "Workshop",
+    "Webinar",
+    "Meetup",
+    "Concert",
+    "Exhibition",
+    "Seminar",
+    "Retreat",
+    "Hackathon",
+    "Networking",
+    "Festival",
+    "Gala",
+  ];
+  const locations = [
+    "New York",
+    "San Francisco",
+    "London",
+    "Tokyo",
+    "Sydney",
+    "Berlin",
+    "Paris",
+    "Toronto",
+    "Singapore",
+    "Dubai",
+    "Seoul",
+    "Barcelona",
+  ];
 
   // Real working image URLs for events
   const eventImages = [
@@ -64,7 +90,7 @@ async function main() {
     "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?q=80&w=1000",
     "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000",
   ];
-  
+
   // Real event titles and descriptions
   const eventTitles = [
     "Tech Innovation Summit 2025",
@@ -157,7 +183,7 @@ async function main() {
 
     // Create different schedule templates
     let eventSchedule;
-    
+
     if (i % 3 === 0) {
       // One-day conference schedule
       eventSchedule = [
@@ -224,7 +250,9 @@ async function main() {
         image_url: eventImages[i],
         price: (Math.floor(Math.random() * 10) + 1) * 500, // Random price between 500-5000 cents
         category: categories[i],
-        duration: `${Math.floor(Math.random() * 3) + 1} day${i !== 5 ? "s" : ""}`,
+        duration: `${Math.floor(Math.random() * 3) + 1} day${
+          i !== 5 ? "s" : ""
+        }`,
         organizer: `Organizer ${String.fromCharCode(65 + i - 5)}`, // Organizers A through G
         available_tickets: 50 + Math.floor(Math.random() * 200), // Random ticket count between 50-250
         schedule: eventSchedule,

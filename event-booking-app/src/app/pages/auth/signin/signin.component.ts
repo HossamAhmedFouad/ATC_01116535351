@@ -53,22 +53,4 @@ export class SigninComponent {
       });
     }
   }
-
-  signInWithGoogle(): void {
-    this.isLoading = true;
-    this.errorMessage = '';
-
-    this.authService.signInWithGoogle().subscribe({
-      next: () => {
-        this.toastService.success('Google sign in successful!');
-        this.router.navigate(['/events']);
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.errorMessage =
-          error.message || 'An error occurred during Google sign in';
-        this.toastService.error(this.errorMessage, 'Google Sign In Failed');
-      },
-    });
-  }
 }

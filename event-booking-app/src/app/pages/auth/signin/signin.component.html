@@ -70,20 +70,6 @@
       </button>
     </form>
 
-    <div class="divider">
-      <span>or</span>
-    </div>
-
-    <button
-      type="button"
-      class="google-button"
-      (click)="signInWithGoogle()"
-      [disabled]="isLoading"
-    >
-      <img src="assets/google-icon.svg" alt="Google" />
-      Sign in with Google
-    </button>
-
     <p class="auth-link">
       Don't have an account? <a routerLink="/auth/signup">Sign Up</a>
     </p>
