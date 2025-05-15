@@ -29,14 +29,6 @@
     </button>
     <button
       class="tab-button"
-      [class.active]="selectedTab === 'activity'"
-      (click)="switchTab('activity')"
-    >
-      <span class="material-icons">history</span>
-      Activity
-    </button>
-    <button
-      class="tab-button"
       [class.active]="selectedTab === 'settings'"
       (click)="switchTab('settings')"
     >
@@ -44,6 +36,7 @@
       Settings
     </button>
   </div>
+
   <div class="profile-card" *ngIf="currentUser">
     <!-- PROFILE TAB -->
     <ng-container *ngIf="selectedTab === 'profile'">
@@ -76,30 +69,6 @@
               <p class="role" *ngIf="currentUser.role">
                 {{ currentUser.role }}
               </p>
-
-              <!-- User stats badges -->
-              <div class="user-stats">
-                <div class="stat-badge">
-                  <span class="material-icons">event</span>
-                  <span class="stat-value">{{ totalBookings }}</span>
-                  <span class="stat-label">Bookings</span>
-                </div>
-                <div class="stat-badge">
-                  <span class="material-icons">calendar_today</span>
-                  <span class="stat-value">{{ totalEvents }}</span>
-                  <span class="stat-label">Events</span>
-                </div>
-              </div>
-
-              <!-- Member since info -->
-              <div class="member-info">
-                <p class="member-since">
-                  Member since {{ memberSince | date : "mediumDate" }}
-                </p>
-                <p class="last-login">
-                  Last login: {{ lastLoginDate | date : "mediumDate" }}
-                </p>
-              </div>
             </div>
           </div>
           <!-- Right: Additional info -->
@@ -112,10 +81,6 @@
             <div class="detail-item" *ngIf="currentUser.phone">
               <span class="material-icons">phone</span>
               <span>{{ currentUser.phone }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="material-icons">language</span>
-              <span>Language: {{ getLanguageName(currentLanguage) }}</span>
             </div>
 
             <h3 class="details-title account-info">Account Information</h3>
@@ -239,42 +204,6 @@
       </div>
     </ng-container>
 
-    <!-- ACTIVITY TAB -->
-    <ng-container *ngIf="selectedTab === 'activity'">
-      <div class="activity-container">
-        <h2 class="section-title">Recent Activity</h2>
-
-        <div class="activity-empty" *ngIf="recentActivity.length === 0">
-          <span class="material-icons">history</span>
-          <p>No recent activity to display</p>
-        </div>
-
-        <ul class="activity-list" *ngIf="recentActivity.length > 0">
-          <li class="activity-item" *ngFor="let item of recentActivity">
-            <div class="activity-icon" [ngClass]="item.type">
-              <span class="material-icons">{{ item.icon }}</span>
-            </div>
-            <div class="activity-content">
-              <div class="activity-header">
-                <h3 class="activity-title">{{ item.title }}</h3>
-                <span class="activity-date">{{
-                  item.date | date : "mediumDate"
-                }}</span>
-              </div>
-              <p class="activity-description">{{ item.description }}</p>
-            </div>
-          </li>
-        </ul>
-
-        <div class="activity-footer">
-          <a routerLink="/bookings" class="view-all-link">
-            <span>View all bookings</span>
-            <span class="material-icons">arrow_forward</span>
-          </a>
-        </div>
-      </div>
-    </ng-container>
-
     <!-- SETTINGS TAB -->
     <ng-container *ngIf="selectedTab === 'settings'">
       <div class="settings-container">
@@ -340,42 +269,8 @@
           </form>
         </div>
 
-        <!-- Language selector -->
-        <div class="language-selector-container" *ngIf="isChangingLanguage">
-          <h3 class="subsection-title">Select Language</h3>
-
-          <div class="language-options">
-            <div
-              class="language-option"
-              *ngFor="let language of availableLanguages"
-              [class.active]="currentLanguage === language.code"
-              (click)="changeLanguage(language.code)"
-            >
-              <span class="language-flag">{{ language.flag }}</span>
-              <span class="language-name">{{ language.name }}</span>
-              <span
-                class="material-icons check-icon"
-                *ngIf="currentLanguage === language.code"
-                >check_circle</span
-              >
-            </div>
-          </div>
-
-          <div class="form-actions language-actions">
-            <button
-              type="button"
-              class="cancel-button"
-              (click)="toggleLanguageSelector()"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
         <!-- Settings list -->
-        <ul
-          class="settings-list"
-          *ngIf="!isChangingPassword && !isChangingLanguage"
-        >
+        <ul class="settings-list" *ngIf="!isChangingPassword">
           <li
             class="settings-item"
             *ngFor="let setting of accountSettings"
@@ -395,21 +290,6 @@
         </ul>
       </div>
     </ng-container>
-  </div>
-  <!-- Bookings Summary Section -->
-  <div
-    class="profile-section"
-    *ngIf="
-      selectedTab === 'profile' &&
-      currentUser?.bookedEvents &&
-      currentUser?.bookedEvents.length > 0
-    "
-  >
-    <h2 class="section-title">Recent Bookings</h2>
-    <div class="bookings-summary">
-      <p>You have {{ currentUser?.bookedEvents?.length }} event bookings</p>
-      <a routerLink="/bookings" class="view-all-link">View all bookings</a>
-    </div>
   </div>
 
   <!-- Not Logged In State -->

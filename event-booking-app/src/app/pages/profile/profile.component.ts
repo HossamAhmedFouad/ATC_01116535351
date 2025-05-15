@@ -15,21 +15,6 @@ interface AccountSetting {
   action: () => void;
 }
 
-interface Language {
-  code: string;
-  name: string;
-  flag: string;
-}
-
-interface ActivityItem {
-  id: number;
-  type: 'booking' | 'event' | 'payment';
-  title: string;
-  date: string;
-  description: string;
-  icon: string;
-}
-
 interface UserForm extends Partial<User> {}
 
 @Component({
@@ -46,9 +31,8 @@ export class ProfileComponent implements OnInit {
   isLoading = false;
   successMessage = '';
   errorMessage = '';
-  selectedTab: 'profile' | 'activity' | 'settings' = 'profile';
+  selectedTab: 'profile' | 'settings' = 'profile';
   isChangingPassword = false;
-  isChangingLanguage = false;
   passwordForm = {
     currentPassword: '',
     newPassword: '',
@@ -61,16 +45,6 @@ export class ProfileComponent implements OnInit {
   totalBookings: number = 0;
   lastLoginDate: string = '2023-05-10';
 
-  // Language settings
-  currentLanguage: string = 'en';
-  availableLanguages: Language[] = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'ar', name: 'Arabic', flag: 'AR' },
-  ];
-
-  // Mock activity data
-  recentActivity: ActivityItem[] = [];
-
   // Account settings options
   accountSettings: AccountSetting[] = [];
 
@@ -78,26 +52,21 @@ export class ProfileComponent implements OnInit {
     private authService: AuthService,
     private userService: UserService
   ) {}
+
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     if (this.currentUser) {
       this.resetForm();
-      this.loadMockData();
       this.setupAccountSettings();
       this.calculateUserStats();
     }
-
-    // Check for saved language preference
-    const savedLanguage = localStorage.getItem('preferredLanguage');
-    if (savedLanguage) {
-      this.currentLanguage = savedLanguage;
-    }
   }
+
   calculateUserStats(): void {
     if (this.currentUser?.bookedEvents) {
       this.totalBookings = this.currentUser.bookedEvents.length;
 
-      // Calculate unique events (for demo purposes)
+      // Calculate unique events
       const uniqueEventIds = new Set();
       this.currentUser.bookedEvents.forEach((booking) => {
         if (booking.event_id) {
@@ -108,35 +77,6 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  loadMockData(): void {
-    // Create some mock activity data
-    this.recentActivity = [
-      {
-        id: 1,
-        type: 'booking',
-        title: 'Booked a ticket',
-        date: '2025-05-10',
-        description: 'Booked a ticket for Tech Conference 2025',
-        icon: 'event_available',
-      },
-      {
-        id: 2,
-        type: 'payment',
-        title: 'Payment completed',
-        date: '2025-05-10',
-        description: 'Payment for Tech Conference 2025',
-        icon: 'payments',
-      },
-      {
-        id: 3,
-        type: 'event',
-        title: 'Attended an event',
-        date: '2025-04-15',
-        description: 'Attended Spring Music Festival',
-        icon: 'event_note',
-      },
-    ];
-  }
   setupAccountSettings(): void {
     this.accountSettings = [
       {
@@ -151,21 +91,15 @@ export class ProfileComponent implements OnInit {
         icon: 'cloud_download',
         action: () => this.downloadUserData(),
       },
-      {
-        name: 'Change Language',
-        description: 'Select your preferred language',
-        icon: 'language',
-        action: () => this.toggleLanguageSelector(),
-      },
     ];
   }
+
   // Tab navigation
-  switchTab(tab: 'profile' | 'activity' | 'settings'): void {
+  switchTab(tab: 'profile' | 'settings'): void {
     this.selectedTab = tab;
     // Close any open forms when switching tabs
     this.isEditing = false;
     this.isChangingPassword = false;
-    this.isChangingLanguage = false;
     this.resetMessages();
   }
 
@@ -198,51 +132,52 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    // In a real app, this would call an API
-    this.isLoading = true;
+    if (this.passwordForm.newPassword.length < 6) {
+      this.errorMessage = 'New password must be at least 6 characters long';
+      return;
+    }
 
-    setTimeout(() => {
-      this.isLoading = false;
-      this.successMessage = 'Password changed successfully';
-      this.isChangingPassword = false;
-      this.passwordForm = {
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      };
-    }, 1000);
+    this.isLoading = true;
+    this.userService
+      .changePassword(
+        this.passwordForm.currentPassword,
+        this.passwordForm.newPassword
+      )
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Password changed successfully';
+          this.isChangingPassword = false;
+          this.isLoading = false;
+          this.passwordForm = {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: '',
+          };
+        },
+        error: (error: Error) => {
+          this.errorMessage = error.message || 'Failed to change password';
+          this.isLoading = false;
+        },
+      });
   }
 
   // Settings methods
-  openNotificationSettings(): void {
-    this.successMessage = 'Notification settings feature coming soon';
-  }
-
-  openPrivacySettings(): void {
-    this.successMessage = 'Privacy settings feature coming soon';
-  }
-
   downloadUserData(): void {
     this.successMessage = 'Your data is being prepared for download';
 
-    // In a real app, this would trigger a backend process to compile user data
-    setTimeout(() => {
-      if (this.currentUser) {
-        // Create a JSON blob with user data
-        const userData = JSON.stringify(this.currentUser, null, 2);
-        const blob = new Blob([userData], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+    if (this.currentUser) {
+      const userData = JSON.stringify(this.currentUser, null, 2);
+      const blob = new Blob([userData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
 
-        // Create a download link and trigger it
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `user-data-${this.currentUser.username}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
-    }, 1500);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `user-data-${this.currentUser.username}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   }
 
   // File upload handler
@@ -385,42 +320,6 @@ export class ProfileComponent implements OnInit {
     }
 
     return color;
-  }
-
-  // Language selector
-  toggleLanguageSelector(): void {
-    this.isChangingLanguage = !this.isChangingLanguage;
-    this.resetMessages();
-  }
-
-  changeLanguage(languageCode: string): void {
-    this.isLoading = true;
-    this.successMessage = '';
-    this.errorMessage = '';
-
-    // In a real app, this would call an API and update app settings
-    setTimeout(() => {
-      this.currentLanguage = languageCode;
-      this.isLoading = false;
-      this.isChangingLanguage = false;
-
-      // Get the language name for the message
-      const selectedLanguage = this.availableLanguages.find(
-        (lang) => lang.code === languageCode
-      );
-      this.successMessage = `Language changed to ${
-        selectedLanguage?.name || languageCode
-      }`;
-
-      // In a real app, this would update a language service
-      localStorage.setItem('preferredLanguage', languageCode);
-    }, 1000);
-  }
-
-  // Helper to get language name by code
-  getLanguageName(code: string): string {
-    const language = this.availableLanguages.find((l) => l.code === code);
-    return language ? language.name : 'English';
   }
 
   // Handle profile image loading errors

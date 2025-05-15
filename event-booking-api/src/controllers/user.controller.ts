@@ -123,4 +123,40 @@ export class UserController {
       next(error);
     }
   };
+
+  /**
+   * Change user password
+   */
+  changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Check if user exists in request (from auth middleware)
+      if (!req.user || !req.user.userId) {
+        throw new AppError("Authentication required", 401);
+      }
+
+      const { currentPassword, newPassword } = req.body;
+
+      // Validate required fields
+      if (!currentPassword || !newPassword) {
+        throw new AppError(
+          "Current password and new password are required",
+          400
+        );
+      }
+
+      // Call service to change password
+      await this.userService.changePassword(
+        req.user.userId,
+        currentPassword,
+        newPassword
+      );
+
+      res.status(200).json({
+        status: "success",
+        data: { message: "Password changed successfully" },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

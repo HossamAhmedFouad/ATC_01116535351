@@ -105,6 +105,39 @@ export class UserService {
   getCurrentUser(): User | null {
     return this.authService.getCurrentUser();
   }
+  /**
+   * Change the user's password
+   * @param currentPassword The user's current password
+   * @param newPassword The new password to set
+   */ changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Observable<void> {
+    return this.http
+      .post<{ status: string; data: { message: string } }>(
+        `${this.apiUrl}/change-password`,
+        {
+          currentPassword,
+          newPassword,
+        }
+      )
+      .pipe(
+        map((response) => {
+          if (response.status !== 'success') {
+            throw new Error('Failed to change password');
+          }
+          this.toastService.success(response.data.message);
+        }),
+        catchError((error) => {
+          this.toastService.error(
+            error.error?.message || 'Failed to change password'
+          );
+          return throwError(
+            () => new Error(error.error?.message || 'Failed to change password')
+          );
+        })
+      );
+  }
 
   /**
    * Helper method to update the AuthService user data

@@ -198,4 +198,60 @@ export class UserService {
       throw new AppError("Failed to retrieve users", 500);
     }
   }
+
+  /**
+   * Change user password
+   * @param userId The ID of the user
+   * @param currentPassword The current password to verify
+   * @param newPassword The new password to set
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string
+  ) {
+    logger.debug(`Changing password for user ID: ${userId}`);
+
+    try {
+      // Get the user with their current password hash
+      const user = await prisma.users.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user) {
+        logger.warn(`User not found with ID: ${userId}`);
+        throw new AppError("User not found", 404);
+      }
+
+      if (!user.password) {
+        logger.warn(`User has no password set: ${userId}`);
+        throw new AppError("User has no password set", 400);
+      }
+
+      // Verify current password
+      const isPasswordValid = await comparePassword(
+        currentPassword,
+        user.password
+      );
+      if (!isPasswordValid) {
+        logger.warn(`Invalid current password for user: ${userId}`);
+        throw new AppError("Current password is incorrect", 401);
+      }
+
+      // Hash the new password
+      const hashedPassword = await hashPassword(newPassword);
+
+      // Update the password
+      await prisma.users.update({
+        where: { id: userId },
+        data: { password: hashedPassword },
+      });
+
+      logger.info(`Password changed successfully for user: ${userId}`);
+    } catch (error) {
+      logger.error(`Failed to change password for user: ${userId}`, error);
+      if (error instanceof AppError) throw error;
+      throw new AppError("Failed to change password", 500);
+    }
+  }
 }
