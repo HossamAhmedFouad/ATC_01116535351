@@ -42,7 +42,7 @@ const specs = swaggerJsdoc(options);
 
 export function setupSwagger(app: Express) {
   // Serve swagger docs
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+  app.use("/api-docs", swaggerUi.serve as any, swaggerUi.setup(specs));
 
   // Serve swagger in JSON format
   app.get("/api-docs.json", (req, res) => {

@@ -187,9 +187,8 @@ export class EventService {
       })
     );
   }
-
   // Navigate to event details page
-  viewEvent(eventId: number): void {
+  viewEvent(eventId: string): void {
     this.router.navigate(['/events', eventId]);
   }
 

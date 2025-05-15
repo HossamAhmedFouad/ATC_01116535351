@@ -11,16 +11,18 @@ import {
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { EventService } from '../../services/event.service';
+import { AdminService } from '../../services/admin.service';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
+import { LoaderComponent } from '../../components/loader/loader.component';
 
 interface Event {
-  id: number;
+  id: string; // Changed from number to string to match UUID format
   title: string;
   date: Date;
   time?: string;
   location: string;
   description: string;
-  status: 'active' | 'draft' | 'completed';
+  status: 'active' | 'inactive';
   capacity?: number;
   image?: string;
 }
@@ -43,6 +45,7 @@ interface Toast {
     RouterModule,
     MatIconModule,
     SearchBarComponent,
+    LoaderComponent,
   ],
 })
 export class AdminEventsComponent implements OnInit {
@@ -80,16 +83,21 @@ export class AdminEventsComponent implements OnInit {
   // Toasts
   toasts: Toast[] = [];
   nextToastId: number = 1;
-
   // Bulk actions
   selectedEvents: Event[] = [];
   bulkAction: string = '';
 
-  constructor(private fb: FormBuilder, private eventService: EventService) {}
+  // Loading state
+  isLoading: boolean = false;
 
+  constructor(
+    private fb: FormBuilder,
+    private eventService: EventService,
+    private adminService: AdminService
+  ) {}
   ngOnInit(): void {
     this.initEventForm();
-    this.loadMockEvents();
+    this.loadEvents();
     this.filterEvents();
   }
 
@@ -108,68 +116,49 @@ export class AdminEventsComponent implements OnInit {
     });
   }
 
-  // Load mock events data
-  loadMockEvents(): void {
-    // This would typically come from a service
-    this.events = [
-      {
-        id: 1,
-        title: 'Annual Tech Conference',
-        date: new Date('2025-06-15'),
-        time: '09:00',
-        location: 'Convention Center',
-        description: 'A gathering of tech professionals from around the world.',
-        status: 'active',
-        capacity: 500,
-        image: 'https://example.com/tech-conference.jpg',
+  // Load events from API
+  loadEvents(): void {
+    this.isLoading = true;
+
+    // Build params for API request
+    const params: any = {
+      sortBy: this.sortColumn,
+      sortDirection: this.sortDirection,
+    };
+
+    if (this.filterStatus !== 'all') {
+      params.status = this.filterStatus;
+    }
+
+    if (this.startDate) {
+      params.startDate = new Date(this.startDate).toISOString().split('T')[0];
+    }
+
+    if (this.endDate) {
+      params.endDate = new Date(this.endDate).toISOString().split('T')[0];
+    }
+
+    if (this.searchTerm) {
+      params.searchTerm = this.searchTerm;
+    }
+
+    this.adminService.getAllEvents(params).subscribe({
+      next: (response) => {
+        this.events = response.data.events.map((event: any) => ({
+          ...event,
+          date: new Date(event.date),
+        }));
+        this.filterEvents();
+        this.isLoading = false;
       },
-      {
-        id: 2,
-        title: 'Product Launch',
-        date: new Date('2025-07-10'),
-        time: '14:00',
-        location: 'Downtown Theater',
-        description: 'Launching our new product line to the market.',
-        status: 'draft',
-        capacity: 200,
-        image: 'https://example.com/product-launch.jpg',
+      error: (err) => {
+        this.showToast(
+          'Error loading events: ' + (err.message || 'Unknown error'),
+          'error'
+        );
+        this.isLoading = false;
       },
-      {
-        id: 3,
-        title: 'Summer Workshop Series',
-        date: new Date('2025-08-05'),
-        time: '10:00',
-        location: 'Innovation Hub',
-        description:
-          'A series of workshops focusing on innovation and creativity.',
-        status: 'active',
-        capacity: 50,
-        image: 'https://example.com/workshop.jpg',
-      },
-      {
-        id: 4,
-        title: 'Networking Mixer',
-        date: new Date('2025-05-22'),
-        time: '18:00',
-        location: 'Skyline Lounge',
-        description: 'Evening networking event for industry professionals.',
-        status: 'completed',
-        capacity: 100,
-        image: 'https://example.com/networking.jpg',
-      },
-      {
-        id: 5,
-        title: 'Developer Hackathon',
-        date: new Date('2025-09-12'),
-        time: '09:00',
-        location: 'Tech Campus',
-        description:
-          '48-hour hackathon for developers to build innovative solutions.',
-        status: 'active',
-        capacity: 150,
-        image: 'https://example.com/hackathon.jpg',
-      },
-    ];
+    });
   }
 
   // Filter events based on search and filters
@@ -317,7 +306,6 @@ export class AdminEventsComponent implements OnInit {
     });
     this.showEventModal = true;
   }
-
   saveEvent(): void {
     if (this.eventForm.invalid) {
       // Mark all fields as touched to trigger validation messages
@@ -329,32 +317,45 @@ export class AdminEventsComponent implements OnInit {
     }
 
     const formData = this.eventForm.value;
+    this.isLoading = true;
 
     if (this.isEditMode) {
       // Update existing event
-      const index = this.events.findIndex((e) => e.id === formData.id);
-      if (index !== -1) {
-        this.events[index] = {
-          ...this.events[index],
-          ...formData,
-          date: new Date(formData.date),
-        };
-        this.showToast('Event updated successfully', 'success');
-      }
+      this.adminService.updateEvent(formData.id, formData).subscribe({
+        next: (response) => {
+          this.showToast('Event updated successfully', 'success');
+          this.closeEventModal();
+          this.loadEvents();
+        },
+        error: (err) => {
+          this.showToast(
+            'Error updating event: ' + (err.message || 'Unknown error'),
+            'error'
+          );
+          this.isLoading = false;
+        },
+      });
     } else {
       // Create new event
-      const newId = Math.max(...this.events.map((e) => e.id), 0) + 1;
-      const newEvent: Event = {
-        ...formData,
-        id: newId,
-        date: new Date(formData.date),
-      };
-      this.events.push(newEvent);
-      this.showToast('Event created successfully', 'success');
-    }
+      this.adminService.createEvent(formData).subscribe({
+        next: (response) => {
+          this.showToast('Event created successfully', 'success');
+          this.closeEventModal();
 
-    this.closeEventModal();
-    this.filterEvents();
+          // Force a complete refresh of events from the API
+          setTimeout(() => {
+            this.loadEvents();
+          }, 500); // Small delay to ensure backend has processed the creation
+        },
+        error: (err) => {
+          this.showToast(
+            'Error creating event: ' + (err.message || 'Unknown error'),
+            'error'
+          );
+          this.isLoading = false;
+        },
+      });
+    }
   }
 
   confirmDelete(event: Event): void {
@@ -366,16 +367,26 @@ export class AdminEventsComponent implements OnInit {
     this.eventToDelete = undefined;
     this.showDeleteModal = false;
   }
-
   deleteEvent(): void {
     if (this.eventToDelete) {
-      this.events = this.events.filter((e) => e.id !== this.eventToDelete!.id);
-      this.showToast(
-        `Event "${this.eventToDelete.title}" has been deleted`,
-        'info'
-      );
-      this.cancelDelete();
-      this.filterEvents();
+      this.isLoading = true;
+      this.adminService.deleteEvent(this.eventToDelete.id).subscribe({
+        next: () => {
+          this.showToast(
+            `Event "${this.eventToDelete!.title}" has been deleted`,
+            'info'
+          );
+          this.cancelDelete();
+          this.loadEvents();
+        },
+        error: (err) => {
+          this.showToast(
+            'Error deleting event: ' + (err.message || 'Unknown error'),
+            'error'
+          );
+          this.isLoading = false;
+        },
+      });
     }
   }
 
@@ -417,12 +428,10 @@ export class AdminEventsComponent implements OnInit {
     this.searchTerm = newValue;
     this.filterEvents();
   }
-
   // Count events by status
-  getEventCountByStatus(status: 'active' | 'draft' | 'completed'): number {
+  getEventCountByStatus(status: 'active' | 'inactive'): number {
     return this.events.filter((event) => event.status === status).length;
   }
-
   // Export events to CSV
   exportEvents(): void {
     if (this.filteredEvents.length === 0) {
@@ -430,6 +439,62 @@ export class AdminEventsComponent implements OnInit {
       return;
     }
 
+    this.isLoading = true;
+
+    // Build params for export
+    const params: any = {};
+
+    if (this.filterStatus !== 'all') {
+      params.status = this.filterStatus;
+    }
+
+    if (this.startDate) {
+      params.startDate = new Date(this.startDate).toISOString().split('T')[0];
+    }
+
+    if (this.endDate) {
+      params.endDate = new Date(this.endDate).toISOString().split('T')[0];
+    }
+
+    if (this.searchTerm) {
+      params.searchTerm = this.searchTerm;
+    }
+
+    this.adminService.exportEventsToCSV(params).subscribe({
+      next: (blob: Blob) => {
+        // Create a URL for the blob
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+
+        link.setAttribute('href', url);
+        link.setAttribute(
+          'download',
+          `events-export-${new Date().toISOString().split('T')[0]}.csv`
+        );
+        link.style.visibility = 'hidden';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        this.showToast('Events exported successfully', 'success');
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.showToast(
+          'Error exporting events: ' + (err.message || 'Unknown error'),
+          'error'
+        );
+        this.isLoading = false;
+
+        // Fallback to client-side export if server fails
+        this.clientSideExport();
+      },
+    });
+  }
+
+  // Fallback client-side CSV export
+  clientSideExport(): void {
     // CSV header
     const header = [
       'ID',
@@ -478,8 +543,6 @@ export class AdminEventsComponent implements OnInit {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    this.showToast('Events exported successfully', 'success');
   }
 
   // Apply preset date ranges
@@ -604,7 +667,6 @@ export class AdminEventsComponent implements OnInit {
   isEventSelected(event: Event): boolean {
     return this.selectedEvents.some((e) => e.id === event.id);
   }
-
   // Apply bulk action to selected events
   applyBulkAction(): void {
     if (this.selectedEvents.length === 0) {
@@ -616,11 +678,8 @@ export class AdminEventsComponent implements OnInit {
       case 'setActive':
         this.setStatusForSelected('active');
         break;
-      case 'setDraft':
-        this.setStatusForSelected('draft');
-        break;
-      case 'setCompleted':
-        this.setStatusForSelected('completed');
+      case 'setInactive':
+        this.setStatusForSelected('inactive');
         break;
       case 'delete':
         this.confirmBulkDelete();
@@ -629,27 +688,30 @@ export class AdminEventsComponent implements OnInit {
         this.showToast('Please select an action', 'warning');
     }
   }
-
   // Set status for selected events
-  setStatusForSelected(status: 'active' | 'draft' | 'completed'): void {
+  setStatusForSelected(status: 'active' | 'inactive'): void {
     const count = this.selectedEvents.length;
+    const selectedIds = this.selectedEvents.map((event) => event.id);
 
-    // Update status for each selected event
-    this.selectedEvents.forEach((event) => {
-      const index = this.events.findIndex((e) => e.id === event.id);
-      if (index !== -1) {
-        this.events[index].status = status;
-      }
+    this.isLoading = true;
+
+    this.adminService.bulkUpdateEventStatus(selectedIds, status).subscribe({
+      next: () => {
+        // Clear selection
+        this.selectedEvents = [];
+        this.bulkAction = '';
+
+        this.showToast(`Status updated for ${count} events`, 'success');
+        this.loadEvents();
+      },
+      error: (err) => {
+        this.showToast(
+          'Error updating events: ' + (err.message || 'Unknown error'),
+          'error'
+        );
+        this.isLoading = false;
+      },
     });
-
-    // Update filtered events
-    this.filterEvents();
-
-    // Clear selection
-    this.selectedEvents = [];
-    this.bulkAction = '';
-
-    this.showToast(`Status updated for ${count} events`, 'success');
   }
 
   // Confirm bulk delete
@@ -663,24 +725,29 @@ export class AdminEventsComponent implements OnInit {
       this.bulkDeleteEvents();
     }
   }
-
   // Delete selected events
   bulkDeleteEvents(): void {
     const count = this.selectedEvents.length;
     const selectedIds = this.selectedEvents.map((event) => event.id);
 
-    // Remove selected events
-    this.events = this.events.filter(
-      (event) => !selectedIds.includes(event.id)
-    );
+    this.isLoading = true;
 
-    // Update filtered events
-    this.filterEvents();
+    this.adminService.bulkDeleteEvents(selectedIds).subscribe({
+      next: () => {
+        // Clear selection
+        this.selectedEvents = [];
+        this.bulkAction = '';
 
-    // Clear selection
-    this.selectedEvents = [];
-    this.bulkAction = '';
-
-    this.showToast(`${count} events deleted successfully`, 'success');
+        this.showToast(`${count} events deleted successfully`, 'success');
+        this.loadEvents();
+      },
+      error: (err) => {
+        this.showToast(
+          'Error deleting events: ' + (err.message || 'Unknown error'),
+          'error'
+        );
+        this.isLoading = false;
+      },
+    });
   }
 }

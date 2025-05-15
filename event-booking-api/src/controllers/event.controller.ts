@@ -161,4 +161,162 @@ export class EventController {
       next(error);
     }
   };
+
+  /**
+   * Get all events with admin privileges (includes events of all statuses)
+   */
+  getAdminEvents = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {
+        page = "1",
+        limit = "10",
+        status,
+        startDate,
+        endDate,
+        searchTerm,
+        sortBy = "date",
+        sortDirection = "desc",
+      } = req.query;
+
+      const parsedPage = parseInt(page as string, 10);
+      const parsedLimit = parseInt(limit as string, 10); // Create query options
+      const options = {
+        sortBy: sortBy as string,
+        sortDirection: sortDirection as "asc" | "desc",
+        status: status as string | undefined,
+        startDate: startDate as string | undefined,
+        endDate: endDate as string | undefined,
+        searchTerm: searchTerm as string | undefined,
+      };
+
+      const events = await this.eventService.getAdminEvents(options);
+
+      res.status(200).json({
+        status: "success",
+        data: {
+          events,
+          pagination: {
+            total: events.length,
+            page: parsedPage,
+            limit: parsedLimit,
+            totalPages: Math.ceil(events.length / parsedLimit),
+          },
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Export events to CSV
+   */
+  exportEvents = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { status, startDate, endDate, searchTerm } = req.query;
+      const options = {
+        status: status as string | undefined,
+        startDate: startDate as string | undefined,
+        endDate: endDate as string | undefined,
+        searchTerm: searchTerm as string | undefined,
+      };
+
+      const events = await this.eventService.exportEvents();
+
+      // Convert events to CSV format
+      const headers = [
+        "ID",
+        "Title",
+        "Date",
+        "Location",
+        "Status",
+        "Available Tickets",
+      ];
+      const csvRows = [
+        headers.join(","),
+        ...events.map((event) =>
+          [
+            event.id,
+            `"${event.title.replace(/"/g, '""')}"`,
+            event.date,
+            `"${event.location?.replace(/"/g, '""') || ""}"`,
+            event.status,
+            event.available_tickets,
+          ].join(",")
+        ),
+      ];
+      const csv = csvRows.join("\r\n");
+
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=events-export-${
+          new Date().toISOString().split("T")[0]
+        }.csv`
+      );
+
+      res.status(200).send(csv);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Bulk update events status
+   */
+  bulkUpdateEvents = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { ids, status } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        throw new AppError("Event IDs are required", 400);
+      }
+      if (!status || !["active", "inactive"].includes(status)) {
+        throw new AppError("Valid status is required", 400);
+      }
+
+      const results = await this.eventService.bulkUpdateEvents(ids, status);
+      res.status(200).json({
+        status: "success",
+        data: {
+          updatedCount: results.successful,
+          message: `${results.successful} events have been updated to ${status}`,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Bulk delete events
+   */
+  bulkDeleteEvents = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const { ids } = req.body;
+
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        throw new AppError("Event IDs are required", 400);
+      }
+
+      const results = await this.eventService.bulkDeleteEvents(ids);
+      res.status(200).json({
+        status: "success",
+        data: {
+          deletedCount: results.successful,
+          message: `${results.successful} events have been deleted`,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

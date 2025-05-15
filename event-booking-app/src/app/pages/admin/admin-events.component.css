@@ -381,6 +381,8 @@
 
 .table-container {
   overflow-x: auto;
+  min-height: 300px; /* Ensure minimum height for loader and empty state */
+  position: relative;
 }
 
 .events-table {
@@ -463,22 +465,13 @@
   background-color: rgba(16, 185, 129, 0.2);
 }
 
-.status-badge.draft {
-  background-color: rgba(245, 158, 11, 0.1);
-  color: var(--warning-color);
+.status-badge.inactive {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger-color);
 }
 
-:host-context(.dark-mode) .status-badge.draft {
-  background-color: rgba(245, 158, 11, 0.2);
-}
-
-.status-badge.completed {
-  background-color: rgba(107, 114, 128, 0.1);
-  color: var(--text-secondary);
-}
-
-:host-context(.dark-mode) .status-badge.completed {
-  background-color: rgba(107, 114, 128, 0.2);
+:host-context(.dark-mode) .status-badge.inactive {
+  background-color: rgba(239, 68, 68, 0.2);
 }
 
 .status-badge mat-icon {
@@ -600,6 +593,11 @@
 .pagination button.active {
   background: var(--primary-color);
   color: white;
+}
+
+.page-numbers {
+  display: flex;
+  align-items: center;
 }
 
 .pagination .page-info {

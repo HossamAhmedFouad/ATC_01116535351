@@ -28,7 +28,6 @@
           <span>5% increase this month</span>
         </div>
       </div>
-
       <div class="stat-card">
         <div class="stat-header">
           <div class="stat-title">Active Events</div>
@@ -44,27 +43,14 @@
 
       <div class="stat-card">
         <div class="stat-header">
-          <div class="stat-title">Completed Events</div>
-          <div class="stat-icon-wrapper info">
+          <div class="stat-title">Inactive Events</div>
+          <div class="stat-icon-wrapper danger">
             <mat-icon>event_busy</mat-icon>
           </div>
         </div>
-        <div class="stat-value">{{ getEventCountByStatus("completed") }}</div>
+        <div class="stat-value">{{ getEventCountByStatus("inactive") }}</div>
         <div class="stat-description">
-          <span>Past events this year</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <div class="stat-title">Draft Events</div>
-          <div class="stat-icon-wrapper warning">
-            <mat-icon>edit_calendar</mat-icon>
-          </div>
-        </div>
-        <div class="stat-value">{{ getEventCountByStatus("draft") }}</div>
-        <div class="stat-description">
-          <span>Upcoming and in preparation</span>
+          <span>Currently unavailable events</span>
         </div>
       </div>
     </div>
@@ -91,8 +77,7 @@
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
-              <option value="draft">Draft</option>
-              <option value="completed">Completed</option>
+              <option value="inactive">Inactive</option>
             </select>
           </div>
           <div class="filter-group">
@@ -144,12 +129,12 @@
           <!-- Bulk actions dropdown -->
           <div class="bulk-actions" *ngIf="selectedEvents.length > 0">
             <select class="action-select" [(ngModel)]="bulkAction">
-              <option value="" disabled selected>
+              <option value="" disabled selected></option>
+              <option disabled selected value="">
                 Bulk Actions ({{ selectedEvents.length }} selected)
               </option>
               <option value="setActive">Set Status: Active</option>
-              <option value="setDraft">Set Status: Draft</option>
-              <option value="setCompleted">Set Status: Completed</option>
+              <option value="setInactive">Set Status: Inactive</option>
               <option value="delete">Delete Selected</option>
             </select>
             <button
@@ -166,9 +151,27 @@
           </button>
         </div>
       </div>
-
       <div class="table-container">
-        <table class="events-table" *ngIf="filteredEvents.length > 0">
+        <!-- Show loader when loading data -->
+        <app-loader
+          *ngIf="isLoading"
+          [message]="'Loading events...'"
+        ></app-loader>
+
+        <!-- Show empty state when no events match filters -->
+        <div
+          class="empty-state"
+          *ngIf="!isLoading && filteredEvents.length === 0"
+        >
+          <mat-icon>event_busy</mat-icon>
+          <h3>No events found</h3>
+          <p>Try adjusting your filters or create a new event.</p>
+        </div>
+
+        <table
+          class="events-table"
+          *ngIf="!isLoading && filteredEvents.length > 0"
+        >
           <thead>
             <tr>
               <th class="select-column">
@@ -256,15 +259,13 @@
                 <span
                   class="status-badge"
                   [class.active]="event.status === 'active'"
-                  [class.draft]="event.status === 'draft'"
-                  [class.completed]="event.status === 'completed'"
+                  [class.inactive]="event.status === 'inactive'"
                 >
                   <mat-icon *ngIf="event.status === 'active'"
                     >check_circle</mat-icon
                   >
-                  <mat-icon *ngIf="event.status === 'draft'">edit</mat-icon>
-                  <mat-icon *ngIf="event.status === 'completed'"
-                    >event_available</mat-icon
+                  <mat-icon *ngIf="event.status === 'inactive'"
+                    >cancel</mat-icon
                   >
                   {{ event.status }}
                 </span>
@@ -427,8 +428,7 @@
               <label class="form-label" for="status">Status</label>
               <select id="status" class="form-control" formControlName="status">
                 <option value="active">Active</option>
-                <option value="draft">Draft</option>
-                <option value="completed">Completed</option>
+                <option value="inactive">Inactive</option>
               </select>
             </div>
 
