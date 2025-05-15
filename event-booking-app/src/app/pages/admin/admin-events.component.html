@@ -431,29 +431,98 @@
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-
             <div class="form-group">
-              <label class="form-label" for="capacity">Capacity</label>
+              <label class="form-label" for="available_tickets"
+                >Available Tickets</label
+              >
               <input
                 type="number"
-                id="capacity"
+                id="available_tickets"
                 class="form-control"
-                formControlName="capacity"
-                min="1"
-                placeholder="Number of attendees"
+                formControlName="available_tickets"
+                min="0"
+                placeholder="Number of available tickets"
+              />
+              <div
+                class="form-error"
+                *ngIf="
+                  eventForm.get('available_tickets')?.invalid &&
+                  eventForm.get('available_tickets')?.touched
+                "
+              >
+                Available tickets must be 0 or greater
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="image_url">Image URL</label>
+            <input
+              type="text"
+              id="image_url"
+              class="form-control"
+              formControlName="image_url"
+              placeholder="Enter image URL"
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="price">Price</label>
+              <input
+                type="number"
+                id="price"
+                class="form-control"
+                formControlName="price"
+                min="0"
+                placeholder="Event price"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="category">Category</label>
+              <input
+                type="text"
+                id="category"
+                class="form-control"
+                formControlName="category"
+                placeholder="Event category"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="duration">Duration</label>
+              <input
+                type="text"
+                id="duration"
+                class="form-control"
+                formControlName="duration"
+                placeholder="Event duration (e.g. 2 hours)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="organizer">Organizer</label>
+              <input
+                type="text"
+                id="organizer"
+                class="form-control"
+                formControlName="organizer"
+                placeholder="Event organizer"
               />
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="image">Image URL</label>
-            <input
-              type="text"
-              id="image"
+            <label class="form-label" for="schedule">Schedule (JSON)</label>
+            <textarea
+              id="schedule"
               class="form-control"
-              formControlName="image"
-              placeholder="Enter image URL"
-            />
+              formControlName="schedule"
+              rows="3"
+              placeholder="Event schedule in JSON format"
+            ></textarea>
           </div>
         </form>
       </div>

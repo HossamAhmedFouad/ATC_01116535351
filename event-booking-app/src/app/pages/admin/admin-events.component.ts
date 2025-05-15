@@ -16,15 +16,22 @@ import { SearchBarComponent } from '../../components/search-bar/search-bar.compo
 import { LoaderComponent } from '../../components/loader/loader.component';
 
 interface Event {
-  id: string; // Changed from number to string to match UUID format
+  id: string; // UUID format from backend
   title: string;
   date: Date;
-  time?: string;
-  location: string;
-  description: string;
-  status: 'active' | 'inactive';
-  capacity?: number;
-  image?: string;
+  time?: string; // UI-only field for time input
+  location?: string;
+  description?: string;
+  image_url?: string;
+  price?: number;
+  category?: string;
+  duration?: string;
+  organizer?: string;
+  available_tickets?: number;
+  schedule?: any;
+  // UI-specific fields
+  status?: 'active' | 'inactive';
+  bookingsCount?: number;
 }
 
 interface Toast {
@@ -111,8 +118,13 @@ export class AdminEventsComponent implements OnInit {
       location: [''],
       description: [''],
       status: ['active'],
-      capacity: [null],
-      image: [''],
+      available_tickets: [100, [Validators.required, Validators.min(0)]],
+      image_url: [''],
+      price: [0, [Validators.min(0)]],
+      category: ['General'],
+      duration: ['2 hours'],
+      organizer: ['Event System'],
+      schedule: ['{}'],
     });
   }
 
@@ -171,8 +183,10 @@ export class AdminEventsComponent implements OnInit {
       filtered = filtered.filter(
         (event) =>
           event.title.toLowerCase().includes(term) ||
-          event.location.toLowerCase().includes(term) ||
-          event.description.toLowerCase().includes(term)
+          event.location?.toLowerCase()?.includes(term) ||
+          false ||
+          event.description?.toLowerCase()?.includes(term) ||
+          false
       );
     }
 
@@ -300,10 +314,37 @@ export class AdminEventsComponent implements OnInit {
 
   editEvent(event: Event): void {
     this.isEditMode = true;
-    this.eventForm.patchValue({
+
+    // Extract time from date if available
+    const eventDate = new Date(event.date);
+    const formattedDate = eventDate.toISOString().split('T')[0];
+
+    // Format the event time (if any)
+    let eventTime = '';
+    if (eventDate) {
+      const hours = eventDate.getHours().toString().padStart(2, '0');
+      const minutes = eventDate.getMinutes().toString().padStart(2, '0');
+      eventTime = `${hours}:${minutes}`;
+    }
+
+    // Map status to UI representation
+    const status = event.available_tickets === 0 ? 'inactive' : 'active';
+
+    // Prepare the form data
+    const formData = {
       ...event,
-      date: new Date(event.date).toISOString().split('T')[0],
-    });
+      date: formattedDate,
+      time: eventTime,
+      status: status,
+      // Map required fields with proper defaults if undefined
+      price: event.price || 0,
+      category: event.category || 'General',
+      duration: event.duration || '2 hours',
+      organizer: event.organizer || 'Event System',
+      schedule: event.schedule ? JSON.stringify(event.schedule) : '{}',
+    };
+
+    this.eventForm.patchValue(formData);
     this.showEventModal = true;
   }
   saveEvent(): void {
@@ -316,7 +357,35 @@ export class AdminEventsComponent implements OnInit {
       return;
     }
 
-    const formData = this.eventForm.value;
+    const formData = { ...this.eventForm.value };
+
+    // Convert the schedule JSON string to an actual object if it exists
+    if (formData.schedule && typeof formData.schedule === 'string') {
+      try {
+        formData.schedule = JSON.parse(formData.schedule);
+      } catch (e) {
+        // If invalid JSON, set to empty object
+        formData.schedule = {};
+      }
+    }
+
+    // Combine date and time if time is provided
+    if (formData.time) {
+      const dateStr = formData.date;
+      formData.date = `${dateStr}T${formData.time}:00`;
+    }
+
+    // Remove the time field since it's not in the database schema
+    delete formData.time;
+
+    // Map status field to available_tickets if inactive
+    if (formData.status === 'inactive') {
+      formData.available_tickets = 0;
+    }
+
+    // Remove the status field since it's not in the database schema
+    delete formData.status;
+
     this.isLoading = true;
 
     if (this.isEditMode) {
@@ -503,22 +572,25 @@ export class AdminEventsComponent implements OnInit {
       'Time',
       'Location',
       'Status',
-      'Capacity',
+      'Available Tickets',
+      'Price',
+      'Category',
     ];
 
     // Convert each event to CSV row format
     const rows = this.filteredEvents.map((event) => {
       const date = new Date(event.date).toLocaleDateString();
       const time = event.time || 'N/A';
-
       return [
         event.id.toString(),
         event.title,
         date,
         time,
-        event.location,
-        event.status,
-        event.capacity ? event.capacity.toString() : 'N/A',
+        event.location || 'N/A',
+        event.status || 'inactive',
+        event.available_tickets ? event.available_tickets.toString() : '0',
+        event.price ? event.price.toString() : '0',
+        event.category || 'General',
       ];
     });
 

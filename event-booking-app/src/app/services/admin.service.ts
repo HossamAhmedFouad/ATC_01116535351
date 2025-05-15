@@ -4,16 +4,20 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Event {
-  id: string; // Changed from number to string to match UUID from backend
+  id: string; // UUID from backend
   title: string;
   date: Date;
-  time?: string;
-  location: string;
-  description: string;
-  status: 'active' | 'draft' | 'completed' | 'cancelled';
-  capacity?: number;
-  image?: string;
+  location?: string;
+  description?: string;
+  image_url?: string;
+  price?: number;
+  category?: string;
+  duration?: string;
+  organizer?: string;
   available_tickets?: number;
+  schedule?: any;
+  // UI-specific fields
+  status?: 'active' | 'inactive';
   bookingsCount?: number;
 }
 
