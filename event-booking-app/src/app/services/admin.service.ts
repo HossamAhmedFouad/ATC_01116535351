@@ -72,9 +72,11 @@ export class AdminService {
   }
   /**
    * Update an existing event
-   */
-  updateEvent(id: string, eventData: any): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/events/${id}`, eventData);
+   */ updateEvent(id: string, eventData: any): Observable<any> {
+    return this.http.patch<{ status: string; data: { event: Event } }>(
+      `${this.apiUrl}/events/${id}`,
+      eventData
+    );
   }
 
   /**

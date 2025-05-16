@@ -1041,7 +1041,6 @@ export class AdminEventsComponent implements OnInit {
       },
     });
   }
-
   // Save event changes
   saveEvent(): void {
     if (this.eventForm.invalid) {
@@ -1051,7 +1050,31 @@ export class AdminEventsComponent implements OnInit {
 
     this.isLoading = true;
     // Get the form data
-    const eventData = { ...this.eventForm.value };
+    const formValue = this.eventForm.value;
+    const eventData: any = {
+      title: formValue.title,
+      location: formValue.location,
+      description: formValue.description,
+      status: formValue.status,
+      available_tickets: formValue.available_tickets,
+      price: formValue.price,
+      category: formValue.category,
+      duration: formValue.duration,
+      organizer: formValue.organizer,
+      schedule: formValue.schedule,
+    };
+
+    // Handle date and time combination
+    if (formValue.date) {
+      // Create new date object
+      const date = new Date(formValue.date);
+      if (formValue.time) {
+        // If time is provided, combine date and time
+        const [hours, minutes] = formValue.time.split(':');
+        date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      }
+      eventData.date = date.toISOString();
+    }
 
     // Convert the image path to a full URL if it exists
     if (eventData.image_url) {
