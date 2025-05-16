@@ -6,12 +6,9 @@ function generateEnvConfig() {
   // Read the template file
   const templatePath = path.join(__dirname, "src", "env-config.js");
   let envConfig = fs.readFileSync(templatePath, "utf8");
-
   // Replace all placeholders with actual values
   envConfig = envConfig
     .replace("{{SUPABASE_URL}}", process.env.SUPABASE_URL || "")
-    .replace("{{SUPABASE_ANON_KEY}}", process.env.SUPABASE_ANON_KEY || "")
-    .replace("{{SUPABASE_STORAGE_URL}}", process.env.SUPABASE_STORAGE_URL || "")
     .replace(
       "{{API_URL}}",
       process.env.API_URL || "http://172.161.48.59:3000/api"
