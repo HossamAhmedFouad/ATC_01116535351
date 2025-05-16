@@ -56,7 +56,7 @@ model tickets {
 model users {
   id          String     @id @default(uuid()) @db.Uuid
   username    String?
-  email       String?    @unique
+  email       String?
   password    String?
   phone       String?
   location    String?

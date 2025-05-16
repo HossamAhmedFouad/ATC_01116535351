@@ -92,18 +92,8 @@ export class UserController {
       if (!req.user || !req.user.userId) {
         throw new AppError("Authentication required", 401);
       }
+
       const userData: UpdateUserInput = req.body;
-
-      // Check if email is being updated and validate uniqueness
-      if (userData.email) {
-        const existingUser = await this.userService.getUserByEmail(
-          userData.email
-        );
-        if (existingUser && existingUser.id !== req.user.userId) {
-          throw new AppError("Email already in use by another user", 400);
-        }
-      }
-
       const updatedUser = await this.userService.updateUser(
         req.user.userId,
         userData
