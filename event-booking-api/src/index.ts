@@ -86,7 +86,7 @@ setupSwagger(app);
 app.use(errorHandler);
 
 // Start server
-app.listen(port, async () => {
+app.listen(3000, "0.0.0.0", async () => {
   logger.info(`Server is running on port ${port}`);
   logger.info(
     `API Documentation available at http://localhost:${port}/api-docs`
