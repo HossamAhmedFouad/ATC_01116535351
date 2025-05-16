@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 // Add BigInt serialization for JSON responses
 (BigInt.prototype as any).toJSON = function () {
