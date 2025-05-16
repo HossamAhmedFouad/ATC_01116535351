@@ -14,7 +14,7 @@ declare global {
 
 export const environment = {
   production: false,
-  apiUrl: 'http://172.161.48.59:3000/api',
+  apiUrl: 'https://atc-01116535351.onrender.com/api',
   supabase: {
     url: window?.env?.SUPABASE_URL || '',
     anonKey: window?.env?.SUPABASE_ANON_KEY || '',
