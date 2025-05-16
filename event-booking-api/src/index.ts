@@ -50,7 +50,7 @@ app.use(
 app.use(
   cors({
     origin: "https://atc-01116535351.vercel.app", // ✅ your actual frontend
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     credentials: true, // ✅ if you're using auth headers or cookies
   })
 );
