@@ -14,11 +14,10 @@ declare global {
 
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/api',
+  apiUrl: window?.env?.API_URL || 'http://172.161.48.59:3000/api',
   supabase: {
-    url: window?.env?.SUPABASE_URL || 'http://localhost:8000',
-    anonKey: window?.env?.SUPABASE_ANON_KEY || 'your-anon-key',
-    storageUrl:
-      window?.env?.SUPABASE_STORAGE_URL || 'http://localhost:8000/storage/v1',
+    url: window?.env?.SUPABASE_URL || '',
+    anonKey: window?.env?.SUPABASE_ANON_KEY || '',
+    storageUrl: window?.env?.SUPABASE_STORAGE_URL || '',
   },
 };
