@@ -1,6 +1,5 @@
 import prisma from "../prisma/client";
 import { AppError } from "../middleware/error";
-import { bookings } from "../generated/prisma";
 
 export interface CreateBookingInput {
   user_id: string;

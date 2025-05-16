@@ -2,7 +2,6 @@ import prisma from "../prisma/client";
 import { hashPassword, comparePassword } from "../utils/password";
 import { generateToken } from "../utils/jwt";
 import { AppError } from "../middleware/error";
-import { users } from "../generated/prisma";
 import { createLogger } from "../utils/logger";
 
 // Create a logger for this service

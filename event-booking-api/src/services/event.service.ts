@@ -1,6 +1,5 @@
 import prisma from "../prisma/client";
 import { AppError } from "../middleware/error";
-import { events } from "../generated/prisma";
 
 export interface CreateEventInput {
   title: string;
