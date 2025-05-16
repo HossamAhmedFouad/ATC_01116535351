@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment.prod';
+import { Observable, throwError } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Event {
   id: string; // UUID from backend
@@ -66,17 +67,29 @@ export class AdminService {
 
   /**
    * Create a new event
-   */
-  createEvent(eventData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/events`, eventData);
+   */ createEvent(eventData: Partial<Event>): Observable<Event> {
+    return this.http
+      .post<{ status: string; data: { event: Event } }>(
+        `${this.apiUrl}/events`,
+        eventData
+      )
+      .pipe(map((response) => response.data.event));
   }
   /**
    * Update an existing event
-   */ updateEvent(id: string, eventData: any): Observable<any> {
-    return this.http.patch<{ status: string; data: { event: Event } }>(
-      `${this.apiUrl}/events/${id}`,
-      eventData
-    );
+   */ updateEvent(
+    id: string | undefined,
+    eventData: Partial<Event>
+  ): Observable<Event> {
+    if (!id) {
+      return throwError(() => new Error('Event ID is required for updates'));
+    }
+    return this.http
+      .patch<{ status: string; data: { event: Event } }>(
+        `${this.apiUrl}/events/${id}`,
+        eventData
+      )
+      .pipe(map((response) => response.data.event));
   }
 
   /**

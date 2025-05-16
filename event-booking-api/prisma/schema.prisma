@@ -37,6 +37,7 @@ model events {
   organizer         String?
   available_tickets Int?
   schedule          Json?      @db.Json
+  status            String?    @default("active")
   bookings          bookings[]
 }
 

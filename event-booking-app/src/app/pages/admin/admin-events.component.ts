@@ -137,7 +137,7 @@ export class AdminEventsComponent implements OnInit {
     this.imageSourceType = 'url';
     this.uploadedFile = undefined;
     this.eventForm = this.fb.group({
-      id: [null],
+      id: [{ value: null, disabled: false }], // Make ID explicitly settable
       title: ['', Validators.required],
       date: ['', Validators.required],
       time: [''],
@@ -989,12 +989,25 @@ export class AdminEventsComponent implements OnInit {
 
   // Edit event
   editEvent(event: Event): void {
+    if (!event?.id) {
+      this.showToast('Cannot edit event: ID is missing', 'error');
+      return;
+    }
+
     this.isEditMode = true;
     this.eventToDelete = undefined;
+
+    // Enable the ID control before patching
+    const idControl = this.eventForm.get('id');
+    if (idControl) {
+      idControl.enable();
+    }
+
+    // Patch the form with event data
     this.eventForm.patchValue({
-      id: event.id,
+      id: event.id, // Explicitly set ID
       title: event.title,
-      date: event.date,
+      date: new Date(event.date).toISOString().split('T')[0],
       time: event.time,
       location: event.location,
       description: event.description,
@@ -1004,7 +1017,20 @@ export class AdminEventsComponent implements OnInit {
       price: event.price,
       category: event.category,
       organizer: event.organizer,
+      schedule: event.schedule || [],
     });
+
+    // Verify ID was set correctly
+    if (this.eventForm.get('id')?.value !== event.id) {
+      this.showToast('Error setting event ID', 'error');
+      return;
+    }
+
+    // Disable the ID control to prevent changes
+    if (idControl) {
+      idControl.disable();
+    }
+
     this.showEventModal = true;
   }
 
@@ -1040,8 +1066,7 @@ export class AdminEventsComponent implements OnInit {
         this.isLoading = false;
       },
     });
-  }
-  // Save event changes
+  } // Save event changes
   saveEvent(): void {
     if (this.eventForm.invalid) {
       this.showToast('Please fill in all required fields', 'error');
@@ -1049,36 +1074,62 @@ export class AdminEventsComponent implements OnInit {
     }
 
     this.isLoading = true;
-    // Get the form data
-    const formValue = this.eventForm.value;
-    const eventData: any = {
+    let formValue;
+
+    if (this.isEditMode) {
+      // When editing, we need to get the ID from raw values since it's in a disabled control
+      formValue = {
+        ...this.eventForm.value,
+        id: this.eventForm.getRawValue().id,
+      };
+    } else {
+      formValue = this.eventForm.value;
+    }
+
+    // Ensure we have an ID when updating
+    if (this.isEditMode && !formValue.id) {
+      this.showToast('Event ID is missing', 'error');
+      this.isLoading = false;
+      return;
+    }
+
+    const eventData: Partial<Event> = {};
+    // Always include the ID when in edit mode
+    if (this.isEditMode) {
+      if (!formValue.id) {
+        this.showToast('Event ID is missing', 'error');
+        this.isLoading = false;
+        return;
+      }
+      eventData.id = formValue.id;
+    }
+
+    // Add all other fields
+    Object.assign(eventData, {
       title: formValue.title,
       location: formValue.location,
       description: formValue.description,
-      status: formValue.status,
-      available_tickets: formValue.available_tickets,
-      price: formValue.price,
+      status: formValue.status as 'active' | 'inactive',
+      available_tickets: Number(formValue.available_tickets),
+      price: Number(formValue.price),
       category: formValue.category,
       duration: formValue.duration,
       organizer: formValue.organizer,
       schedule: formValue.schedule,
-    };
+    });
 
     // Handle date and time combination
     if (formValue.date) {
-      // Create new date object
       const date = new Date(formValue.date);
       if (formValue.time) {
-        // If time is provided, combine date and time
         const [hours, minutes] = formValue.time.split(':');
         date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
       }
-      eventData.date = date.toISOString();
+      eventData.date = date;
     }
 
-    // Convert the image path to a full URL if it exists
-    if (eventData.image_url) {
-      eventData.image_url = this.getEventImageUrl(eventData.image_url);
+    if (formValue.image_url) {
+      eventData.image_url = this.getEventImageUrl(formValue.image_url);
     }
 
     const operation = this.isEditMode
@@ -1094,10 +1145,11 @@ export class AdminEventsComponent implements OnInit {
         this.closeEventModal();
         this.loadEvents();
       },
-      error: (err) => {
+      error: (error: Error) => {
         this.showToast(
-          `Error ${this.isEditMode ? 'updating' : 'creating'} event: ` +
-            (err.message || 'Unknown error'),
+          `Error ${this.isEditMode ? 'updating' : 'creating'} event: ${
+            error.message
+          }`,
           'error'
         );
         this.isLoading = false;

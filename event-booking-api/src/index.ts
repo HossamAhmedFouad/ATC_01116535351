@@ -49,7 +49,10 @@ app.use(
 );
 app.use(
   cors({
-    origin: "https://atc-01116535351.vercel.app", // ✅ your actual frontend
+    origin: [
+      "https://atc-01116535351.vercel.app", // Production frontend
+      "http://localhost:4200", // Local development frontend
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     credentials: true, // ✅ if you're using auth headers or cookies
   })
