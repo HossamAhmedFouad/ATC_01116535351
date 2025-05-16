@@ -47,7 +47,14 @@ app.use(
     },
   })
 );
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://atc-01116535351.vercel.app", // ✅ your actual frontend
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true, // ✅ if you're using auth headers or cookies
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
