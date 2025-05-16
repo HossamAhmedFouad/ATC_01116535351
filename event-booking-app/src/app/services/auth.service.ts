@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { Router } from '@angular/router';
 import { delay, tap, map, catchError } from 'rxjs/operators';
 import { Booking, BookingService } from './booking.service';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { CacheService } from './cache.service';
 
 export interface User {

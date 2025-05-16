@@ -6,7 +6,7 @@ import { User, AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { FileUploadComponent } from '../../components/file-upload/file-upload.component';
 import { UploadResponse } from '../../services/assets.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 interface AccountSetting {
   name: string;

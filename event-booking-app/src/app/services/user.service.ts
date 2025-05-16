@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, throwError, of, tap } from 'rxjs';
 import { User } from './auth.service';
 import { AuthService } from './auth.service';
-import { environment } from '../../environments/environment';
+import { environment } from '../../environments/environment.prod';
 import { ToastService } from './toast.service';
 import { CacheService } from './cache.service';
 

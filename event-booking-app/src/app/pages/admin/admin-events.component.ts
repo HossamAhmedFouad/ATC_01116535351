@@ -18,7 +18,7 @@ import { LoaderComponent } from '../../components/loader/loader.component';
 import { FileUploadComponent } from '../../components/file-upload/file-upload.component';
 import { ToastService } from '../../services/toast.service';
 import { UploadResponse } from '../../services/assets.service';
-import { environment } from '../../../environments/environment';
+import { environment } from '../../../environments/environment.prod';
 
 interface Event {
   id: string; // UUID format from backend
