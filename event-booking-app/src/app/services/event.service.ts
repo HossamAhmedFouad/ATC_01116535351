@@ -48,6 +48,8 @@ export class EventService {
       return of(cachedData);
     }
 
+    console.log('making http request to', url);
+
     // No cached data, make the HTTP request
     return this.http
       .get<{ status: string; results: number; data: { events: any[] } }>(url)
