@@ -23,6 +23,7 @@ export interface LoginInput {
 
 export interface UpdateUserInput {
   username?: string;
+  email?: string;
   phone?: string;
   location?: string;
   bio?: string;
@@ -161,8 +162,7 @@ export class UserService {
    * @param userId The ID of the user to update
    * @param userData The data to update
    * @returns The updated user without password
-   */
-  async updateUser(userId: string, userData: UpdateUserInput) {
+   */ async updateUser(userId: string, userData: UpdateUserInput) {
     logger.debug(`Updating user profile for ID: ${userId}`);
     try {
       const user = await prisma.users.update({
@@ -175,6 +175,9 @@ export class UserService {
       return userWithoutPassword;
     } catch (error: any) {
       logger.error(`Failed to update user profile: ${userId}`, error);
+      if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+        throw new AppError("Email already exists", 400);
+      }
       throw new AppError("Failed to update user profile", 500);
     }
   }
@@ -251,6 +254,29 @@ export class UserService {
       logger.error(`Failed to change password for user: ${userId}`, error);
       if (error instanceof AppError) throw error;
       throw new AppError("Failed to change password", 500);
+    }
+  }
+
+  /**
+   * Get user by email
+   * @param email The email of the user to retrieve
+   * @returns The user data without password or null if not found
+   */
+  async getUserByEmail(email: string) {
+    try {
+      const user = await prisma.users.findFirst({
+        where: { email },
+      });
+
+      if (!user) {
+        return null;
+      }
+
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    } catch (error) {
+      logger.error(`Error finding user by email: ${email}`, error);
+      throw new AppError("Error finding user", 500);
     }
   }
 }
