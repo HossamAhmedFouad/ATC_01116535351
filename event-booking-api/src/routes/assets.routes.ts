@@ -25,9 +25,6 @@ router.delete(
   assetsController.deleteFile
 );
 
-// Get signed URL route - Protected, requires authentication
-router.get("/signed-url", authenticate, assetsController.getSignedUrl);
-
 // Add multer error handling middleware
 router.use(handleMulterError);
 

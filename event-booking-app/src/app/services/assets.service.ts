@@ -11,14 +11,7 @@ export interface UploadResponse {
   fullPath: string; // Complete path including bucket
   id: string; // Unique identifier for the file
   size: number; // File size in bytes
-  signedUrl?: string; // Signed URL for private access
-  publicUrl?: string; // Public URL for the file
-}
-
-export interface SignedUrlResponse {
-  signedUrl: string;
-  path: string;
-  expiresAt: string;
+  publicUrl: string; // Public URL for the file
 }
 
 @Injectable({
@@ -106,32 +99,6 @@ export class AssetsService {
         catchError((error) => {
           this.toastService.error(
             error.error?.error || 'Failed to delete file. Please try again.'
-          );
-          return throwError(() => error);
-        })
-      );
-  }
-
-  /**
-   * Get a signed URL for a file in the Supabase storage bucket
-   * @param path The full path of the file
-   * @param bucket The storage bucket name (default: 'images')
-   * @param expiresIn Expiration time in seconds (default: 3600 - 1 hour)
-   * @returns Observable with the signed URL response
-   */
-  getSignedUrl(
-    path: string,
-    bucket: string = 'images',
-    expiresIn: number = 3600
-  ): Observable<SignedUrlResponse> {
-    return this.http
-      .get<SignedUrlResponse>(`${this.apiUrl}/signed-url`, {
-        params: { path, bucket, expiresIn: expiresIn.toString() },
-      })
-      .pipe(
-        catchError((error) => {
-          this.toastService.error(
-            error.error?.error || 'Failed to get file URL.'
           );
           return throwError(() => error);
         })

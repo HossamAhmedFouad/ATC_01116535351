@@ -12,6 +12,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AssetsService, UploadResponse } from '../../services/assets.service';
 import { Subscription } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-file-upload',
@@ -145,16 +146,14 @@ export class FileUploadComponent implements ControlValueAccessor, OnDestroy {
   previewUrl: string | null = null;
   errorMessage = '';
   disabled = false;
-  private signedUrlSubscription?: Subscription;
 
   // For ControlValueAccessor
   onChange: any = () => {};
   onTouched: any = () => {};
 
   constructor(private assetsService: AssetsService) {}
-
   ngOnDestroy(): void {
-    this.signedUrlSubscription?.unsubscribe();
+    // Nothing to clean up
   }
 
   get acceptedFileTypesText(): string {
@@ -164,9 +163,8 @@ export class FileUploadComponent implements ControlValueAccessor, OnDestroy {
 
     return `Accepted file types: ${this.accept}`;
   }
-
   writeValue(value: any): void {
-    // If a path is provided, get a signed URL for preview
+    // If a path is provided, construct the public URL for preview
     if (value && typeof value === 'string') {
       this.fileName = value.split('/').pop() || '';
       this.loadPreviewUrl(value);
@@ -285,6 +283,7 @@ export class FileUploadComponent implements ControlValueAccessor, OnDestroy {
           this.uploadProgress = 100;
           // Store the path and load preview URL
           this.loadPreviewUrl(response.path);
+          console.log('File uploaded successfully:', response);
 
           setTimeout(() => {
             this.isUploading = false;
@@ -302,23 +301,11 @@ export class FileUploadComponent implements ControlValueAccessor, OnDestroy {
         },
       });
   }
-
   private loadPreviewUrl(path: string): void {
-    // Clean up previous subscription
-    this.signedUrlSubscription?.unsubscribe();
-
-    // For image files, get a signed URL for preview
+    // For image files, use the public URL for preview
     if (this.accept === 'image/*' || this.file?.type.startsWith('image/')) {
-      this.signedUrlSubscription = this.assetsService
-        .getSignedUrl(path, this.bucket)
-        .subscribe({
-          next: (response) => {
-            this.previewUrl = response.signedUrl;
-          },
-          error: () => {
-            this.previewUrl = null;
-          },
-        });
+      const publicUrl = `${environment.supabase.url}/storage/v1/object/public/${this.bucket}/${path}`;
+      this.previewUrl = publicUrl;
     } else {
       this.previewUrl = null;
     }

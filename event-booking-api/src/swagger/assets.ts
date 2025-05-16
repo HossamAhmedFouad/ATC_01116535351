@@ -108,52 +108,6 @@
  *       401:
  *         description: Unauthorized, authentication required
  *       403:
- *         description: Forbidden, admin role required
- *       500:
- *         description: Internal server error
- *
- * /api/assets/signed-url:
- *   get:
- *     summary: Get a signed URL for a file in Supabase storage
- *     tags: [Assets]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: path
- *         schema:
- *           type: string
- *         required: true
- *         description: The path of the file
- *       - in: query
- *         name: bucket
- *         schema:
- *           type: string
- *         required: false
- *         default: images
- *         description: The storage bucket name
- *       - in: query
- *         name: expiresIn
- *         schema:
- *           type: string
- *         required: false
- *         default: 3600
- *         description: Expiration time in seconds
- *     responses:
- *       200:
- *         description: Signed URL generated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 url:
- *                   type: string
- *                   example: https://your-project.supabase.co/storage/v1/object/sign/images/folder/image.jpg?token=...
- *       400:
- *         description: Bad request, missing path
- *       401:
- *         description: Unauthorized, authentication required
- *       500:
+ *         description: Forbidden, admin role required *       500:
  *         description: Internal server error
  */

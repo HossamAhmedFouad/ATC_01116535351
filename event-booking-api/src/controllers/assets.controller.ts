@@ -34,14 +34,6 @@ interface FileDeleteRequest extends Request {
   };
 }
 
-interface SignedUrlRequest extends Request {
-  query: {
-    path?: string;
-    bucket?: AllowedBucket;
-    expiresIn?: string;
-  };
-}
-
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -158,28 +150,19 @@ export class AssetsController {
 
       // Clean up the temporary file
       await promisify(fs.unlink)(file.path);
-
       if (error) {
         this.logger.error("Error uploading file to Supabase:", error);
         res.status(500).json({ error: "Error uploading file to storage" });
         return;
       }
 
-      // Get the signed URL for the uploaded file
-      const { data: signedUrlData, error: signedUrlError } =
-        await this.supabaseClient.storage
-          .from(bucket)
-          .createSignedUrl(filePath, 3600);
-
-      if (signedUrlError) {
-        this.logger.error("Error generating signed URL:", signedUrlError);
-      }
+      // Only use the public URL
+      const publicUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}`;
 
       res.status(201).json({
         ...data,
         path: filePath,
-        signedUrl: signedUrlData?.signedUrl,
-        publicUrl: `${process.env.SUPABASE_URL}/storage/v1/object/sign/${bucket}/${filePath}`,
+        publicUrl,
       });
     } catch (error) {
       this.logger.error("Error in uploadFile:", error);
@@ -208,39 +191,6 @@ export class AssetsController {
       res.status(200).json({ message: "File deleted successfully" });
     } catch (error) {
       this.logger.error("Error in deleteFile:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  };
-
-  public getSignedUrl: RequestHandler = async (
-    req: SignedUrlRequest,
-    res: Response
-  ): Promise<void> => {
-    try {
-      const {
-        path: filePath,
-        bucket = "images",
-        expiresIn = "3600",
-      } = req.query;
-
-      if (!filePath) {
-        res.status(400).json({ error: "File path is required" });
-        return;
-      }
-
-      const { data, error } = await this.supabaseClient.storage
-        .from(bucket)
-        .createSignedUrl(filePath as string, parseInt(expiresIn as string));
-
-      if (error) {
-        this.logger.error("Error generating signed URL:", error);
-        res.status(500).json({ error: "Error generating signed URL" });
-        return;
-      }
-
-      res.status(200).json(data);
-    } catch (error) {
-      this.logger.error("Error in getSignedUrl:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   };
