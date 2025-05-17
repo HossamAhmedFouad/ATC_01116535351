@@ -1,14 +1,20 @@
 # 🎪 EventHub
 
+![EventHub Banner](github-header-image.png)
+
 <div align="center">
-  
-  ![EventHub Logo](https://img.shields.io/badge/EventHub-Your%20Ultimate%20Event%20Management%20Platform-blue?style=for-the-badge&logo=react)
-  
-  [![Angular](https://img.shields.io/badge/Frontend-Angular-DD0031?style=flat-square&logo=angular)](https://angular.io/)
-  [![Node.js](https://img.shields.io/badge/Backend-Node.js-339933?style=flat-square&logo=node.js)](https://nodejs.org/)
-  [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
-  [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-  
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Site-success?style=for-the-badge)](https://atc-01116535351.vercel.app/)
+
+![EventHub Logo](https://img.shields.io/badge/EventHub-Your%20Ultimate%20Event%20Management%20Platform-blue?style=for-the-badge&logo=angular)
+
+[![Angular](https://img.shields.io/badge/Frontend-Angular-DD0031?style=flat-square&logo=angular)](https://angular.io/)
+[![Node.js](https://img.shields.io/badge/Backend-Node.js-339933?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+[![Backend Status](https://img.shields.io/badge/Backend-Deployed%20on%20Heroku-430098?style=flat-square&logo=heroku)](https://event-booking-node-app-a3b82058a077.herokuapp.com/api)
+[![Frontend Status](https://img.shields.io/badge/Frontend-Deployed%20on%20Vercel-000000?style=flat-square&logo=vercel)](https://atc-01116535351.vercel.app/)
+
 </div>
 
 ## 📋 Table of Contents
@@ -24,7 +30,6 @@
 - [Usage](#-usage)
 - [API Documentation](#-api-documentation)
 - [Screenshots](#-screenshots)
-- [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
 - [License](#-license)
 - [Contact](#-contact)
@@ -50,23 +55,36 @@ The project is organized into two main directories:
 ```
 event-system/
 │
-├── event-booking-app/   # Angular frontend
+├── event-booking-app/        # Angular frontend
 │   ├── src/
-│   │   ├── app/         # Angular components, services, etc.
-│   │   ├── assets/      # Static assets and mock data
-│   │   └── ...
+│   │   ├── app/
+│   │   │   ├── components/  # Reusable UI components
+│   │   │   ├── guards/      # Route guards for authentication
+│   │   │   ├── interceptors/# HTTP interceptors
+│   │   │   ├── pages/      # Page components
+│   │   │   ├── services/   # Application services
+│   │   │   └── utils/      # Utility functions
+│   │   ├── assets/         # Static assets and mock data
+│   │   └── environments/   # Environment configurations
 │   └── ...
 │
-└── event-api/           # Node.js backend (to be created)
+└── event-booking-api/       # Node.js backend
     ├── src/
-    │   ├── controllers/
-    │   ├── models/
-    │   ├── routes/
-    │   ├── services/
-    │   └── utils/
-    ├── config/
-    └── ...
+    │   ├── controllers/    # Request handlers
+    │   ├── routes/        # API route definitions
+    │   ├── services/      # Business logic
+    │   ├── middleware/    # Custom middleware
+    │   ├── utils/         # Utility functions
+    │   └── swagger/       # API documentation
+    ├── prisma/           # Database schema and migrations
+    └── uploads/          # File upload directory
 ```
+
+### Key Files
+
+- `event-booking-app/src/environments/environment.prod.ts`: Production environment configuration
+- `event-booking-api/src/routes/`: API route definitions for events, users, bookings, and assets
+- `event-booking-api/prisma/schema.prisma`: Database schema definition
 
 ## 🛠 Tech Stack
 
@@ -85,6 +103,13 @@ event-system/
 - **ORM**: Sequelize/TypeORM
 - **Authentication**: JWT
 - **API Documentation**: Swagger
+
+## 🌐 Deployment
+
+- **Frontend**: The application is deployed on Vercel and can be accessed at [https://atc-01116535351.vercel.app/](https://atc-01116535351.vercel.app/)
+- **Backend**: The API is hosted on Heroku at [https://event-booking-node-app-a3b82058a077.herokuapp.com/api](https://event-booking-node-app-a3b82058a077.herokuapp.com/api)
+
+You can also find the live application link in the "About" section of this GitHub repository.
 
 ## 📥 Installation
 
@@ -115,21 +140,48 @@ Navigate to `http://localhost:4200/` to view the application.
 
 ```bash
 # Navigate to backend directory
-cd ../event-api
+cd ../event-booking-api
 
 # Install dependencies
 npm install
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env file with your database credentials
+
+# Edit .env file with your database credentials and other configurations
+# Required environment variables:
+# - DATABASE_URL=your_postgresql_connection_string
+# - JWT_SECRET=your_jwt_secret
+# - PORT=3000 (default)
+# - UPLOAD_DIR=uploads
 
 # Run database migrations
-npm run migrate
+npx prisma migrate dev
+
+# Seed the database (optional)
+npm run seed
 
 # Start development server
 npm run dev
 ```
+
+The API will be running at `http://localhost:3000/`.
+
+#### Demo Credentials
+
+For testing purposes, you can use the following credentials:
+
+**Admin Account:**
+
+- Email: hossamaf15@gmail.com
+- Password: 01116535351
+
+**Test User Account:**
+
+- Email: user2@example.com
+- Password: password2
+
+> ⚠️ Note: These credentials are for demonstration purposes only. In a production environment, always use secure credentials.
 
 The API will be available at `http://localhost:3000/`.
 
@@ -147,20 +199,6 @@ The API will be available at `http://localhost:3000/`.
 
 API documentation will be available at `http://localhost:3000/api-docs` when the backend is implemented, providing detailed information about all available endpoints, request methods, and response formats.
 
-## 📸 Screenshots
-
-_Coming soon_
-
-## 🗺 Roadmap
-
-- [ ] Mobile application development
-- [ ] Advanced analytics for event organizers
-- [ ] Social sharing integration
-- [ ] Recommendation engine based on user preferences
-- [ ] QR code ticket scanning
-- [ ] Event check-in system
-- [ ] Multilingual support
-
 ## 👥 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -171,17 +209,13 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 📞 Contact
 
 For any inquiries regarding the project, please reach out via:
 
-- **Email**: [your.email@example.com](mailto:your.email@example.com)
-- **LinkedIn**: [Your Name](https://www.linkedin.com/in/yourname/)
-- **Project Link**: [GitHub Repository](https://github.com/yourusername/event-system)
+- **Email**: [hossamaf15@gmail.com](mailto:hossamaf15@gmail.com)
+- **LinkedIn**: [Hossam Ahmed Fouad](https://www.linkedin.com/in/hossamahmedfouad/)
+- **Project Link**: [GitHub Repository](https://github.com/HossamAhmedFouad/ATC_01116535351)
 
 ---
 
