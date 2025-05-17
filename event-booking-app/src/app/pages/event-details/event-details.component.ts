@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, NavigationStart } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Event, EventService } from '../../services/event.service';
 import { ToastService } from '../../services/toast.service';
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
-import { filter, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-event-details',
@@ -21,7 +21,7 @@ export class EventDetailsComponent implements OnInit, OnDestroy {
   error = false;
   ticketsToBook = 1;
   isEventBooked = false;
-  private navigationSubscription: Subscription | null = null;
+  private routeSubscription: Subscription | null = null;
   private eventId: string | null = null;
 
   constructor(
@@ -32,51 +32,33 @@ export class EventDetailsComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private bookingService: BookingService
   ) {}
-  ngOnInit() {
-    this.eventId = this.route.snapshot.paramMap.get('id');
-    if (this.eventId) {
-      this.loadEventDetails(this.eventId);
 
-      // Set up navigation subscription to detect returning from payment page
-      this.navigationSubscription = this.router.events
-        .pipe(filter((event) => event instanceof NavigationStart))
-        .subscribe((event: any) => {
-          // Check if we're coming back to this page from the payment page
-          if (
-            event.url.includes('/events') &&
-            event.navigationTrigger === 'popstate'
-          ) {
-            console.log('Returning to event details, refreshing data...');
-            if (this.eventId) {
-              // Clear event cache and reload event details
-              this.eventService.clearEventCache(this.eventId);
-              this.loadEventDetails(this.eventId);
-            }
-          }
-        });
-    } else {
-      this.error = true;
-      this.loading = false;
-    }
+  ngOnInit() {
+    // Subscribe to route params to handle navigation within the same component
+    this.routeSubscription = this.route.paramMap.subscribe((params) => {
+      this.eventId = params.get('id');
+      if (this.eventId) {
+        this.loadEventDetails(this.eventId);
+      } else {
+        this.error = true;
+        this.loading = false;
+      }
+    });
   }
 
   ngOnDestroy() {
-    // Clean up subscription to prevent memory leaks
-    if (this.navigationSubscription) {
-      this.navigationSubscription.unsubscribe();
+    if (this.routeSubscription) {
+      this.routeSubscription.unsubscribe();
     }
   }
-  loadEventDetails(eventId: string, forceRefresh: boolean = false) {
+  loadEventDetails(eventId: string) {
     this.loading = true;
-
-    // If force refresh is requested, clear the event cache first
-    if (forceRefresh) {
-      this.eventService.clearEventCache(eventId);
-    }
 
     this.eventService.getEvent(eventId).subscribe({
       next: (event) => {
         this.event = event;
+        // Update isCompleted flag based on current date
+        this.event.isCompleted = new Date(event.date) < new Date();
         this.checkIfEventIsBooked(eventId);
         this.loading = false;
       },

@@ -604,90 +604,23 @@
   background: #4b5563;
 }
 
-.booking-note {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  background: linear-gradient(145deg, #fee2e2, #fecaca);
-  border-radius: 0.5rem;
-  color: #dc2626;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-}
-
-:host-context(.dark-mode) .booking-note {
-  background: linear-gradient(145deg, #7f1d1d, #991b1b);
-  color: #fecaca;
-}
-
-/* Already booked button styles */
-.already-booked {
-  background-color: #10b981 !important;
-  color: white !important;
-  opacity: 0.8 !important;
-  cursor: not-allowed !important;
-}
-
-/* Style for already booked button */
-.pagination-button.already-booked {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
+/* Style for completed events */
+.pagination-button.completed {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
   opacity: 0.9;
+  cursor: not-allowed;
 }
 
-:host-context(.dark-mode) .pagination-button.already-booked {
-  background: linear-gradient(135deg, #059669, #065f46);
+:host-context(.dark-mode) .pagination-button.completed {
+  background: linear-gradient(135deg, #60a5fa, #93c5fd);
 }
 
-@media (max-width: 768px) {
-  .events-container {
-    padding: 1rem;
-  }
-
-  .events-header h1 {
-    font-size: 2rem;
-  }
-
-  .event-details {
-    grid-template-columns: 1fr;
-  }
-
-  .event-image {
-    height: 300px;
-  }
-
-  .event-meta {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .timeline-item {
-    grid-template-columns: 80px 1fr;
-  }
+.booking-note.completed {
+  background: linear-gradient(145deg, #dbeafe, #bfdbfe);
+  color: #1d4ed8;
 }
 
-@media (max-width: 480px) {
-  .events-container {
-    padding: 0.75rem;
-  }
-
-  .events-header h1 {
-    font-size: 1.75rem;
-  }
-
-  .event-image {
-    height: 250px;
-  }
-
-  .booking-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-
-  .total-price {
-    text-align: center;
-  }
+:host-context(.dark-mode) .booking-note.completed {
+  background: linear-gradient(145deg, #1e40af, #1d4ed8);
+  color: #bfdbfe;
 }

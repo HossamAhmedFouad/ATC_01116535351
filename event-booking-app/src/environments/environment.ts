@@ -12,7 +12,7 @@ declare global {
 
 export const environment = {
   production: false,
-  apiUrl: 'https://atc-01116535351.onrender.com/api',
+  apiUrl: 'https://event-booking-node-app-a3b82058a077.herokuapp.com/api',
   supabase: {
     url: 'https://twxkscrkqztvzqucypof.supabase.co',
   },

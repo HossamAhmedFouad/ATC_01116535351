@@ -101,10 +101,22 @@ export class BookingsComponent implements OnInit {
     return this.bookings.filter((booking) => booking.status === 'CANCELLED')
       .length;
   }
-
   get completedCount(): number {
-    return this.bookings.filter((booking) => booking.status === 'COMPLETED')
-      .length;
+    return this.bookings.filter((booking) => {
+      // Skip cancelled bookings
+      if (booking.status === 'CANCELLED') {
+        return false;
+      }
+      // Get event details
+      const event = this.events.get(booking.event_id);
+      if (!event) {
+        return false;
+      }
+      // Check if event date has passed
+      const eventDate = new Date(event.date);
+      const today = new Date();
+      return eventDate < today;
+    }).length;
   }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -192,9 +204,24 @@ export class BookingsComponent implements OnInit {
       );
     }); // Then filter by status if not 'all'
     if (this.selectedStatusFilter !== 'all') {
-      filtered = filtered.filter(
-        (booking) => booking.status === this.selectedStatusFilter
-      );
+      filtered = filtered.filter((booking) => {
+        if (this.selectedStatusFilter === 'COMPLETED') {
+          // For completed status, check event date
+          if (booking.status === 'CANCELLED') {
+            return false;
+          }
+          const event = this.events.get(booking.event_id);
+          if (!event) {
+            return false;
+          }
+          const eventDate = new Date(event.date);
+          const today = new Date();
+          return eventDate < today;
+        } else {
+          // For other statuses, just check the booking status
+          return booking.status === this.selectedStatusFilter;
+        }
+      });
     }
 
     this.filteredBookings.data = filtered;

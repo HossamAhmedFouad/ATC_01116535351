@@ -137,6 +137,31 @@
   opacity: 0.8 !important;
 }
 
+/* Style for completed events */
+.event-card.completed {
+  position: relative;
+}
+
+.event-card.completed::after {
+  content: "COMPLETED";
+  position: absolute;
+  top: 20px;
+  left: -30px;
+  transform: rotate(-45deg);
+  background: rgba(59, 130, 246, 0.9);
+  color: white;
+  padding: 5px 40px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.event-card.completed .book-button {
+  background-color: #3b82f6;
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
 /* Dark mode styles */
 :host-context(.dark-mode) .event-card {
   background: #1f2937;
@@ -173,4 +198,8 @@
 
 :host-context(.dark-mode) .book-button:disabled {
   background: #6b7280;
+}
+
+:host-context(.dark-mode) .event-card.completed .book-button {
+  background-color: #60a5fa;
 }

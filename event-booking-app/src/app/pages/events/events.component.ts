@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EventCardComponent } from '../../components/event-card/event-card.component';
@@ -9,6 +9,9 @@ import { EventService } from '../../services/event.service';
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { AuthService } from '../../services/auth.service';
 import { BookingService } from '../../services/booking.service';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-events',
@@ -23,7 +26,7 @@ import { BookingService } from '../../services/booking.service';
   templateUrl: './events.component.html',
   styleUrls: ['events.component.css'],
 })
-export class EventsComponent implements OnInit {
+export class EventsComponent implements OnInit, OnDestroy {
   searchQuery = '';
   priceFilter = '';
   locationFilter = '';
@@ -41,12 +44,25 @@ export class EventsComponent implements OnInit {
   events: Event[] = [];
   loading = false;
   userBookedEventIds: Set<string> = new Set<string>();
+  private routerSubscription: Subscription;
+
   constructor(
     private http: HttpClient,
     private eventService: EventService,
     private authService: AuthService,
-    private bookingService: BookingService
-  ) {}
+    private bookingService: BookingService,
+    private router: Router
+  ) {
+    // Subscribe to router events to reload data on navigation
+    this.routerSubscription = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        // Always fetch fresh data
+        this.loadEvents();
+        this.loadMetadata();
+        this.loadUserBookings();
+      });
+  }
 
   ngOnInit() {
     this.loadEvents();
@@ -54,14 +70,30 @@ export class EventsComponent implements OnInit {
     this.loadUserBookings();
   }
 
+  ngOnDestroy() {
+    if (this.routerSubscription) {
+      this.routerSubscription.unsubscribe();
+    }
+  }
+  updateEventsWithStatus() {
+    const today = new Date();
+    this.events = this.events.map((event) => ({
+      ...event,
+      isCompleted: new Date(event.date) < today,
+    }));
+  }
   loadEvents() {
     this.loading = true;
+    // Clear existing events first
+    this.events = [];
     this.eventService.getEvents().subscribe({
       next: (events) => {
         this.events = events;
         this.totalPages = Math.ceil(this.events.length / this.itemsPerPage);
         this.loading = false;
-        // Update events with booked status if we already have user bookings
+        // Update completed status
+        this.updateEventsWithStatus();
+        // Then update booked status if needed
         if (this.userBookedEventIds.size > 0) {
           this.updateEventsWithBookedStatus();
         }
@@ -72,7 +104,6 @@ export class EventsComponent implements OnInit {
       },
     });
   }
-
   loadMetadata() {
     this.eventService.getEventMetadata().subscribe({
       next: (metadata) => {
@@ -84,18 +115,16 @@ export class EventsComponent implements OnInit {
   }
 
   loadUserBookings() {
-    // Only attempt to load bookings if the user is logged in
+    this.userBookedEventIds.clear(); // Clear existing bookings
     this.authService.currentUser$.subscribe((user) => {
       if (user) {
         this.bookingService.getUserBookings().subscribe({
           next: (bookings) => {
-            // Extract event IDs from bookings and store them in the Set
             bookings.forEach((booking) => {
               if (booking.status !== 'CANCELLED') {
                 this.userBookedEventIds.add(booking.event_id);
               }
             });
-            // After loading bookings, update events with booked status
             this.updateEventsWithBookedStatus();
           },
           error: (error) =>
