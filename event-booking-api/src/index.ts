@@ -14,7 +14,7 @@ import prisma from "./prisma/client";
 // Load environment variables
 dotenv.config();
 
-// Create Express app
+// Create a Express app
 const app = express();
 const port = process.env.PORT || 3000;
 
