@@ -17,8 +17,19 @@ import { createLogger } from "../utils/logger";
 type AllowedBucket = "images" | "documents" | "avatars";
 
 // Define request types
-interface FileUploadRequest extends Request {
-  file?: Express.Multer.File;
+interface FileUploadRequest extends Omit<Request, "file"> {
+  file?: {
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    destination: string;
+    filename: string;
+    path: string;
+    size: number;
+    buffer: Buffer;
+    stream: NodeJS.ReadableStream;
+  };
   body: {
     bucket?: AllowedBucket;
     folder?: string;
